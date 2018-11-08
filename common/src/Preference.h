@@ -34,21 +34,41 @@
 #include <wx/tokenzr.h>
 
 namespace TrenchBroom {
+    class PreferenceSerializerBase {
+    public:
+        static wxString pathToConfigKey(const IO::Path& path) {
+            ensure(!path.isAbsolute(), "TrenchBroom config paths must be relative");
+
+            // Prepend a / to make it an absolute path. wxConfig has a concept of relative paths and a
+            // current path, which are bug-prone (#2438), so never use relative paths.
+            wxString key;
+            key << "/";
+            key << path.asString("/");
+            return key;
+        }
+
+        static bool readString(wxConfigBase* config, const IO::Path& path, wxString* valueOut) {
+            return config->Read(pathToConfigKey(path), valueOut);
+        }
+
+        static bool writeString(wxConfigBase* config, const IO::Path& path, const wxString& value) {
+            return config->Write(pathToConfigKey(path), value);
+        }
+    };
+
     template <typename T>
-    class PreferenceSerializer {
+    class PreferenceSerializer : public PreferenceSerializerBase {
     public:
         bool read(wxConfigBase* config, const IO::Path& path, T& result) const { return false; }
         bool write(wxConfigBase* config, const IO::Path& path, const T& value) const { return false; }
     };
     
     template <>
-    class PreferenceSerializer<bool> {
+    class PreferenceSerializer<bool> : public PreferenceSerializerBase {
     public:
         bool read(wxConfigBase* config, const IO::Path& path, bool& result) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
             wxString string;
-            if (config->Read(path.asString('/'), &string)) {
+            if (readString(config, path, &string)) {
                 long longValue = 0;
                 if (string.ToLong(&longValue)) {
                     result = longValue != 0L;
@@ -59,22 +79,18 @@ namespace TrenchBroom {
         }
         
         bool write(wxConfigBase* config, const IO::Path& path, const bool& value) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
             wxString str;
             str << (value ? 1 : 0);
-            return config->Write(path.asString('/'), str);
+            return writeString(config, path, str);
         }
     };
     
     template <>
-    class PreferenceSerializer<int> {
+    class PreferenceSerializer<int> : public PreferenceSerializerBase {
     public:
         bool read(wxConfigBase* config, const IO::Path& path, int& result) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
             wxString string;
-            if (config->Read(path.asString('/'), &string)) {
+            if (readString(config, path, &string)) {
                 long longValue = 0;
                 if (string.ToLong(&longValue) && longValue >= std::numeric_limits<int>::min() && longValue <= std::numeric_limits<int>::max()) {
                     result = static_cast<int>(longValue);
@@ -85,22 +101,18 @@ namespace TrenchBroom {
         }
         
         bool write(wxConfigBase* config, const IO::Path& path, const int& value) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
             wxString str;
             str << value;
-            return config->Write(path.asString('/'), str);
+            return writeString(config, path, str);
         }
     };
     
     template <>
-    class PreferenceSerializer<float> {
+    class PreferenceSerializer<float> : public PreferenceSerializerBase {
     public:
         bool read(wxConfigBase* config, const IO::Path& path, float& result) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
             wxString string;
-            if (config->Read(path.asString('/'), &string)) {
+            if (readString(config, path, &string)) {
                 double doubleValue = 0.0;
                 if (string.ToDouble(&doubleValue) && doubleValue >= std::numeric_limits<float>::min() && doubleValue <= std::numeric_limits<float>::max()) {
                     result = static_cast<float>(doubleValue);
@@ -111,22 +123,18 @@ namespace TrenchBroom {
         }
         
         bool write(wxConfigBase* config, const IO::Path& path, const float& value) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
             wxString str;
             str << value;
-            return config->Write(path.asString('/'), str);
+            return writeString(config, path, str);
         }
     };
     
     template <>
-    class PreferenceSerializer<double> {
+    class PreferenceSerializer<double> : public PreferenceSerializerBase {
     public:
         bool read(wxConfigBase* config, const IO::Path& path, double& result) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
             wxString string;
-            if (config->Read(path.asString('/'), &string)) {
+            if (readString(config, path, &string)) {
                 double doubleValue = 0.0;
                 if (string.ToDouble(&doubleValue)) {
                     result = doubleValue;
@@ -137,22 +145,18 @@ namespace TrenchBroom {
         }
         
         bool write(wxConfigBase* config, const IO::Path& path, const double& value) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
             wxString str;
             str << value;
-            return config->Write(path.asString('/'), str);
+            return writeString(config, path, str);
         }
     };
     
     template <>
-    class PreferenceSerializer<String> {
+    class PreferenceSerializer<String> : public PreferenceSerializerBase {
     public:
         bool read(wxConfigBase* config, const IO::Path& path, String& result) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
             wxString string;
-            if (config->Read(path.asString('/'), &string)) {
+            if (readString(config, path, &string)) {
                 result = string.ToStdString();
                 return true;
             }
@@ -160,20 +164,18 @@ namespace TrenchBroom {
         }
         
         bool write(wxConfigBase* config, const IO::Path& path, const String& value) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
-            return config->Write(path.asString('/'), wxString(value));
+            wxString str;
+            str << value;
+            return writeString(config, path, str);
         }
     };
     
     template <>
-    class PreferenceSerializer<Color> {
+    class PreferenceSerializer<Color> : public PreferenceSerializerBase {
     public:
         bool read(wxConfigBase* config, const IO::Path& path, Color& result) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
             wxString string;
-            if (config->Read(path.asString('/'), &string)) {
+            if (readString(config, path, &string)) {
                 result = Color::parse(string.ToStdString());
                 return true;
             }
@@ -181,20 +183,18 @@ namespace TrenchBroom {
         }
         
         bool write(wxConfigBase* config, const IO::Path& path, const Color& value) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
-            return config->Write(path.asString('/'), wxString(StringUtils::toString(value)));
+            wxString str;
+            str << StringUtils::toString(value);
+            return writeString(config, path, str);
         }
     };
     
     template<>
-    class PreferenceSerializer<View::KeyboardShortcut> {
+    class PreferenceSerializer<View::KeyboardShortcut> : public PreferenceSerializerBase {
     public:
         bool read(wxConfigBase* config, const IO::Path& path, View::KeyboardShortcut& result) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
             wxString string;
-            if (config->Read(path.asString('/'), &string)) {
+            if (readString(config, path, &string)) {
                 result = View::KeyboardShortcut(string);
                 return true;
             }
@@ -202,20 +202,18 @@ namespace TrenchBroom {
         }
         
         bool write(wxConfigBase* config, const IO::Path& path, const View::KeyboardShortcut& value) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
-            return config->Write(path.asString('/'), wxString(value.asString()));
+            wxString str;
+            str << value.asString();
+            return writeString(config, path, str);
         }
     };
     
     template<>
-    class PreferenceSerializer<IO::Path> {
+    class PreferenceSerializer<IO::Path> : public PreferenceSerializerBase {
     public:
         bool read(wxConfigBase* config, const IO::Path& path, IO::Path& result) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
             wxString string;
-            if (config->Read(path.asString('/'), &string)) {
+            if (readString(config, path, &string)) {
                 result = IO::Path(string.ToStdString());
                 return true;
             }
@@ -223,110 +221,9 @@ namespace TrenchBroom {
         }
         
         bool write(wxConfigBase* config, const IO::Path& path, const IO::Path& value) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
-            return config->Write(path.asString('/'), wxString(value.asString()));
-        }
-    };
-
-    template<typename S>
-    class PreferenceSerializer<std::vector<S> > {
-    private:
-        PreferenceSerializer<S> m_serializer;
-    public:
-        bool read(wxConfigBase* config, const IO::Path& path, std::vector<S>& result) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
-
-            const wxString wxPath(path.asString('/'));
-            if (!config->Exists(wxPath))
-                return false;
-            
-            config->SetPath(wxPath);
-
-            bool success = true;
-            std::vector<S> temp;
-
-            wxString name;
-            long index;
-            if (config->GetFirstEntry(name, index)) {
-                do {
-                    S value;
-                    success = m_serializer.read(config, IO::Path(name.ToStdString()), value);
-                    if (success)
-                        temp.push_back(value);
-                } while (success && config->GetNextEntry(name, index));
-            }
-            
-            using std::swap;
-            if (success)
-                swap(result, temp);
-            return success;
-        }
-
-        bool write(wxConfigBase* config, const IO::Path& path, const std::vector<S>& values) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
-
-            config->DeleteGroup(path.asString('/'));
-            config->SetPath(path.asString('/'));
-
-            for (size_t i = 0; i < values.size(); ++i) {
-                wxString name;
-                name << i;
-                m_serializer.write(config, IO::Path(name.ToStdString()), values[i]);
-            }
-            
-            return true;
-        }
-    };
-    
-    template<typename S>
-    class PreferenceSerializer<std::map<String, S> > {
-    private:
-        PreferenceSerializer<S> m_serializer;
-    public:
-        bool read(wxConfigBase* config, const IO::Path& path, std::map<String, S>& result) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
-
-            config->SetPath(path.asString('/'));
-
-            bool success = true;
-            std::map<String, S> temp;
-            
-            wxString name;
-            long index;
-            if (config->GetFirstEntry(name, index)) {
-                do {
-                    const String nameStr = name.ToStdString();
-                    S value;
-                    success = m_serializer.read(config, IO::Path(nameStr), value);
-                    if (success)
-                        temp[nameStr] = value;
-                } while (success && config->GetNextEntry(name, index));
-            }
-
-            using std::swap;
-            if (success)
-                swap(result, temp);
-            return success;
-        }
-        
-        bool write(wxConfigBase* config, const IO::Path& path, const std::map<String, S>& values) const {
-            config->SetPath("/");
-            const wxConfigPathChanger setPath(config, "/");
-
-            config->DeleteGroup(path.asString('/'));
-            config->SetPath(path.asString('/'));
-            
-            for (const auto& entry : values) {
-                const String& name = entry.first;
-                const S& value = entry.second;
-                m_serializer.write(config, IO::Path(name), value);
-            }
-            
-            return true;
+            wxString str;
+            str << value.asString();
+            return writeString(config, path, str);
         }
     };
 

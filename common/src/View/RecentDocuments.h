@@ -109,11 +109,9 @@ namespace TrenchBroom {
             void loadFromConfig() {
                 m_recentDocuments.clear();
                 wxConfigBase* conf = wxConfig::Get();
-                conf->SetPath("/");
-                const wxConfigPathChanger setPath(conf, "/");
 
                 for (size_t i = 0; i < m_maxSize; ++i) {
-                    const wxString confName = wxString("RecentDocuments/") << i;
+                    const wxString confName = wxString("/RecentDocuments/") << i;
                     wxString value;
                     if (conf->Read(confName, &value)) {
                         m_recentDocuments.push_back(IO::Path(value.ToStdString()));
@@ -125,12 +123,10 @@ namespace TrenchBroom {
             
             void saveToConfig() {
                 wxConfigBase* conf = wxConfig::Get();
-                conf->SetPath("/");
-                const wxConfigPathChanger setPath(conf, "/");
-
-                conf->DeleteGroup("RecentDocuments");
+                
+                conf->DeleteGroup("/RecentDocuments");
                 for (size_t i = 0; i < m_recentDocuments.size(); ++i) {
-                    const wxString confName = wxString("RecentDocuments/") << i;
+                    const wxString confName = wxString("/RecentDocuments/") << i;
                     const wxString value = m_recentDocuments[i].asString();
                     conf->Write(confName, value);
                 }
