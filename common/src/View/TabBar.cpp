@@ -20,6 +20,7 @@
 #include "TabBar.h"
 
 #include "Macros.h"
+#include "CollectionUtils.h"
 #include "View/TabBook.h"
 #include "View/ViewConstants.h"
 
@@ -85,9 +86,13 @@ namespace TrenchBroom {
         
         void TabBar::addTab(TabBookPage* bookPage, const wxString& title) {
             ensure(bookPage != nullptr, "bookPage is null");
+            m_bookPages.push_back(bookPage);
             
             TabBarButton* button = new TabBarButton(this, title);
             button->Bind(wxEVT_BUTTON, &TabBar::OnButtonClicked, this);
+            if (m_tabBook->pinningBehaviour() != TabBook::Pinning::None) {
+                button->Bind(wxEVT_CONTEXT_MENU, &TabBar::OnButtonContextMenu, this);
+            }
             button->setPressed(m_buttons.empty());
             m_buttons.push_back(button);
             
@@ -96,8 +101,29 @@ namespace TrenchBroom {
             m_controlSizer->InsertSpacer(sizerIndex + 1, LayoutConstants::WideHMargin);
             
             wxWindow* barPage = bookPage->createTabBarPage(m_barBook);
+            m_barPages.push_back(barPage);
             m_barBook->AddPage(barPage, title);
             
+            Layout();
+        }
+        
+        void TabBar::removeTab(TabBookPage* bookPage) {
+            ensure(bookPage != nullptr, "bookPage is null");
+            
+            const auto index = VectorUtils::indexOf(m_bookPages, bookPage);
+            
+            auto *button = m_buttons.at(index);
+            
+            VectorUtils::erase(m_bookPages, index);
+            VectorUtils::erase(m_buttons, index);
+            VectorUtils::erase(m_barPages, index);
+            
+            // remove button
+            button->Destroy();
+            
+            // remove bar page from m_barBook
+            m_barBook->DeletePage(index);
+        
             Layout();
         }
         
@@ -110,15 +136,42 @@ namespace TrenchBroom {
             m_tabBook->switchToPage(index);
         }
 
+        void TabBar::OnButtonContextMenu(wxContextMenuEvent& event) {
+            if (IsBeingDeleted()) return;
+            
+            wxWindow* button = static_cast<wxWindow*>(event.GetEventObject());
+            const size_t index = findButtonIndex(button);
+            ensure(index < m_buttons.size(), "index out of range");
+            
+            wxMenu popupMenu;
+            const auto pinTabId = PinTabBaseId + static_cast<int>(index);
+            popupMenu.Append(pinTabId, "Pin");
+            popupMenu.Bind(wxEVT_MENU, &TabBar::OnPinTab, this, pinTabId);
+            PopupMenu(&popupMenu);
+        }
+        
+        void TabBar::OnPinTab(wxCommandEvent& event) {
+            if (IsBeingDeleted()) return;
+            
+            const auto index = static_cast<size_t>(event.GetId() - PinTabBaseId);
+            auto* bookPage = m_bookPages.at(index);
+            
+            m_tabBook->pinTab(bookPage);
+        }
+        
         void TabBar::OnTabBookPageChanged(wxBookCtrlEvent& event) {
             if (IsBeingDeleted()) return;
 
             const int oldIndex = event.GetOldSelection();
             const int newIndex = event.GetSelection();
             
-            setButtonInactive(oldIndex);
-            setButtonActive(newIndex);
-            m_barBook->SetSelection(static_cast<size_t>(newIndex));
+            if (oldIndex != wxNOT_FOUND && static_cast<size_t>(oldIndex) < m_buttons.size()) {
+                setButtonInactive(oldIndex);
+            }
+            if (newIndex != wxNOT_FOUND && static_cast<size_t>(newIndex) < m_buttons.size()) {
+                setButtonActive(newIndex);
+                m_barBook->SetSelection(static_cast<size_t>(newIndex));
+            }
         }
 
         size_t TabBar::findButtonIndex(wxWindow* button) const {
@@ -130,11 +183,11 @@ namespace TrenchBroom {
         }
 
         void TabBar::setButtonActive(const int index) {
-            m_buttons[static_cast<size_t>(index)]->setPressed(true);
+            m_buttons.at(static_cast<size_t>(index))->setPressed(true);
         }
         
         void TabBar::setButtonInactive(const int index) {
-            m_buttons[static_cast<size_t>(index)]->setPressed(false);
+            m_buttons.at(static_cast<size_t>(index))->setPressed(false);
         }
     }
 }

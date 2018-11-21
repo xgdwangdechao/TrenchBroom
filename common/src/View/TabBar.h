@@ -47,20 +47,34 @@ namespace TrenchBroom {
             void updateLabel();
         };
         
+        /**
+         * Shows a list of tabs. The area in the tab bar to the right of the tab buttons
+         * can be customized by TabBookPage::createTabBarPage
+         */
         class TabBar : public ContainerBar {
         private:
-            typedef std::vector<TabBarButton*> ButtonList;
+            static const int PinTabBaseId = 100;
             
+            /**
+             * Owner of this TabBar
+             */
             TabBook* m_tabBook;
             wxSimplebook* m_barBook;
             wxSizer* m_controlSizer;
-            ButtonList m_buttons;
+            
+            // These are all weak references
+            std::vector<TabBarButton*> m_buttons;
+            std::vector<wxWindow*> m_barPages;
+            std::vector<TabBookPage*> m_bookPages;
         public:
             TabBar(TabBook* tabBook);
             
             void addTab(TabBookPage* bookPage, const wxString& title);
+            void removeTab(TabBookPage* bookPage);
             
             void OnButtonClicked(wxCommandEvent& event);
+            void OnButtonContextMenu(wxContextMenuEvent& event);
+            void OnPinTab(wxCommandEvent& event);
             void OnTabBookPageChanged(wxBookCtrlEvent& event);
         private:
             size_t findButtonIndex(wxWindow* button) const;

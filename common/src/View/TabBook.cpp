@@ -27,6 +27,8 @@
 
 namespace TrenchBroom {
     namespace View {
+        // TabBookPage
+        
         TabBookPage::TabBookPage(wxWindow* parent) :
         wxPanel(parent) {}
         TabBookPage::~TabBookPage() {}
@@ -35,21 +37,29 @@ namespace TrenchBroom {
             return new wxPanel(parent);
         }
 
-        TabBook::TabBook(wxWindow* parent) :
+        // TabBook
+        
+        TabBook::TabBook(wxWindow* parent, const Pinning pinning) :
         wxPanel(parent),
         m_tabBar(new TabBar(this)),
-        m_tabBook(new wxSimplebook(this)) {
+        m_tabBook(new wxSimplebook(this)),
+        m_pinningBehaviour(pinning) {
             m_tabBook->Bind(wxEVT_COMMAND_BOOKCTRL_PAGE_CHANGED, &TabBook::OnTabBookPageChanged, this);
 
-            wxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-            sizer->Add(m_tabBar, 0, wxEXPAND);
-            sizer->Add(m_tabBook, 1, wxEXPAND);
-            SetSizer(sizer);
+            m_tabBarAndBookSizer = new wxBoxSizer(wxVERTICAL);
+            m_tabBarAndBookSizer->Add(m_tabBar, 0, wxEXPAND);
+            m_tabBarAndBookSizer->Add(m_tabBook, 1, wxEXPAND);
+            
+            m_outerSizer = new wxBoxSizer(wxHORIZONTAL);
+            m_outerSizer->Add(m_tabBarAndBookSizer, 1, wxEXPAND);
+            SetSizer(m_outerSizer);
         }
         
         void TabBook::addPage(TabBookPage* page, const wxString& title) {
             ensure(page != nullptr, "page is null");
             assert(page->GetParent() == this);
+            
+            m_allPages.push_back(page);
             
             RemoveChild(page);
             page->Reparent(m_tabBook);
@@ -58,15 +68,43 @@ namespace TrenchBroom {
         }
 
         void TabBook::switchToPage(const size_t index) {
-            assert(index < m_tabBook->GetPageCount());
-            m_tabBook->SetSelection(index);
+            auto* page = m_allPages.at(index);
+            
+            auto bookIndex = m_tabBook->FindPage(page);
+            if (bookIndex != wxNOT_FOUND) {
+                // bookIndex will be wxNOT_FOUND if the tab is pinned
+                m_tabBook->SetSelection(static_cast<size_t>(bookIndex));
+            }
         }
 
+        void TabBook::pinTab(TabBookPage* page) {
+            wxLogDebug("pin tab %p", static_cast<void*>(page));
+            
+            const auto tabBookIndex = m_tabBook->FindPage(page);
+            ensure(tabBookIndex != wxNOT_FOUND, "page should be in the tab book in order to pin it");
+            
+            m_tabBar->removeTab(page);
+            
+            // reparent it
+            
+            m_tabBook->RemovePage(static_cast<size_t>(tabBookIndex));
+            
+            page->Reparent(this);
+            
+            m_outerSizer->Prepend(page, 1, wxEXPAND);
+            page->Show();
+            Layout();
+        }
+        
         void TabBook::setTabBarHeight(const int height) {
-            GetSizer()->SetItemMinSize(m_tabBar, wxDefaultCoord, height);
+            m_tabBarAndBookSizer->SetItemMinSize(m_tabBar, wxDefaultCoord, height);
             Layout();
         }
 
+        TabBook::Pinning TabBook::pinningBehaviour() const {
+            return m_pinningBehaviour;
+        }
+        
         void TabBook::OnTabBookPageChanged(wxBookCtrlEvent& event) {
             if (IsBeingDeleted()) return;
 

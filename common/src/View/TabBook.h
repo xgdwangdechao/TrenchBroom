@@ -22,6 +22,8 @@
 
 #include <wx/panel.h>
 
+#include <vector>
+
 class wxBookCtrlEvent;
 class wxSimplebook;
 
@@ -37,15 +39,34 @@ namespace TrenchBroom {
         };
         
         class TabBook : public wxPanel {
+        public:
+            enum class Pinning {
+                None, Vertical
+            };
         private:
+            /**
+             * Includes pinned and unpinned tabs
+             */
+            std::vector<TabBookPage*> m_allPages;
+            /**
+             * Horizontal sizer for the pinned tabs, followed by the tab book
+             * of unpinned tabs
+             */
+            wxBoxSizer* m_outerSizer;
+            
+            wxBoxSizer* m_tabBarAndBookSizer;
             TabBar* m_tabBar;
             wxSimplebook* m_tabBook;
+            
+            Pinning m_pinningBehaviour;
         public:
-            TabBook(wxWindow* parent);
+            TabBook(wxWindow* parent, Pinning pinningBehaviour = Pinning::None);
             
             void addPage(TabBookPage* page, const wxString& title);
             void switchToPage(size_t index);
+            void pinTab(TabBookPage* page);
             void setTabBarHeight(int height);
+            Pinning pinningBehaviour() const;
             
             void OnTabBookPageChanged(wxBookCtrlEvent& event);
         };

@@ -36,7 +36,7 @@ namespace TrenchBroom {
         m_entityInspector(nullptr),
         m_faceInspector(nullptr) {
             
-            m_tabBook = new TabBook(this);
+            m_tabBook = new TabBook(this, TabBook::Pinning::Vertical);
 
             m_mapInspector = new MapInspector(m_tabBook, document, contextManager);
             m_entityInspector = new EntityInspector(m_tabBook, document, contextManager);
