@@ -64,6 +64,7 @@ namespace TrenchBroom {
             
             void addPage(TabBookPage* page, const wxString& title);
             void switchToPage(size_t index);
+            void switchToPage(TabBookPage* page);
             void pinTab(TabBookPage* page);
             void setTabBarHeight(int height);
             Pinning pinningBehaviour() const;

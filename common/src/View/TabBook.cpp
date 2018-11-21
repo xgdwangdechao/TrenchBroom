@@ -20,6 +20,7 @@
 #include "TabBook.h"
 
 #include "Macros.h"
+#include "CollectionUtils.h"
 #include "View/TabBar.h"
 
 #include <wx/simplebook.h>
@@ -69,6 +70,11 @@ namespace TrenchBroom {
 
         void TabBook::switchToPage(const size_t index) {
             auto* page = m_allPages.at(index);
+            switchToPage(page);
+        }
+        
+        void TabBook::switchToPage(TabBookPage* page) {
+            ensure(VectorUtils::contains(m_allPages, page), "must contain the requested page");
             
             auto bookIndex = m_tabBook->FindPage(page);
             if (bookIndex != wxNOT_FOUND) {
@@ -78,6 +84,7 @@ namespace TrenchBroom {
         }
 
         void TabBook::pinTab(TabBookPage* page) {
+            ensure(m_pinningBehaviour != Pinning::None, "pinning should be enabled");
             wxLogDebug("pin tab %p", static_cast<void*>(page));
             
             const auto tabBookIndex = m_tabBook->FindPage(page);
@@ -90,9 +97,19 @@ namespace TrenchBroom {
             m_tabBook->RemovePage(static_cast<size_t>(tabBookIndex));
             
             page->Reparent(this);
-            
-            m_outerSizer->Prepend(page, 1, wxEXPAND);
             page->Show();
+            
+            // add it to the layout
+            
+            TabBar* pinnedPageTabBar = new TabBar(this);
+            pinnedPageTabBar->addTab(page, "Some pinned tab!");
+            
+            wxBoxSizer* pinnedPageSizer = new wxBoxSizer(wxVERTICAL);
+            pinnedPageSizer->Add(pinnedPageTabBar, 0, wxEXPAND);
+            pinnedPageSizer->Add(page, 1, wxEXPAND);
+            
+            m_outerSizer->Prepend(pinnedPageSizer, 1, wxEXPAND);
+            
             Layout();
         }
         

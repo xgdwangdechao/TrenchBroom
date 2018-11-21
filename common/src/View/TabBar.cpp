@@ -130,15 +130,19 @@ namespace TrenchBroom {
         void TabBar::OnButtonClicked(wxCommandEvent& event) {
             if (IsBeingDeleted()) return;
 
+            // TODO: factor out
             wxWindow* button = static_cast<wxWindow*>(event.GetEventObject());
             const size_t index = findButtonIndex(button);
             ensure(index < m_buttons.size(), "index out of range");
-            m_tabBook->switchToPage(index);
+            
+            auto* bookPage = m_bookPages.at(index);
+            m_tabBook->switchToPage(bookPage);
         }
 
         void TabBar::OnButtonContextMenu(wxContextMenuEvent& event) {
             if (IsBeingDeleted()) return;
             
+            // TODO: factor out
             wxWindow* button = static_cast<wxWindow*>(event.GetEventObject());
             const size_t index = findButtonIndex(button);
             ensure(index < m_buttons.size(), "index out of range");
