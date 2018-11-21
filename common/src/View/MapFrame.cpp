@@ -92,6 +92,7 @@ namespace TrenchBroom {
         m_mapView(nullptr),
         m_console(nullptr),
         m_inspector(nullptr),
+        m_floatingInspectorFrame(nullptr),
         m_lastFocus(nullptr),
         m_gridChoice(nullptr),
         m_compilationDialog(nullptr),
@@ -106,6 +107,7 @@ namespace TrenchBroom {
         m_mapView(nullptr),
         m_console(nullptr),
         m_inspector(nullptr),
+        m_floatingInspectorFrame(nullptr),
         m_lastFocus(nullptr),
         m_gridChoice(nullptr),
         m_compilationDialog(nullptr),
@@ -449,6 +451,21 @@ namespace TrenchBroom {
 
             wxPersistenceManager::Get().RegisterAndRestore(m_hSplitter);
             wxPersistenceManager::Get().RegisterAndRestore(m_vSplitter);
+            
+            // do the popup
+            
+            const auto style = wxCAPTION | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxCLOSE_BOX | wxRESIZE_BORDER | wxFRAME_TOOL_WINDOW | wxFRAME_FLOAT_ON_PARENT;
+            m_floatingInspectorFrame = new wxFrame(this, -1, "Inspector", wxDefaultPosition, wxDefaultSize /* m_inspector->GetSize() */, style);
+            m_floatingInspectorFrame->Show();
+            
+            // reparent inspector
+            m_inspector->Reparent(m_floatingInspectorFrame);
+            m_inspector->Show();
+            
+            wxSizer* inspectorSizer = new wxBoxSizer(wxVERTICAL);
+            inspectorSizer->Add(m_inspector, 1, wxEXPAND);
+            
+            m_floatingInspectorFrame->SetSizer(inspectorSizer);
         }
 
         void MapFrame::createToolBar() {

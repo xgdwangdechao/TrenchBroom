@@ -67,6 +67,7 @@ namespace TrenchBroom {
             SwitchableMapViewContainer* m_mapView;
             Console* m_console;
             Inspector* m_inspector;
+            wxFrame* m_floatingInspectorFrame;
 
             wxWindow* m_lastFocus;
 
