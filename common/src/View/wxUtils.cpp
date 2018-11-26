@@ -42,13 +42,13 @@
 namespace TrenchBroom {
     namespace View {
         MapFrame* findMapFrame(wxWindow* window) {
-            return wxDynamicCast(findFrame(window), MapFrame);
+            return dynamic_cast<MapFrame*>(findFrame(window));
         }
 
         wxFrame* findFrame(wxWindow* window) {
             if (window == nullptr)
                 return nullptr;
-            return wxDynamicCast(wxGetTopLevelParent(window), wxFrame);
+            return dynamic_cast<wxFrame*>(wxGetTopLevelParent(window));
         }
 
         void fitAll(wxWindow* window) {
