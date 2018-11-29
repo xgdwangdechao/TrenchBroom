@@ -34,6 +34,8 @@
 
 namespace TrenchBroom {
     namespace View {
+        // SplitterWindow2
+
         SplitterWindow2::SplitterWindow2(wxWindow* parent) :
         wxPanel(parent, wxID_ANY),
         m_splitMode(SplitMode_Unset),
@@ -43,7 +45,8 @@ namespace TrenchBroom {
         m_initialSplitRatio(-1.0),
         m_currentSplitRatio(m_initialSplitRatio),
         m_sashCursorSet(0),
-        m_oldSize(GetSize()) {
+        m_oldSize(GetSize()),
+        m_floatingFrame(nullptr) {
             for (size_t i = 0; i < NumWindows; ++i) {
                 m_windows[i] = nullptr;
                 m_minSizes[i] = wxDefaultSize;
@@ -97,10 +100,51 @@ namespace TrenchBroom {
         
         void SplitterWindow2::restore() {
             if (m_maximizedWindow != nullptr) {
+                // first close the floating window if any
+                if (isFloatingWindow(unmaximizedWindow())) {
+                    closeFloatingWindow(unmaximizedWindow());
+                }
+                
+                ensure(unmaximizedWindow() != nullptr, "the unmaximized window should be non-null");
+                ensure(this->IsDescendant(unmaximizedWindow()), "the floating window should have been reparented");
+
                 unmaximizedWindow()->Show();
                 m_maximizedWindow = nullptr;
                 sizeWindows();
             }
+        }
+
+        void SplitterWindow2::floatWindow(wxWindow* window) {
+            assert(window == m_windows[0] || window == m_windows[1]);
+            ensure(m_floatingFrame == nullptr, "there should not be a floating frame");
+            ensure(this->IsDescendant(window), "window should be a descendant of this");
+            assert(m_maximizedWindow != window);
+
+            // maximize the other window
+            maximize(otherWindow(window));
+
+            // do the popup
+
+            m_floatingFrame = new SplitterWindow2FloatingFrame(this, window);
+            m_floatingFrame->Show();
+        }
+
+        bool SplitterWindow2::isFloatingWindow(wxWindow* window) const {
+            assert(window == m_windows[0] || window == m_windows[1]);
+            if (m_floatingFrame == nullptr) {
+                return false;
+            }
+            return m_floatingFrame->IsDescendant(window);
+        }
+
+        void SplitterWindow2::closeFloatingWindow(wxWindow* window) {
+            ensure(m_floatingFrame != nullptr, "there should be a floating frame");
+            ensure(isFloatingWindow(window), "specified window should be floated");
+
+            window->Reparent(this);
+
+            m_floatingFrame->Destroy();
+            m_floatingFrame = nullptr;
         }
 
         int SplitterWindow2::currentSashPosition() const {
@@ -317,7 +361,45 @@ namespace TrenchBroom {
  
         wxWindow* SplitterWindow2::unmaximizedWindow() {
             ensure(m_maximizedWindow != nullptr, "maximizedWindow is null");
-            return m_windows[0] == m_maximizedWindow ? m_windows[1] : m_windows[0];
+            return otherWindow(m_maximizedWindow);
+        }
+
+        wxWindow* SplitterWindow2::otherWindow(wxWindow* window) {
+            return m_windows[0] == window ? m_windows[1] : m_windows[0];
+        }
+
+        // SplitterWindow2FloatingFrame
+
+        SplitterWindow2FloatingFrame::SplitterWindow2FloatingFrame(SplitterWindow2* owner, wxWindow* floatWindow)
+            : m_owner(owner),
+              m_floatWindow(floatWindow),
+              m_sizer(nullptr),
+              wxFrame(owner, -1, "Inspector", wxDefaultPosition, wxDefaultSize /* m_inspector->GetSize() */, 
+                  wxCAPTION | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxCLOSE_BOX | wxRESIZE_BORDER | wxFRAME_TOOL_WINDOW | wxFRAME_FLOAT_ON_PARENT)
+        {
+            // reparent inspector
+            m_floatWindow->Reparent(this);
+            m_floatWindow->Show();
+
+            m_sizer = new wxBoxSizer(wxVERTICAL);
+            m_sizer->Add(floatWindow, 1, wxEXPAND);
+
+            SetSizer(m_sizer);
+        }
+
+        bool SplitterWindow2FloatingFrame::Destroy() {
+            if (!m_owner->IsBeingDeleted()) {
+                // Reparent the window back into the splitter 
+
+                m_sizer->Detach(m_floatWindow);
+
+                m_floatWindow->Reparent(m_owner);
+                //m_floatWindow->Show();
+
+                m_owner->m_floatingFrame = nullptr;
+            }
+
+            return wxFrame::Destroy();
         }
     }
 }

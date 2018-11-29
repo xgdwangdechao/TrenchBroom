@@ -57,6 +57,10 @@ namespace TrenchBroom {
         private:
             void OnTopWidgetSize(wxSizeEvent& event);
         };
+
+        class InspectorFrame : public wxFrame {
+
+        };
     }
 }
 

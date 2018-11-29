@@ -29,7 +29,8 @@ class wxPersistentObject;
 namespace TrenchBroom {
     namespace View {
         class PersistentSplitterWindow2;
-        
+        class SplitterWindow2FloatingFrame;
+
         class SplitterWindow2 : public wxPanel {
         private:
             static const size_t NumWindows = 2;
@@ -55,7 +56,10 @@ namespace TrenchBroom {
             
             wxSize m_oldSize;
             
+            SplitterWindow2FloatingFrame *m_floatingFrame;
+
             friend class PersistentSplitterWindow2;
+            friend class SplitterWindow2FloatingFrame;
         public:
             SplitterWindow2(wxWindow* parent);
             
@@ -67,7 +71,28 @@ namespace TrenchBroom {
             
             bool isMaximized(wxWindow* window) const;
             void maximize(wxWindow* window);
+            /**
+             * If one of the child windows is maximized, restores the split window
+             * so both children are un-maximized.
+             * If one of the child windows was floating, that is also cancelled.
+             */
             void restore();
+
+            /**
+             * Moves the given child window to a floating frame and maximizes the other window.
+             * Calling restore() will close the floating frame and restore it in the splitter window.
+             *
+             * Only one window at a time can be floated, and it must not be maximized before floating.
+             */
+            void floatWindow(wxWindow* window);
+            /**
+             * Returns whenther the window is currently in a floating frame.
+             */
+            bool isFloatingWindow(wxWindow* window) const;
+            /**
+             * Closes the floating window without restoring the layout. The other window will remain maximized.
+             */
+            void closeFloatingWindow(wxWindow* window);
         private:
             int currentSashPosition() const;
             int sashPosition(double ratio) const;
@@ -97,6 +122,7 @@ namespace TrenchBroom {
             int sashSize() const;
             
             wxWindow* unmaximizedWindow();
+            wxWindow* otherWindow(wxWindow* window);
             
             template <typename T>
             void setHV(T& p, const int h, const int v) const {
@@ -159,6 +185,23 @@ namespace TrenchBroom {
                     switchDefault()
                 }
             }
+        };
+
+        class SplitterWindow2FloatingFrame : public wxFrame {
+        private:
+            SplitterWindow2* m_owner;
+            /** 
+             * The splitter pane that's being floated
+             */
+            wxWindow* m_floatWindow;
+            wxSizer* m_sizer;
+        public:
+            /**
+             * Reparents the given floatWindow to be in this floating frame.
+             */
+            SplitterWindow2FloatingFrame(SplitterWindow2* owner, wxWindow* floatWindow);
+
+            bool Destroy() override;
         };
     }
 }

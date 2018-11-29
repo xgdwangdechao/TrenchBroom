@@ -74,6 +74,7 @@ namespace TrenchBroom {
                 const int ViewToggleMaximizeCurrentView      = Lowest +  89;
                 const int ViewToggleInfoPanel                = Lowest +  90;
                 const int ViewToggleInspector                = Lowest +  91;
+                const int ViewToggleFloatingInspector        = Lowest +  92;
                 
                 const int FileOpenRecent                     = Lowest +  96;
                 const int FileExportObj                      = Lowest +  97;

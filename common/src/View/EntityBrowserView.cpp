@@ -21,6 +21,7 @@
 
 #include "Preferences.h"
 #include "Logger.h"
+#include "TrenchBroomApp.h"
 #include "Assets/EntityDefinition.h"
 #include "Assets/EntityDefinitionManager.h"
 #include "Assets/EntityModel.h"
@@ -163,13 +164,15 @@ namespace TrenchBroom {
         }
         
         void EntityBrowserView::dndWillStart() {
-            MapFrame* mapFrame = findMapFrame(this);
+            auto* frameManager = TrenchBroomApp::instance().frameManager();
+            auto* mapFrame = frameManager->topFrame();
             ensure(mapFrame != nullptr, "mapFrame is null");
             mapFrame->setToolBoxDropTarget();
         }
         
         void EntityBrowserView::dndDidEnd() {
-            MapFrame* mapFrame = findMapFrame(this);
+            auto* frameManager = TrenchBroomApp::instance().frameManager();
+            auto* mapFrame = frameManager->topFrame();
             ensure(mapFrame != nullptr, "mapFrame is null");
             mapFrame->clearDropTarget();
         }

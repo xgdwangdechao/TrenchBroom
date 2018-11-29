@@ -92,7 +92,6 @@ namespace TrenchBroom {
         m_mapView(nullptr),
         m_console(nullptr),
         m_inspector(nullptr),
-        m_floatingInspectorFrame(nullptr),
         m_lastFocus(nullptr),
         m_gridChoice(nullptr),
         m_compilationDialog(nullptr),
@@ -107,7 +106,6 @@ namespace TrenchBroom {
         m_mapView(nullptr),
         m_console(nullptr),
         m_inspector(nullptr),
-        m_floatingInspectorFrame(nullptr),
         m_lastFocus(nullptr),
         m_gridChoice(nullptr),
         m_compilationDialog(nullptr),
@@ -434,7 +432,14 @@ namespace TrenchBroom {
             InfoPanel* infoPanel = new InfoPanel(m_vSplitter, m_document);
             m_console = infoPanel->console();
             m_mapView = new SwitchableMapViewContainer(m_vSplitter, m_console, m_document, *m_contextManager);
+            //m_inspectorContainer = new wxPanel(m_hSplitter);
+            //m_inspectorContainer->SetBackgroundColour(wxColour(255, 0, 0));
+
             m_inspector = new Inspector(m_hSplitter, m_document, *m_contextManager);
+           
+           /* wxSizer* inspectorSizer = new wxBoxSizer(wxVERTICAL);
+            inspectorSizer->Add(m_inspector, 1, wxEXPAND);*/
+            //m_inspectorContainer->SetSizerAndFit(inspectorSizer);
 
             m_mapView->connectTopWidgets(m_inspector);
 
@@ -452,20 +457,22 @@ namespace TrenchBroom {
             wxPersistenceManager::Get().RegisterAndRestore(m_hSplitter);
             wxPersistenceManager::Get().RegisterAndRestore(m_vSplitter);
             
-            // do the popup
-            
-            const auto style = wxCAPTION | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxCLOSE_BOX | wxRESIZE_BORDER | wxFRAME_TOOL_WINDOW | wxFRAME_FLOAT_ON_PARENT;
-            m_floatingInspectorFrame = new wxFrame(this, -1, "Inspector", wxDefaultPosition, wxDefaultSize /* m_inspector->GetSize() */, style);
-            m_floatingInspectorFrame->Show();
-            
-            // reparent inspector
-            m_inspector->Reparent(m_floatingInspectorFrame);
-            m_inspector->Show();
-            
-            wxSizer* inspectorSizer = new wxBoxSizer(wxVERTICAL);
-            inspectorSizer->Add(m_inspector, 1, wxEXPAND);
-            
-            m_floatingInspectorFrame->SetSizer(inspectorSizer);
+            //// do the popup
+            //
+            //const auto style = wxCAPTION | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxCLOSE_BOX | wxRESIZE_BORDER | wxFRAME_TOOL_WINDOW | wxFRAME_FLOAT_ON_PARENT;
+            //m_floatingInspectorFrame = new wxFrame(this, -1, "Inspector", wxDefaultPosition, wxDefaultSize /* m_inspector->GetSize() */, style);
+            //m_floatingInspectorFrame->Show();
+            //
+            //// reparent inspector
+            //inspectorSizer->Detach(m_inspector);
+            //inspectorSizer->Layout();
+            //m_inspector->Reparent(m_floatingInspectorFrame);
+            //m_inspector->Show();
+            //
+            //wxSizer* inspectorFloatingSizer = new wxBoxSizer(wxVERTICAL);
+            //inspectorFloatingSizer->Add(m_inspector, 1, wxEXPAND);
+            //
+            //m_floatingInspectorFrame->SetSizer(inspectorFloatingSizer);
         }
 
         void MapFrame::createToolBar() {
@@ -777,6 +784,7 @@ namespace TrenchBroom {
             Bind(wxEVT_MENU, &MapFrame::OnViewToggleMaximizeCurrentView, this, CommandIds::Menu::ViewToggleMaximizeCurrentView);
             Bind(wxEVT_MENU, &MapFrame::OnViewToggleInfoPanel, this, CommandIds::Menu::ViewToggleInfoPanel);
             Bind(wxEVT_MENU, &MapFrame::OnViewToggleInspector, this, CommandIds::Menu::ViewToggleInspector);
+            Bind(wxEVT_MENU, &MapFrame::OnViewToggleFloatingInspector, this, CommandIds::Menu::ViewToggleFloatingInspector);
 
             Bind(wxEVT_MENU, &MapFrame::OnRunCompile, this, CommandIds::Menu::RunCompile);
             Bind(wxEVT_MENU, &MapFrame::OnRunLaunch, this, CommandIds::Menu::RunLaunch);
@@ -1390,6 +1398,15 @@ namespace TrenchBroom {
                 m_hSplitter->maximize(m_vSplitter);
         }
 
+        void MapFrame::OnViewToggleFloatingInspector(wxCommandEvent& event) {
+            if (IsBeingDeleted()) return;
+
+            if (m_hSplitter->isFloatingWindow(m_inspector))
+                m_hSplitter->restore();
+            else
+                m_hSplitter->floatWindow(m_inspector);
+        }
+
         void MapFrame::OnRunCompile(wxCommandEvent& event) {
             if (IsBeingDeleted()) return;
             
@@ -1795,6 +1812,10 @@ namespace TrenchBroom {
                 case CommandIds::Menu::ViewToggleInspector:
                     event.Enable(true);
                     event.Check(!m_hSplitter->isMaximized(m_vSplitter));
+                    break;
+                case CommandIds::Menu::ViewToggleFloatingInspector:
+                    event.Enable(true); // FIXME:
+                    event.Check(m_hSplitter->isFloatingWindow(m_inspector));
                     break;
                 case CommandIds::Menu::RunCompile:
                     event.Enable(canCompile());

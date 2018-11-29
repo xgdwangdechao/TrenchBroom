@@ -67,7 +67,6 @@ namespace TrenchBroom {
             SwitchableMapViewContainer* m_mapView;
             Console* m_console;
             Inspector* m_inspector;
-            wxFrame* m_floatingInspectorFrame;
 
             wxWindow* m_lastFocus;
 
@@ -224,6 +223,7 @@ namespace TrenchBroom {
             void OnViewToggleMaximizeCurrentView(wxCommandEvent& event);
             void OnViewToggleInfoPanel(wxCommandEvent& event);
             void OnViewToggleInspector(wxCommandEvent& event);
+            void OnViewToggleFloatingInspector(wxCommandEvent& event);
 
             void OnRunCompile(wxCommandEvent& event);
         public:
