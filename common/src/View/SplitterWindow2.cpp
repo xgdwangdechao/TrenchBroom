@@ -394,7 +394,7 @@ namespace TrenchBroom {
                 m_sizer->Detach(m_floatWindow);
 
                 m_floatWindow->Reparent(m_owner);
-                //m_floatWindow->Show();
+                m_floatWindow->Hide();
 
                 m_owner->m_floatingFrame = nullptr;
             }
