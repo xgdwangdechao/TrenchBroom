@@ -432,14 +432,7 @@ namespace TrenchBroom {
             InfoPanel* infoPanel = new InfoPanel(m_vSplitter, m_document);
             m_console = infoPanel->console();
             m_mapView = new SwitchableMapViewContainer(m_vSplitter, m_console, m_document, *m_contextManager);
-            //m_inspectorContainer = new wxPanel(m_hSplitter);
-            //m_inspectorContainer->SetBackgroundColour(wxColour(255, 0, 0));
-
             m_inspector = new Inspector(m_hSplitter, m_document, *m_contextManager);
-           
-           /* wxSizer* inspectorSizer = new wxBoxSizer(wxVERTICAL);
-            inspectorSizer->Add(m_inspector, 1, wxEXPAND);*/
-            //m_inspectorContainer->SetSizerAndFit(inspectorSizer);
 
             m_mapView->connectTopWidgets(m_inspector);
 
@@ -456,23 +449,6 @@ namespace TrenchBroom {
 
             wxPersistenceManager::Get().RegisterAndRestore(m_hSplitter);
             wxPersistenceManager::Get().RegisterAndRestore(m_vSplitter);
-            
-            //// do the popup
-            //
-            //const auto style = wxCAPTION | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxCLOSE_BOX | wxRESIZE_BORDER | wxFRAME_TOOL_WINDOW | wxFRAME_FLOAT_ON_PARENT;
-            //m_floatingInspectorFrame = new wxFrame(this, -1, "Inspector", wxDefaultPosition, wxDefaultSize /* m_inspector->GetSize() */, style);
-            //m_floatingInspectorFrame->Show();
-            //
-            //// reparent inspector
-            //inspectorSizer->Detach(m_inspector);
-            //inspectorSizer->Layout();
-            //m_inspector->Reparent(m_floatingInspectorFrame);
-            //m_inspector->Show();
-            //
-            //wxSizer* inspectorFloatingSizer = new wxBoxSizer(wxVERTICAL);
-            //inspectorFloatingSizer->Add(m_inspector, 1, wxEXPAND);
-            //
-            //m_floatingInspectorFrame->SetSizer(inspectorFloatingSizer);
         }
 
         void MapFrame::createToolBar() {
