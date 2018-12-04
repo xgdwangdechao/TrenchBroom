@@ -368,6 +368,10 @@ namespace TrenchBroom {
             return m_windows[0] == window ? m_windows[1] : m_windows[0];
         }
 
+        void SplitterWindow2::childSizeRequest(wxWindow* child, wxSize size) {
+
+        }
+
         // SplitterWindow2FloatingFrame
 
         SplitterWindow2FloatingFrame::SplitterWindow2FloatingFrame(SplitterWindow2* owner, wxWindow* floatWindow)
@@ -377,6 +381,8 @@ namespace TrenchBroom {
               wxFrame(owner, -1, "Inspector", wxDefaultPosition, wxDefaultSize /* m_inspector->GetSize() */, 
                   wxCAPTION | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxCLOSE_BOX | wxRESIZE_BORDER | wxFRAME_TOOL_WINDOW | wxFRAME_FLOAT_ON_PARENT)
         {
+            const wxSize oldSize = floatWindow->GetSize();
+
             // reparent inspector
             m_floatWindow->Reparent(this);
             m_floatWindow->Show();
@@ -385,6 +391,9 @@ namespace TrenchBroom {
             m_sizer->Add(floatWindow, 1, wxEXPAND);
 
             SetSizer(m_sizer);
+
+            // FIXME: also preserve position on screen
+            SetClientSize(oldSize);
         }
 
         bool SplitterWindow2FloatingFrame::Destroy() {
@@ -400,6 +409,12 @@ namespace TrenchBroom {
             }
 
             return wxFrame::Destroy();
+        }
+
+        void SplitterWindow2FloatingFrame::childSizeRequest(wxWindow* child, wxSize size) {
+            wxLogDebug("got request to %d %d from %p", size.GetWidth(), size.GetHeight(), child);
+
+            SetClientSize(size);
         }
     }
 }

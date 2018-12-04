@@ -22,6 +22,7 @@
 #include "Macros.h"
 #include "CollectionUtils.h"
 #include "View/TabBar.h"
+#include "SplitterWindow2.h"
 
 #include <wx/simplebook.h>
 #include <wx/sizer.h>
@@ -110,7 +111,19 @@ namespace TrenchBroom {
             
             m_outerSizer->Prepend(pinnedPageSizer, 1, wxEXPAND);
             
-            Layout();
+            //Layout();
+
+            // Search for a parent wxWidget implementing the ChildSizeRequestHandler protocol and ask it to resize us 
+
+            wxSize wantedSize = GetSize();
+            wantedSize.Scale(2.0, 1.0);
+
+            for (wxWindow* parent = GetParent(); parent != nullptr; parent = parent->GetParent()) {
+                if (ChildSizeRequestHandler* childSizeRequestHandler = dynamic_cast<ChildSizeRequestHandler*>(parent); childSizeRequestHandler) {
+                    childSizeRequestHandler->childSizeRequest(this, wantedSize);
+                    break;
+                }
+            }
         }
         
         void TabBook::setTabBarHeight(const int height) {

@@ -31,7 +31,12 @@ namespace TrenchBroom {
         class PersistentSplitterWindow2;
         class SplitterWindow2FloatingFrame;
 
-        class SplitterWindow2 : public wxPanel {
+        class ChildSizeRequestHandler {
+        public:
+            virtual void childSizeRequest(wxWindow* child, wxSize size) = 0;
+        };
+
+        class SplitterWindow2 : public wxPanel, public ChildSizeRequestHandler {
         private:
             static const size_t NumWindows = 2;
             static const int HalfMinSashSize = 2;
@@ -185,9 +190,11 @@ namespace TrenchBroom {
                     switchDefault()
                 }
             }
+        public: // ChildSizeRequestHandler
+            void childSizeRequest(wxWindow* child, wxSize size) override;
         };
 
-        class SplitterWindow2FloatingFrame : public wxFrame {
+        class SplitterWindow2FloatingFrame : public wxFrame, public ChildSizeRequestHandler {
         private:
             SplitterWindow2* m_owner;
             /** 
@@ -202,6 +209,9 @@ namespace TrenchBroom {
             SplitterWindow2FloatingFrame(SplitterWindow2* owner, wxWindow* floatWindow);
 
             bool Destroy() override;
+
+        public: // ChildSizeRequestHandler
+            void childSizeRequest(wxWindow* child, wxSize size) override;
         };
     }
 }
