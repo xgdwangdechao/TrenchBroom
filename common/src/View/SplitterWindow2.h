@@ -23,6 +23,7 @@
 #include "Macros.h"
 
 #include <wx/panel.h>
+#include <wx/frame.h>
 
 class wxPersistentObject;
 

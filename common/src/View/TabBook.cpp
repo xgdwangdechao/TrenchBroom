@@ -26,6 +26,7 @@
 
 #include <wx/simplebook.h>
 #include <wx/sizer.h>
+#include <wx/log.h>
 
 namespace TrenchBroom {
     namespace View {

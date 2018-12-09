@@ -27,6 +27,7 @@
 #include <wx/control.h>
 #include <wx/dcclient.h>
 #include <wx/log.h>
+#include <wx/sizer.h>
 
 #include <cassert>
 #include <iostream>

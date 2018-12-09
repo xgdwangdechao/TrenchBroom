@@ -29,6 +29,7 @@
 #include <wx/simplebook.h>
 #include <wx/sizer.h>
 #include <wx/statline.h>
+#include <wx/menu.h>
 
 #include <cassert>
 #include <iostream>

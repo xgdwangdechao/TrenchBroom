@@ -26,6 +26,7 @@
 
 class wxBookCtrlEvent;
 class wxSimplebook;
+class wxBoxSizer;
 
 namespace TrenchBroom {
     namespace View {
