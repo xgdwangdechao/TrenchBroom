@@ -57,7 +57,7 @@ namespace TrenchBroom {
              */
             vm::vec3 m_origin;
         public:
-            UVViewHelper(Renderer::OrthographicCamera& camera);
+            explicit UVViewHelper(Renderer::OrthographicCamera& camera);
 
             bool valid() const;
             Model::BrushFace* face() const;
@@ -79,7 +79,8 @@ namespace TrenchBroom {
 
             void pickTextureGrid(const vm::ray3& ray, const Model::Hit::HitType hitTypes[2], Model::PickResult& pickResult) const;
 
-            vm::vec2f snapDelta(const vm::vec2f& delta, const vm::vec2f& distance) const;
+            vm::vec2f snapDeltaComponentWise(const vm::vec2f& delta, const vm::vec2f& distance) const;
+            vm::vec2f snapDeltaFully(const vm::vec2f& delta, const vm::vec2f& distance) const;
             vm::vec2f computeDistanceFromTextureGrid(const vm::vec3& position) const;
 
             void computeOriginHandleVertices(vm::vec3& x1, vm::vec3& x2, vm::vec3& y1, vm::vec3& y2) const;

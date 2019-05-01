@@ -194,12 +194,31 @@ namespace TrenchBroom {
             const auto newOriginInFaceCoords = m_helper.originInFaceCoords() + delta;
             const auto newOriginInTexCoords  = vm::vec2f(f2tTransform * vm::vec3(newOriginInFaceCoords));
 
-            // now snap to the vertices
-            // TODO: this actually doesn't work because we're snapping to the X or Y coordinate of the vertices
-            // instead, we must snap to the edges!
+            // snap to the vertices
             auto distanceInTexCoords = vm::vec2f::max;
             for (const Model::BrushVertex* vertex : face->vertices()) {
                 distanceInTexCoords = vm::absMin(distanceInTexCoords, vm::vec2f(w2tTransform * vertex->position()) - newOriginInTexCoords);
+            }
+
+            // snap to the face center
+            const auto faceCenter = vm::vec2f(w2tTransform * face->boundsCenter());
+            distanceInTexCoords = vm::absMin(distanceInTexCoords, faceCenter - newOriginInTexCoords);
+
+            // if we can fully snap to a vertex or the face center, that's what we do
+            auto distanceInFaceCoords = vm::vec2f(t2fTransform * vm::vec3(newOriginInTexCoords + distanceInTexCoords)) - newOriginInFaceCoords;
+            auto fullySnapped = m_helper.snapDeltaFully(delta, distanceInFaceCoords);
+            if (fullySnapped != delta) {
+                return fullySnapped;
+            }
+
+            // now snap to the edges
+            for (const Model::BrushEdge* edge : face->edges()) {
+                // the edge in tex coords
+                const auto s = vm::segment2f(vm::vec2f(w2tTransform * edge->firstVertex()->position()), vm::vec2f(w2tTransform * edge->secondVertex()->position()));
+
+                // the point on the edge which is closest to the hit point, in tex coords
+                const auto p = s.pointAtDistance(vm::distance(s, newOriginInTexCoords).position);
+                distanceInTexCoords = vm::absMin(distanceInTexCoords, p - newOriginInTexCoords);
             }
 
             // and to the texture grid
@@ -208,15 +227,11 @@ namespace TrenchBroom {
                 distanceInTexCoords = vm::absMin(distanceInTexCoords, m_helper.computeDistanceFromTextureGrid(vm::vec3(newOriginInTexCoords)));
             }
 
-            // finally snap to the face center
-            const auto faceCenter = vm::vec2f(w2tTransform * face->boundsCenter());
-            distanceInTexCoords = vm::absMin(distanceInTexCoords, faceCenter - newOriginInTexCoords);
-
             // now we have a distance in the scaled and translated texture coordinate system
             // so we transform the new position plus distance back to the unscaled and untranslated texture coordinate system
-            // and take the actual distance
-            const auto distanceInFaceCoords = newOriginInFaceCoords - vm::vec2f(t2fTransform * vm::vec3(newOriginInTexCoords + distanceInTexCoords));
-            return m_helper.snapDelta(delta, -distanceInFaceCoords);
+            // and take the actual distance - note the component wise snapping here
+            distanceInFaceCoords = vm::vec2f(t2fTransform * vm::vec3(newOriginInTexCoords + distanceInTexCoords)) - newOriginInFaceCoords;
+            return m_helper.snapDeltaComponentWise(delta, distanceInFaceCoords);
         }
 
         void UVOriginTool::doEndMouseDrag(const InputState& inputState) {}

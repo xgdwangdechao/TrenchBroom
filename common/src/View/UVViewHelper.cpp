@@ -151,17 +151,29 @@ namespace TrenchBroom {
             }
         }
 
-        vm::vec2f UVViewHelper::snapDelta(const vm::vec2f& delta, const vm::vec2f& distance) const {
-            const float zoom = cameraZoom();
+        vm::vec2f UVViewHelper::snapDeltaComponentWise(const vm::vec2f& delta, const vm::vec2f& distance) const {
+            const auto zoom = cameraZoom();
 
             vm::vec2f result;
             for (size_t i = 0; i < 2; ++i) {
-                if (vm::abs(distance[i]) < 4.0f / zoom)
+                if (vm::abs(distance[i]) < 4.0f / zoom) {
                     result[i] = delta[i] + distance[i];
-                else
-                    result[i] = vm::round(delta[i]);
+                } else {
+                    result[i] = delta[i];
+                }
             }
             return result;
+        }
+
+        vm::vec2f UVViewHelper::snapDeltaFully(const vm::vec2f& delta, const vm::vec2f& distance) const {
+            const auto zoom = cameraZoom();
+            const auto maxDistance = 4.0f / zoom;
+            if (vm::abs(distance.x()) < maxDistance &&
+                vm::abs(distance.y()) < maxDistance) {
+                return delta + distance;
+            } else {
+                return delta;
+            }
         }
 
         vm::vec2f UVViewHelper::computeDistanceFromTextureGrid(const vm::vec3& position) const {
