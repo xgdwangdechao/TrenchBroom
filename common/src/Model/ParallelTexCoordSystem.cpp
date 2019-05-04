@@ -222,8 +222,8 @@ namespace TrenchBroom {
             // Use the "face" whose texture normal (cross product of the x and y axis) is closest to newNormal (the new face normal).
 
             std::vector<std::pair<vm::vec3, vm::vec3>> possibleTexAxes;
-            possibleTexAxes.push_back({m_xAxis, m_yAxis}); // possibleTexAxes[0] = front
-            possibleTexAxes.push_back({m_yAxis, m_xAxis}); // possibleTexAxes[1] = back
+            possibleTexAxes.emplace_back(m_xAxis, m_yAxis); // possibleTexAxes[0] = front
+            possibleTexAxes.emplace_back(m_yAxis, m_xAxis); // possibleTexAxes[1] = back
             const std::vector<vm::quat3> rotations {
                 vm::quat3(normalize(m_xAxis), vm::toRadians(90.0)),  // possibleTexAxes[2]= bottom (90 degrees CCW about m_xAxis)
                 vm::quat3(normalize(m_xAxis), vm::toRadians(-90.0)), // possibleTexAxes[3] = top
@@ -231,7 +231,7 @@ namespace TrenchBroom {
                 vm::quat3(normalize(m_yAxis), vm::toRadians(-90.0)), // possibleTexAxes[5] = right
             };
             for (const vm::quat3& rotation : rotations) {
-                possibleTexAxes.push_back({rotation * m_xAxis, rotation * m_yAxis});
+                possibleTexAxes.emplace_back(rotation * m_xAxis, rotation * m_yAxis);
             }
             assert(possibleTexAxes.size() == 6);
 
@@ -283,9 +283,9 @@ namespace TrenchBroom {
 
         void ParallelTexCoordSystem::doShearTexture(const vm::vec3& normal, const vm::vec2f& f) {
             const vm::mat4x4 shear( 1.0, f[0], 0.0, 0.0,
-                               f[1],  1.0, 0.0, 0.0,
-                                0.0,  0.0, 1.0, 0.0,
-                                0.0,  0.0, 0.0, 1.0);
+                                   f[1],  1.0, 0.0, 0.0,
+                                    0.0,  0.0, 1.0, 0.0,
+                                    0.0,  0.0, 0.0, 1.0);
 
             const auto toMatrix = vm::coordinateSystemMatrix(m_xAxis, m_yAxis, getZAxis(), vm::vec3::zero);
             const auto [invertible, fromMatrix] = vm::invert(toMatrix);
@@ -302,9 +302,16 @@ namespace TrenchBroom {
          * Returns this, added to `currentAngle` (also in CCW degrees).
          */
         float ParallelTexCoordSystem::doMeasureAngle(const float currentAngle, const vm::vec2f& center, const vm::vec2f& point) const {
+            const auto rot = vm::quat3(vm::vec3::pos_z, vm::toRadians(currentAngle));
+            const auto vec = rot * vm::vec3(point - center);
+
+            const auto angleInRadians = vm::measureAngle(vm::normalize(vec), vm::vec3::pos_x, vm::vec3::pos_z);
+            return static_cast<float>(vm::toDegrees(angleInRadians));
+            /*
             const vm::vec3 vec(point - center);
             const auto angleInRadians = vm::measureAngle(vm::normalize(vec), vm::vec3::pos_x, vm::vec3::pos_z);
             return static_cast<float>(currentAngle + vm::toDegrees(angleInRadians));
+             */
         }
 
         void ParallelTexCoordSystem::computeInitialAxes(const vm::vec3& normal, vm::vec3& xAxis, vm::vec3& yAxis) const {

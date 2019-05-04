@@ -246,7 +246,7 @@ namespace TrenchBroom {
             const auto vec = rot * vm::vec3(point - center);
 
             const auto angleInRadians = vm::C::twoPi() - vm::measureAngle(vm::normalize(vec), vm::vec3::pos_x, vm::vec3::pos_z);
-            return float(vm::toDegrees(angleInRadians));
+            return static_cast<float>(vm::toDegrees(angleInRadians));
         }
 
         void ParaxialTexCoordSystem::rotateAxes(vm::vec3& xAxis, vm::vec3& yAxis, const FloatType angleInRadians, const size_t planeNormIndex) const {

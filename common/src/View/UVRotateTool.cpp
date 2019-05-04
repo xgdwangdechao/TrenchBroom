@@ -172,25 +172,27 @@ namespace TrenchBroom {
         }
 
         float UVRotateTool::snapAngle(const float angle) const {
-            const auto* face = m_helper.face();
-
-            const float angles[] = {
+            const auto rightAngles = std::vector<float>({
                 vm::mod(angle +   0.0f, 360.0f),
                 vm::mod(angle +  90.0f, 360.0f),
                 vm::mod(angle + 180.0f, 360.0f),
                 vm::mod(angle + 270.0f, 360.0f),
-            };
+            });
+
             auto minDelta = std::numeric_limits<float>::max();
 
+            const auto* face = m_helper.face();
             const auto toFace = face->toTexCoordSystemMatrix(vm::vec2f::zero, vm::vec2f::one, true);
             for (const auto* edge : face->edges()) {
                 const auto startInFaceCoords = vm::vec2f(toFace * edge->firstVertex()->position());
                 const auto endInFaceCoords   = vm::vec2f(toFace * edge->secondVertex()->position());
+
+                // CCW angle between the edge and the current texture X axis (using the texture Z axis as axis of rotation)
                 const auto edgeAngle         = vm::mod(face->measureTextureAngle(startInFaceCoords, endInFaceCoords), 360.0f);
 
-                for (size_t i = 0; i < 4; ++i) {
-                    if (std::abs(angles[i] - edgeAngle) < std::abs(minDelta)) {
-                        minDelta = angles[i] - edgeAngle;
+                for (const auto& rightAngle : rightAngles) {
+                    if (std::abs(rightAngle - edgeAngle) < std::abs(minDelta)) {
+                        minDelta = rightAngle - edgeAngle;
                     }
                 }
             }
