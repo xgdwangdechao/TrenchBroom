@@ -115,8 +115,9 @@ namespace TrenchBroom {
 
             const auto toFace = face->toTexCoordSystemMatrix(vm::vec2f::zero, vm::vec2f::one, true);
 
+            // Compute the angle between the (rotated) texture X axis and the hit point:
             const auto hitPointInFaceCoords(toFace * angleHandleHit.hitPoint());
-            m_initalAngle = measureAngle(vm::vec2f(hitPointInFaceCoords)) - face->rotation();
+            m_initalAngle = measureAngle(vm::vec2f(hitPointInFaceCoords));
 
             auto document = lock(m_document);
             document->beginTransaction("Rotate Texture");
@@ -134,11 +135,13 @@ namespace TrenchBroom {
             const auto curPoint = pickRay.pointAtDistance(curPointDistance);
 
             const auto toFaceOld = face->toTexCoordSystemMatrix(vm::vec2f::zero, vm::vec2f::one, true);
-            const auto toWorld = face->fromTexCoordSystemMatrix(vm::vec2f::zero, vm::vec2f::one, true);
+            const auto toWorld   = face->fromTexCoordSystemMatrix(vm::vec2f::zero, vm::vec2f::one, true);
 
+            // Compute the angle between the hit point and the (rotated) texture X axis:
             const auto curPointInFaceCoords = vm::vec2f(toFaceOld * curPoint);
             const auto curAngle = measureAngle(curPointInFaceCoords);
 
+            // Subtract the initial angle to get only the amount by which the angle has changed:
             const auto angle = curAngle - m_initalAngle;
             const auto snappedAngle = vm::correct(snapAngle(angle), 4, 0.0f);
 
@@ -146,7 +149,7 @@ namespace TrenchBroom {
             const auto oldCenterInWorldCoords = toWorld * vm::vec3(oldCenterInFaceCoords);
 
             Model::ChangeBrushFaceAttributesRequest request;
-            request.setRotation(snappedAngle);
+            request.setRotation(snappedAngle + face->rotation());
 
             auto document = lock(m_document);
             document->setFaceAttributes(request);
@@ -172,6 +175,7 @@ namespace TrenchBroom {
         }
 
         float UVRotateTool::snapAngle(const float angle) const {
+            // We want to snap all four possible orientations of the texture axes.
             const auto rightAngles = std::vector<float>({
                 vm::mod(angle +   0.0f, 360.0f),
                 vm::mod(angle +  90.0f, 360.0f),
@@ -187,20 +191,21 @@ namespace TrenchBroom {
                 const auto startInFaceCoords = vm::vec2f(toFace * edge->firstVertex()->position());
                 const auto endInFaceCoords   = vm::vec2f(toFace * edge->secondVertex()->position());
 
-                // CCW angle between the edge and the current texture X axis (using the texture Z axis as axis of rotation)
-                const auto edgeAngle         = vm::mod(face->measureTextureAngle(startInFaceCoords, endInFaceCoords), 360.0f);
-
-                for (const auto& rightAngle : rightAngles) {
-                    if (std::abs(rightAngle - edgeAngle) < std::abs(minDelta)) {
-                        minDelta = rightAngle - edgeAngle;
+                // The angle between the edge and the (rotated) texture X axis:
+                const auto edgeAngle = vm::mod(face->measureTextureAngle(startInFaceCoords, endInFaceCoords), 360.0f);
+                for (const auto rightAngle : rightAngles) {
+                    const auto delta = edgeAngle - rightAngle;
+                    if (vm::abs(delta) < vm::abs(minDelta)) {
+                        minDelta = delta;
                     }
                 }
             }
 
-            if (std::abs(minDelta) < 3.0f) {
-                return angle - minDelta;
+            if (vm::abs(minDelta) < 3.0f) {
+                return angle + minDelta;
+            } else {
+                return angle;
             }
-            return angle;
         }
 
         void UVRotateTool::doEndMouseDrag(const InputState& inputState) {

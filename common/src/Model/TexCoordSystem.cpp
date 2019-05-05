@@ -188,9 +188,9 @@ namespace TrenchBroom {
             const vm::vec3 z = getZAxis();
 
             return vm::mat4x4(x[0], x[1], x[2], o[0],
-                          y[0], y[1], y[2], o[1],
-                          z[0], z[1], z[2],  0.0,
-                           0.0,  0.0,  0.0,  1.0);
+                              y[0], y[1], y[2], o[1],
+                              z[0], z[1], z[2],  0.0,
+                               0.0,  0.0,  0.0,  1.0);
         }
 
         vm::mat4x4 TexCoordSystem::fromMatrix(const vm::vec2f& offset, const vm::vec2f& scale) const {

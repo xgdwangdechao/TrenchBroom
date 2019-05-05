@@ -302,16 +302,10 @@ namespace TrenchBroom {
          * Returns this, added to `currentAngle` (also in CCW degrees).
          */
         float ParallelTexCoordSystem::doMeasureAngle(const float currentAngle, const vm::vec2f& center, const vm::vec2f& point) const {
-            const auto rot = vm::quat3(vm::vec3::pos_z, vm::toRadians(currentAngle));
-            const auto vec = rot * vm::vec3(point - center);
+            const auto vec = vm::vec3(point - center);
 
             const auto angleInRadians = vm::measureAngle(vm::normalize(vec), vm::vec3::pos_x, vm::vec3::pos_z);
             return static_cast<float>(vm::toDegrees(angleInRadians));
-            /*
-            const vm::vec3 vec(point - center);
-            const auto angleInRadians = vm::measureAngle(vm::normalize(vec), vm::vec3::pos_x, vm::vec3::pos_z);
-            return static_cast<float>(currentAngle + vm::toDegrees(angleInRadians));
-             */
         }
 
         void ParallelTexCoordSystem::computeInitialAxes(const vm::vec3& normal, vm::vec3& xAxis, vm::vec3& yAxis) const {
