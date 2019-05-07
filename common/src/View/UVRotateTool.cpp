@@ -142,14 +142,13 @@ namespace TrenchBroom {
             const auto curAngle = measureAngle(curPointInFaceCoords);
 
             // Subtract the initial angle to get only the amount by which the angle has changed:
-            const auto angle = curAngle - m_initalAngle;
-            const auto snappedAngle = vm::correct(snapAngle(angle), 4, 0.0f);
+            const auto snappedDelta = vm::correct(snapAngle(curAngle - m_initalAngle), 4, 0.0f);
 
             const auto oldCenterInFaceCoords = m_helper.originInFaceCoords();
             const auto oldCenterInWorldCoords = toWorld * vm::vec3(oldCenterInFaceCoords);
 
             Model::ChangeBrushFaceAttributesRequest request;
-            request.setRotation(snappedAngle + face->rotation());
+            request.setRotation(snappedDelta + face->rotation());
 
             auto document = lock(m_document);
             document->setFaceAttributes(request);
@@ -159,7 +158,7 @@ namespace TrenchBroom {
             const auto newCenterInFaceCoords = vm::vec2f(toFaceNew * oldCenterInWorldCoords);
 
             const auto delta = (oldCenterInFaceCoords - newCenterInFaceCoords) / face->scale();
-            const auto newOffset = correct(face->offset() + delta, 4, 0.0f);
+            const auto newOffset = vm::correct(vm::mod(face->offset() + delta, face->textureSize()), 4, 0.0f);
 
             request.clear();
             request.setOffset(newOffset);

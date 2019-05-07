@@ -70,7 +70,7 @@ namespace TrenchBroom {
             wxTextCtrl* m_colorEditor;
         public:
             FaceAttribsEditor(wxWindow* parent, MapDocumentWPtr document, GLContextManager& contextManager);
-            ~FaceAttribsEditor();
+            ~FaceAttribsEditor() override;
 
             bool cancelMouseDrag();
         private:

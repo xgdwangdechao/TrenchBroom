@@ -40,7 +40,7 @@ namespace TrenchBroom {
             vm::vec3 m_yAxis;
         public:
             ParallelTexCoordSystemSnapshot(const vm::vec3& xAxis, const vm::vec3& yAxis);
-            ParallelTexCoordSystemSnapshot(ParallelTexCoordSystem* coordSystem);
+            explicit ParallelTexCoordSystemSnapshot(ParallelTexCoordSystem* coordSystem);
         private:
             std::unique_ptr<TexCoordSystemSnapshot> doClone() const override;
             void doRestore(ParallelTexCoordSystem& coordSystem) const override;

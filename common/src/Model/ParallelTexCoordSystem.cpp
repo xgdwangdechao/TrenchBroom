@@ -123,7 +123,7 @@ namespace TrenchBroom {
             if (angleDelta == 0.0f)
                 return;
 
-            const FloatType angle = static_cast<FloatType>(vm::toRadians(angleDelta));
+            const auto angle = static_cast<FloatType>(vm::toRadians(angleDelta));
             applyRotation(getZAxis(), angle);
         }
 
