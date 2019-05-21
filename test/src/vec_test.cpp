@@ -755,6 +755,13 @@ namespace vm {
         ASSERT_FLOAT_EQ(measureAngle(vec3f::neg_y, vec3f::pos_x, vec3f::pos_z), 3.0f * Cf::piOverTwo());
     }
 
+    TEST(VecTest, measureAngle_small) {
+        const auto smallAngleDeg = 0.13f;
+        const auto M = vm::rotationMatrix(vec3f::pos_z, vm::toRadians(smallAngleDeg));
+        const auto rotatedVec = vec3f(M * vec4f(1, 0, 0, 0));
+        ASSERT_NEAR(vm::toDegrees(measureAngle(rotatedVec, vec3f::pos_x, vec3f::pos_z)), smallAngleDeg, 0.001f);
+    }
+
     /* ========== operations on vectors of vectors ========== */
 
     TEST(VecTest, addList) {

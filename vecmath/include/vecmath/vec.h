@@ -1769,18 +1769,12 @@ namespace vm {
      */
     template <typename T>
     T measureAngle(const vec<T,3>& v, const vec<T,3>& axis, const vec<T,3>& up) {
-        const auto cos = dot(v, axis);
-        if (isEqual(cos, T(+1.0), vm::constants<T>::almostZero())) {
-            return T(0.0);
-        } else if (isEqual(cos, T(-1.0), vm::constants<T>::almostZero())) {
-            return constants<T>::pi();
+        const auto cos = clamp(dot(v, axis), T(-1), T(1));
+        const auto perp = cross(axis, v);
+        if (dot(perp, up) >= T(0.0)) {
+            return std::acos(cos);
         } else {
-            const auto perp = cross(axis, v);
-            if (dot(perp, up) >= T(0.0)) {
-                return std::acos(cos);
-            } else {
-                return constants<T>::twoPi() - std::acos(cos);
-            }
+            return constants<T>::twoPi() - std::acos(cos);
         }
     }
 }
