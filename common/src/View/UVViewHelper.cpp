@@ -113,6 +113,10 @@ namespace TrenchBroom {
             return vm::vec2f(toFace * origin());
         }
 
+        const vm::vec2f UVViewHelper::originInViewportCoords() const {
+            return vm::vec2f(m_camera.project(vm::vec3f(m_origin)));
+        }
+
         void UVViewHelper::setOriginInFaceCoords(const vm::vec2f& originInFaceCoords) {
             const vm::mat4x4 fromFace = m_face->fromTexCoordSystemMatrix(vm::vec2f::zero, vm::vec2f::one, true);
             m_origin = fromFace * vm::vec3(originInFaceCoords);

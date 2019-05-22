@@ -178,9 +178,23 @@ namespace TrenchBroom {
             void snapPlanePointsToInteger();
             void findIntegerPlanePoints();
 
+            /**
+             * Returns a transform that projects points onto the face plane. The returned matrix is non-invertible.
+             */
             vm::mat4x4 projectToBoundaryMatrix() const;
+            /**
+             * Returns a transform from world to a texture space with the specified offset and scale.
+             * To get the true texture space, you need to pass `attribs().offset()` and `attribs().scale()`.
+             * (Texture space in TrenchBroom is UV coordinates multiplied by the texture size.)
+             *
+             * If `project` is true, the Z component in texture space is zeroed (making the returned matrix non-invertible.)
+             * TODO: Should be simplified to having no arguments.
+             */
             vm::mat4x4 toTexCoordSystemMatrix(const vm::vec2f& offset, const vm::vec2f& scale, bool project) const;
             vm::mat4x4 fromTexCoordSystemMatrix(const vm::vec2f& offset, const vm::vec2f& scale, bool project) const;
+            /**
+             * TODO: This should not be delegating to the TexCoordSystem, and probably should not be a method on BrushFace.
+             */
             float measureTextureAngle(const vm::vec2f& center, const vm::vec2f& point) const;
 
             size_t vertexCount() const;

@@ -27,6 +27,9 @@
 
 namespace TrenchBroom {
     namespace Model {
+        /**
+         * Snapshot of a face's BrushFaceAttributes and texture alignment (but not the face normal).
+         */
         class BrushFaceSnapshot {
         private:
             BrushFaceReference m_faceRef;

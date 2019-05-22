@@ -187,10 +187,12 @@ namespace TrenchBroom {
             return doGetPerspectiveScalingFactor(position);
         }
 
+        // TODO: Better name like worldToViewportCoords
         vm::vec3f Camera::project(const vm::vec3f& point) const {
             if (!m_valid)
                 validateMatrices();
 
+            // TODO: Don't have operator* do an implicit perspective divide, do it explicitly here
             vm::vec3f win = m_matrix * point;
             win[0] = m_viewport.x + m_viewport.width *(win.x() + 1.0f)/2.0f;
             win[1] = m_viewport.y + m_viewport.height*(win.y() + 1.0f)/2.0f;

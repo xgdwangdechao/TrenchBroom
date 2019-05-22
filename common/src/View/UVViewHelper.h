@@ -69,9 +69,20 @@ namespace TrenchBroom {
             vm::vec2 stripeSize() const;
             void setSubDivisions(const vm::vec2i& subDivisions);
 
+            /**
+             * Scaling/rotation anchor point in world space. Note, this is unrelated to the texture offset, and only used
+             * as the pivot point for user scaling/rotation actions in the UV editor. It's not stored in any map formats.
+             */
             const vm::vec3 origin() const;
+            /**
+             * Scaling/rotation anchor point in face coordinates (texture space without the scale/offset).
+             */
             const vm::vec2f originInFaceCoords() const;
             const vm::vec2f originInTexCoords() const;
+            /**
+             * Scaling/rotation anchor point in viewport coordinates (pixels).
+             */
+            const vm::vec2f originInViewportCoords() const;
             void setOriginInFaceCoords(const vm::vec2f& originInFaceCoords);
 
             const Renderer::OrthographicCamera& camera() const;
