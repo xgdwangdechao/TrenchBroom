@@ -247,7 +247,7 @@ namespace TrenchBroom {
 
         void UVOriginTool::renderLineHandles(const InputState& inputState, Renderer::RenderContext& renderContext, Renderer::RenderBatch& renderBatch) {
             Renderer::DirectEdgeRenderer edgeRenderer(Renderer::VertexArray::move(getHandleVertices(inputState)), GL_LINES);
-            edgeRenderer.renderOnTop(renderBatch, 0.25f);
+            edgeRenderer.renderOnTop(renderBatch, 0.5f);
         }
 
         UVOriginTool::EdgeVertex::List UVOriginTool::getHandleVertices(const InputState& inputState) const {
