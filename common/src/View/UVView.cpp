@@ -298,8 +298,11 @@ namespace TrenchBroom {
             const auto* face = m_helper.face();
             const auto& normal = face->boundary().normal;
 
-            const auto xAxis  = vm::vec3f(face->textureXAxis() - dot(face->textureXAxis(), normal) * normal);
-            const auto yAxis  = vm::vec3f(face->textureYAxis() - dot(face->textureYAxis(), normal) * normal);
+            // we project the texture axes onto the boundary plane along the boundary normal to avoid clipping them
+            // against the ortho camera's frustrum
+            const auto xAxis  = vm::vec3f(face->textureXAxis() - vm::dot(face->textureXAxis(), normal) * normal);
+            const auto yAxis  = vm::vec3f(face->textureYAxis() - vm::dot(face->textureYAxis(), normal) * normal);
+            const auto zAxis  = vm::vec3f(face->textureZAxis() - vm::dot(face->textureZAxis(), normal) * normal);
             const auto center = vm::vec3f(face->boundsCenter());
 
             const auto length = 32.0f / m_helper.cameraZoom();
@@ -310,6 +313,8 @@ namespace TrenchBroom {
                 Vertex(center + length * xAxis, pref(Preferences::XAxisColor)),
                 Vertex(center, pref(Preferences::YAxisColor)),
                 Vertex(center + length * yAxis, pref(Preferences::YAxisColor)),
+                Vertex(center, pref(Preferences::ZAxisColor)),
+                Vertex(center + length * zAxis, pref(Preferences::ZAxisColor)),
             })), GL_LINES);
             edgeRenderer.renderOnTop(renderBatch, 2.0f);
         }

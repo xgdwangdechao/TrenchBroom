@@ -185,7 +185,10 @@ namespace TrenchBroom {
             auto minDelta = std::numeric_limits<float>::max();
 
             const auto* face = m_helper.face();
-            const auto toFace = face->toTexCoordSystemMatrix(vm::vec2f::zero, vm::vec2f::one, true);
+            const auto scale = vm::vec2f(
+                1.0f / vm::length(face->textureXAxis()),
+                1.0f / vm::length(face->textureYAxis()));
+            const auto toFace = face->toTexCoordSystemMatrix(vm::vec2f::zero, scale, true);
             for (const auto* edge : face->edges()) {
                 const auto startInFaceCoords = vm::vec2f(toFace * edge->firstVertex()->position());
                 const auto endInFaceCoords   = vm::vec2f(toFace * edge->secondVertex()->position());

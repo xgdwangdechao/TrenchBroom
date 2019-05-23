@@ -67,6 +67,7 @@ namespace TrenchBroom {
 
             vm::vec3 xAxis() const;
             vm::vec3 yAxis() const;
+            vm::vec3 zAxis() const;
 
             void resetCache(const vm::vec3& point0, const vm::vec3& point1, const vm::vec3& point2, const BrushFaceAttributes& attribs);
             void resetTextureAxes(const vm::vec3& normal);

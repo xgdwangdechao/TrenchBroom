@@ -165,6 +165,7 @@ namespace TrenchBroom {
 
             vm::vec3 textureXAxis() const;
             vm::vec3 textureYAxis() const;
+            vm::vec3 textureZAxis() const;
             void resetTextureAxes();
 
             void moveTexture(const vm::vec3& up, const vm::vec3& right, const vm::vec2f& offset);

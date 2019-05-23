@@ -425,6 +425,10 @@ namespace TrenchBroom {
             return m_texCoordSystem->yAxis();
         }
 
+        vm::vec3 BrushFace::textureZAxis() const {
+            return m_texCoordSystem->zAxis();
+        }
+
         void BrushFace::resetTextureAxes() {
             m_texCoordSystem->resetTextureAxes(m_boundary.normal);
             invalidateVertexCache();

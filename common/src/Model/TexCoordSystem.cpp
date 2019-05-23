@@ -55,6 +55,10 @@ namespace TrenchBroom {
             return getYAxis();
         }
 
+        vm::vec3 TexCoordSystem::zAxis() const {
+            return getZAxis();
+        }
+
         void TexCoordSystem::resetCache(const vm::vec3& point0, const vm::vec3& point1, const vm::vec3& point2, const BrushFaceAttributes& attribs) {
             doResetCache(point0, point1, point2, attribs);
         }
