@@ -724,4 +724,21 @@ namespace vm {
             EXPECT_VEC_EQ(out[i], test[i]);
         }
     }
+
+    TEST(MatTest, row) {
+        const auto M = mat<float, 3, 2>{
+            1, 2,
+            3, 4,
+            5, 6
+        };
+
+        ASSERT_EQ(vec2f(1, 2), row(M, 0));
+        ASSERT_EQ(vec2f(3, 4), row(M, 1));
+        ASSERT_EQ(vec2f(5, 6), row(M, 2));
+
+        // compile-time bounds checked
+        ASSERT_EQ(vec2f(1, 2), row<0>(M));
+        ASSERT_EQ(vec2f(3, 4), row<1>(M));
+        ASSERT_EQ(vec2f(5, 6), row<2>(M));
+    }
 }

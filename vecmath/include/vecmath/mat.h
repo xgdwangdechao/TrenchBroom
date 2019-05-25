@@ -630,6 +630,42 @@ namespace vm {
     }
 
     /**
+     * Returns the row at the given index.
+     *
+     * @tparam T the component type
+     * @tparam R the number of rows
+     * @tparam C the number of columns
+     * @param m the matrix
+     * @param r the index of the row to return
+     * @return the row at the given index
+     */
+    template <typename T, size_t R, size_t C>
+    vec<T, C> row(const mat<T,R,C>& m, const size_t r) {
+        assert(r < R);
+        vec<T, C> v;
+        for (size_t c = 0; c < C; ++c) {
+            v[c] = m[c][r];
+        }
+        return v;
+    }
+
+    /**
+     * Returns the row at the given index, with the row provided at compile-time.
+     *
+     * @tparam r the index of the row to return
+     * @tparam T the component type
+     * @tparam R the number of rows
+     * @tparam C the number of columns
+     * @param m the matrix
+     * @return the row at the given index
+     */
+    template <size_t r, typename T, size_t R, size_t C>
+    vec<T, C> row(const mat<T, R, C>& m) {
+        static_assert(r < R);
+        return row(m, r);
+    }
+
+    /**
      * Computes a minor of the given square matrix. The minor of a matrix is obtained by erasing one column
      * and one row from that matrix. Thus, any minor matrix of an n*n matrix is a (n-1)*(n-1) matrix.
      *
