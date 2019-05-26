@@ -76,15 +76,27 @@ namespace TrenchBroom {
 
             vm::vec2f getTexCoords(const vm::vec3& point, const BrushFaceAttributes& attribs) const;
 
+            /**
+             * Applies a rotation (in degrees CCW) from oldAngle to newAngle about the texture Z axis.
+             */
             void setRotation(const vm::vec3& normal, float oldAngle, float newAngle);
             void transform(const vm::plane3& oldBoundary, const vm::plane3& newBoundary, const vm::mat4x4& transformation, BrushFaceAttributes& attribs, bool lockTexture, const vm::vec3& invariant);
             void updateNormal(const vm::vec3& oldNormal, const vm::vec3& newNormal, const BrushFaceAttributes& attribs, const WrapStyle style);
 
             void moveTexture(const vm::vec3& normal, const vm::vec3& up, const vm::vec3& right, const vm::vec2f& offset, BrushFaceAttributes& attribs) const;
+            /**
+             * Adds the given delta angle in degrees to `attribs`. Doesn't modifier the receiver.
+             */
             void rotateTexture(const vm::vec3& normal, float angle, BrushFaceAttributes& attribs) const;
             void shearTexture(const vm::vec3& normal, const vm::vec2f& factors);
 
+            /**
+             * Returns a transformation from world to texture space.
+             */
             vm::mat4x4 toMatrix(const vm::vec2f& offset, const vm::vec2f& scale) const;
+            /**
+             * Returns a transformation from texture to world space.
+             */
             vm::mat4x4 fromMatrix(const vm::vec2f& offset, const vm::vec2f& scale) const;
             float measureAngle(float currentAngle, const vm::vec2f& center, const vm::vec2f& point) const;
         private:
