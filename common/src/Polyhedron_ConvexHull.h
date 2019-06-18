@@ -51,6 +51,11 @@ public:
         assert(check());
     }
 
+    /**
+     * Moves elements from the front to the back of m_edges until `this` satisfies `criterion`.
+     *
+     * Returns false if all rotations of m_edges are tested and `criterion` was never satisfied.
+     */
     template <typename C>
     bool shift(const C& criterion) {
         size_t i = 0;
@@ -64,6 +69,9 @@ public:
         return false;
     }
 
+    /**
+     * Moves the first element in m_edges to the end
+     */
     void shift() {
         assert(!m_edges.empty());
         iterator pos = std::end(m_edges);
