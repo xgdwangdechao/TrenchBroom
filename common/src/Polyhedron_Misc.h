@@ -1379,4 +1379,48 @@ void Polyhedron<T,FP,VP>::updateBounds() {
     }
 }
 
+template <typename T, typename FP, typename VP>
+String Polyhedron<T, FP, VP>::exportObj() const {
+    StringStream ss;
+    std::vector<Vertex*> verticesVector;
+
+    // copy vertices into a vector
+    Vertex* firstVertex = m_vertices.front();
+    Vertex* currentVertex = firstVertex;
+    do {
+        verticesVector.push_back(currentVertex);
+        currentVertex = currentVertex->next();
+    } while (currentVertex != firstVertex);
+
+    // write the vertices
+    for (Vertex* v : verticesVector) {
+        // vec operator<< prints the vector space delimited
+        ss << "v " << v->position() << "\n";
+    }
+
+    // write the faces
+    Face* firstFace = m_faces.front();
+    Face* currentFace = firstFace;
+    do {
+        ss << "f ";
+        HalfEdge* firstHalfEdge = currentFace->m_boundary.front();
+        HalfEdge* currentHalfEdge = firstHalfEdge;
+        do {
+            Vertex* vertex = currentHalfEdge->origin();
+            size_t index = VectorUtils::indexOf(verticesVector, vertex);
+            assert(index != verticesVector.size());
+
+            // .obj indices are 1-based
+            ss << (index + 1) << " ";
+
+            currentHalfEdge = currentHalfEdge->next();
+        } while (currentHalfEdge != firstHalfEdge);
+        ss << "\n";
+
+        currentFace = currentFace->next();
+    } while (currentFace != firstFace);
+
+    return ss.str();
+}
+
 #endif

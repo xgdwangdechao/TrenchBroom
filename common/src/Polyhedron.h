@@ -22,6 +22,7 @@
 
 #include "Allocator.h"
 #include "DoublyLinkedList.h"
+#include "StringUtils.h"
 
 #include <vecmath/forward.h>
 #include <vecmath/vec.h>
@@ -553,6 +554,8 @@ private:
 
     static bool separate(const Face* faces, const Vertex* vertices, const Callback& callback);
     static vm::point_status pointStatus(const vm::plane<T,3>& plane, const Vertex* vertices);
+public: // debugging
+    String exportObj() const;
 };
 
 #endif
