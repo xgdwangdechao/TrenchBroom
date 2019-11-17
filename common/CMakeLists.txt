@@ -93,8 +93,6 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/Model/AttributableNode.cpp
         ${COMMON_SOURCE_DIR}/Model/AttributableNodeIndex.cpp
         ${COMMON_SOURCE_DIR}/Model/AttributableNodeVariableStore.cpp
-        ${COMMON_SOURCE_DIR}/Model/AttributeNameWithDoubleQuotationMarksIssueGenerator.cpp
-        ${COMMON_SOURCE_DIR}/Model/AttributeValueWithDoubleQuotationMarksIssueGenerator.cpp
         ${COMMON_SOURCE_DIR}/Model/BoundsContainsNodeVisitor.cpp
         ${COMMON_SOURCE_DIR}/Model/BoundsIntersectsNodeVisitor.cpp
         ${COMMON_SOURCE_DIR}/Model/Brush.cpp
@@ -118,10 +116,6 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/Model/CompilationTask.cpp
         ${COMMON_SOURCE_DIR}/Model/ComputeNodeBoundsVisitor.cpp
         ${COMMON_SOURCE_DIR}/Model/EditorContext.cpp
-        ${COMMON_SOURCE_DIR}/Model/EmptyAttributeNameIssueGenerator.cpp
-        ${COMMON_SOURCE_DIR}/Model/EmptyAttributeValueIssueGenerator.cpp
-        ${COMMON_SOURCE_DIR}/Model/EmptyBrushEntityIssueGenerator.cpp
-        ${COMMON_SOURCE_DIR}/Model/EmptyGroupIssueGenerator.cpp
         ${COMMON_SOURCE_DIR}/Model/Entity.cpp
         ${COMMON_SOURCE_DIR}/Model/EntityAttributes.cpp
         ${COMMON_SOURCE_DIR}/Model/EntityAttributeSnapshot.cpp
@@ -145,25 +139,17 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/Model/HitAdapter.cpp
         ${COMMON_SOURCE_DIR}/Model/HitFilter.cpp
         ${COMMON_SOURCE_DIR}/Model/HitQuery.cpp
-        ${COMMON_SOURCE_DIR}/Model/InvalidTextureScaleIssueGenerator.cpp
         ${COMMON_SOURCE_DIR}/Model/Issue.cpp
         ${COMMON_SOURCE_DIR}/Model/IssueGenerator.cpp
+        ${COMMON_SOURCE_DIR}/Model/IssueGenerators.cpp
         ${COMMON_SOURCE_DIR}/Model/IssueGeneratorRegistry.cpp
         ${COMMON_SOURCE_DIR}/Model/IssueQuickFix.cpp
         ${COMMON_SOURCE_DIR}/Model/Layer.cpp
-        ${COMMON_SOURCE_DIR}/Model/LinkSourceIssueGenerator.cpp
-        ${COMMON_SOURCE_DIR}/Model/LinkTargetIssueGenerator.cpp
-        ${COMMON_SOURCE_DIR}/Model/LongAttributeNameIssueGenerator.cpp
-        ${COMMON_SOURCE_DIR}/Model/LongAttributeValueIssueGenerator.cpp
         ${COMMON_SOURCE_DIR}/Model/MapFacade.cpp
         ${COMMON_SOURCE_DIR}/Model/MapFormat.cpp
         ${COMMON_SOURCE_DIR}/Model/MatchNodesByVisibility.cpp
         ${COMMON_SOURCE_DIR}/Model/MatchSelectableNodes.cpp
         ${COMMON_SOURCE_DIR}/Model/MergeNodesIntoWorldVisitor.cpp
-        ${COMMON_SOURCE_DIR}/Model/MissingClassnameIssueGenerator.cpp
-        ${COMMON_SOURCE_DIR}/Model/MissingDefinitionIssueGenerator.cpp
-        ${COMMON_SOURCE_DIR}/Model/MissingModIssueGenerator.cpp
-        ${COMMON_SOURCE_DIR}/Model/MixedBrushContentsIssueGenerator.cpp
         ${COMMON_SOURCE_DIR}/Model/ModelFactory.cpp
         ${COMMON_SOURCE_DIR}/Model/ModelFactoryImpl.cpp
         ${COMMON_SOURCE_DIR}/Model/ModelUtils.cpp
@@ -172,14 +158,11 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/Model/NodePredicates.cpp
         ${COMMON_SOURCE_DIR}/Model/NodeSnapshot.cpp
         ${COMMON_SOURCE_DIR}/Model/NodeVisitor.cpp
-        ${COMMON_SOURCE_DIR}/Model/NonIntegerPlanePointsIssueGenerator.cpp
-        ${COMMON_SOURCE_DIR}/Model/NonIntegerVerticesIssueGenerator.cpp
         ${COMMON_SOURCE_DIR}/Model/Object.cpp
         ${COMMON_SOURCE_DIR}/Model/ParallelTexCoordSystem.cpp
         ${COMMON_SOURCE_DIR}/Model/ParaxialTexCoordSystem.cpp
         ${COMMON_SOURCE_DIR}/Model/PickResult.cpp
         ${COMMON_SOURCE_DIR}/Model/PlanePointFinder.cpp
-        ${COMMON_SOURCE_DIR}/Model/PointEntityWithBrushesIssueGenerator.cpp
         ${COMMON_SOURCE_DIR}/Model/PointFile.cpp
         ${COMMON_SOURCE_DIR}/Model/PortalFile.cpp
         ${COMMON_SOURCE_DIR}/Model/PushSelection.cpp
@@ -195,7 +178,6 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/Model/TransformEntityAttributesQuickFix.cpp
         ${COMMON_SOURCE_DIR}/Model/TransformObjectVisitor.cpp
         ${COMMON_SOURCE_DIR}/Model/World.cpp
-        ${COMMON_SOURCE_DIR}/Model/WorldBoundsIssueGenerator.cpp
         ${COMMON_SOURCE_DIR}/RecoverableExceptions.cpp
         ${COMMON_SOURCE_DIR}/Renderer/AllocationTracker.cpp
         ${COMMON_SOURCE_DIR}/Renderer/BoundsGuideRenderer.cpp
@@ -603,8 +585,6 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/Model/AttributableNode.h
         ${COMMON_SOURCE_DIR}/Model/AttributableNodeIndex.h
         ${COMMON_SOURCE_DIR}/Model/AttributableNodeVariableStore.h
-        ${COMMON_SOURCE_DIR}/Model/AttributeNameWithDoubleQuotationMarksIssueGenerator.h
-        ${COMMON_SOURCE_DIR}/Model/AttributeValueWithDoubleQuotationMarksIssueGenerator.h
         ${COMMON_SOURCE_DIR}/Model/BoundsContainsNodeVisitor.h
         ${COMMON_SOURCE_DIR}/Model/BoundsIntersectsNodeVisitor.h
         ${COMMON_SOURCE_DIR}/Model/Brush.h
@@ -638,10 +618,6 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/Model/CompilationTask.h
         ${COMMON_SOURCE_DIR}/Model/ComputeNodeBoundsVisitor.h
         ${COMMON_SOURCE_DIR}/Model/EditorContext.h
-        ${COMMON_SOURCE_DIR}/Model/EmptyAttributeNameIssueGenerator.h
-        ${COMMON_SOURCE_DIR}/Model/EmptyAttributeValueIssueGenerator.h
-        ${COMMON_SOURCE_DIR}/Model/EmptyBrushEntityIssueGenerator.h
-        ${COMMON_SOURCE_DIR}/Model/EmptyGroupIssueGenerator.h
         ${COMMON_SOURCE_DIR}/Model/Entity.h
         ${COMMON_SOURCE_DIR}/Model/EntityAttributes.h
         ${COMMON_SOURCE_DIR}/Model/EntityAttributeSnapshot.h
@@ -666,26 +642,18 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/Model/HitAdapter.h
         ${COMMON_SOURCE_DIR}/Model/HitFilter.h
         ${COMMON_SOURCE_DIR}/Model/HitQuery.h
-        ${COMMON_SOURCE_DIR}/Model/InvalidTextureScaleIssueGenerator.h
         ${COMMON_SOURCE_DIR}/Model/Issue.h
         ${COMMON_SOURCE_DIR}/Model/IssueGenerator.h
+        ${COMMON_SOURCE_DIR}/Model/IssueGenerators.h
         ${COMMON_SOURCE_DIR}/Model/IssueGeneratorRegistry.h
         ${COMMON_SOURCE_DIR}/Model/IssueQuickFix.h
         ${COMMON_SOURCE_DIR}/Model/Layer.h
-        ${COMMON_SOURCE_DIR}/Model/LinkSourceIssueGenerator.h
-        ${COMMON_SOURCE_DIR}/Model/LinkTargetIssueGenerator.h
-        ${COMMON_SOURCE_DIR}/Model/LongAttributeNameIssueGenerator.h
-        ${COMMON_SOURCE_DIR}/Model/LongAttributeValueIssueGenerator.h
         ${COMMON_SOURCE_DIR}/Model/MapFacade.h
         ${COMMON_SOURCE_DIR}/Model/MapFormat.h
         ${COMMON_SOURCE_DIR}/Model/MatchNodesByVisibility.h
         ${COMMON_SOURCE_DIR}/Model/MatchSelectableNodes.h
         ${COMMON_SOURCE_DIR}/Model/MatchSelectedNodes.h
         ${COMMON_SOURCE_DIR}/Model/MergeNodesIntoWorldVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/MissingClassnameIssueGenerator.h
-        ${COMMON_SOURCE_DIR}/Model/MissingDefinitionIssueGenerator.h
-        ${COMMON_SOURCE_DIR}/Model/MissingModIssueGenerator.h
-        ${COMMON_SOURCE_DIR}/Model/MixedBrushContentsIssueGenerator.h
         ${COMMON_SOURCE_DIR}/Model/ModelFactory.h
         ${COMMON_SOURCE_DIR}/Model/ModelFactoryImpl.h
         ${COMMON_SOURCE_DIR}/Model/ModelTypes.h
@@ -695,15 +663,12 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/Model/NodePredicates.h
         ${COMMON_SOURCE_DIR}/Model/NodeSnapshot.h
         ${COMMON_SOURCE_DIR}/Model/NodeVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/NonIntegerPlanePointsIssueGenerator.h
-        ${COMMON_SOURCE_DIR}/Model/NonIntegerVerticesIssueGenerator.h
         ${COMMON_SOURCE_DIR}/Model/Object.h
         ${COMMON_SOURCE_DIR}/Model/ParallelTexCoordSystem.h
         ${COMMON_SOURCE_DIR}/Model/ParaxialTexCoordSystem.h
         ${COMMON_SOURCE_DIR}/Model/Pickable.h
         ${COMMON_SOURCE_DIR}/Model/PickResult.h
         ${COMMON_SOURCE_DIR}/Model/PlanePointFinder.h
-        ${COMMON_SOURCE_DIR}/Model/PointEntityWithBrushesIssueGenerator.h
         ${COMMON_SOURCE_DIR}/Model/PointFile.h
         ${COMMON_SOURCE_DIR}/Model/PortalFile.h
         ${COMMON_SOURCE_DIR}/Model/PushSelection.h
@@ -719,7 +684,6 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/Model/TransformEntityAttributesQuickFix.h
         ${COMMON_SOURCE_DIR}/Model/TransformObjectVisitor.h
         ${COMMON_SOURCE_DIR}/Model/World.h
-        ${COMMON_SOURCE_DIR}/Model/WorldBoundsIssueGenerator.h
         ${COMMON_SOURCE_DIR}/Polyhedron.h
         ${COMMON_SOURCE_DIR}/Polyhedron_BrushGeometryPayload.h
         ${COMMON_SOURCE_DIR}/Polyhedron_Clip.h
