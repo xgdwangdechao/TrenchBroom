@@ -20,10 +20,9 @@
 #include "World.h"
 
 #include "AABBTree.h"
-#include "Model/AssortNodesVisitor.h"
 #include "Model/Brush.h"
 #include "Model/BrushFace.h"
-#include "Model/CollectNodesWithDescendantSelectionCountVisitor.h"
+#include "Model/NodeVisitors.h"
 #include "Model/IssueGenerator.h"
 #include "Model/TagVisitor.h"
 

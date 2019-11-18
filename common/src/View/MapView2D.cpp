@@ -24,7 +24,7 @@
 #include "Model/Brush.h"
 #include "Model/BrushBuilder.h"
 #include "Model/BrushFace.h"
-#include "Model/CollectContainedNodesVisitor.h"
+#include "Model/NodeVisitors.h"
 #include "Model/HitAdapter.h"
 #include "Model/PickResult.h"
 #include "Model/PointFile.h"

@@ -21,19 +21,12 @@
 
 #include "TrenchBroom.h"
 #include "Model/TagMatcher.h"
-#include "Model/BoundsContainsNodeVisitor.h"
-#include "Model/BoundsIntersectsNodeVisitor.h"
 #include "Model/Brush.h"
-#include "Model/ComputeNodeBoundsVisitor.h"
 #include "Model/Entity.h"
-#include "Model/FindContainerVisitor.h"
-#include "Model/FindGroupVisitor.h"
-#include "Model/FindLayerVisitor.h"
 #include "Model/GroupSnapshot.h"
 #include "Model/IssueGenerator.h"
-#include "Model/NodeVisitor.h"
+#include "Model/NodeVisitors.h"
 #include "Model/PickResult.h"
-#include "Model/TransformObjectVisitor.h"
 #include "Model/TagVisitor.h"
 
 #include <vecmath/ray.h>

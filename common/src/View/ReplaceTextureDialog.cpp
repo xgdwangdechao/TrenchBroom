@@ -21,7 +21,7 @@
 
 #include "Assets/Texture.h"
 #include "Model/BrushFace.h"
-#include "Model/CollectMatchingBrushFacesVisitor.h"
+#include "Model/NodeVisitors.h"
 #include "Model/World.h"
 #include "View/BorderLine.h"
 #include "View/MapDocument.h"

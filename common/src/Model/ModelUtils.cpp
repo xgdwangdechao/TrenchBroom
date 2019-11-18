@@ -18,7 +18,7 @@
  */
 
 #include "ModelUtils.h"
-#include "Model/CollectNodesVisitor.h"
+#include "Model/NodeVisitors.h"
 
 namespace TrenchBroom {
     namespace Model {

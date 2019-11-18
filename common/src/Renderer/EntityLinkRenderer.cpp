@@ -21,10 +21,9 @@
 
 #include "Macros.h"
 #include "Model/AttributableNode.h"
-#include "Model/CollectMatchingNodesVisitor.h"
 #include "Model/EditorContext.h"
 #include "Model/Entity.h"
-#include "Model/NodeVisitor.h"
+#include "Model/NodeVisitors.h"
 #include "Model/World.h"
 #include "Renderer/Camera.h"
 #include "Renderer/RenderBatch.h"

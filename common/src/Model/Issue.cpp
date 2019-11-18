@@ -21,7 +21,7 @@
 
 #include "CollectionUtils.h"
 #include "Model/BrushFace.h"
-#include "Model/CollectSelectableNodesVisitor.h"
+#include "Model/NodeVisitors.h"
 #include "Model/EditorContext.h"
 #include "Model/Node.h"
 

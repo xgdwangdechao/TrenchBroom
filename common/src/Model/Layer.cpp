@@ -21,11 +21,10 @@
 
 #include "Model/TagMatcher.h"
 #include "Model/Brush.h"
-#include "Model/ComputeNodeBoundsVisitor.h"
 #include "Model/Group.h"
 #include "Model/Entity.h"
 #include "Model/IssueGenerator.h"
-#include "Model/NodeVisitor.h"
+#include "Model/NodeVisitors.h"
 #include "Model/TagVisitor.h"
 
 namespace TrenchBroom {

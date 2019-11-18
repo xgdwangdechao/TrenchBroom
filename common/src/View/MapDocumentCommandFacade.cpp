@@ -27,10 +27,6 @@
 #include "Model/Brush.h"
 #include "Model/BrushFace.h"
 #include "Model/ChangeBrushFaceAttributesRequest.h"
-#include "Model/CollectNodesWithDescendantSelectionCountVisitor.h"
-#include "Model/CollectRecursivelySelectedNodesVisitor.h"
-#include "Model/CollectSelectableBrushFacesVisitor.h"
-#include "Model/CollectSelectableNodesVisitor.h"
 #include "Model/EditorContext.h"
 #include "Model/Entity.h"
 #include "Model/Game.h"
@@ -38,9 +34,8 @@
 #include "Model/Issue.h"
 #include "Model/ModelUtils.h"
 #include "Model/Snapshot.h"
-#include "Model/TransformObjectVisitor.h"
 #include "Model/World.h"
-#include "Model/NodeVisitor.h"
+#include "Model/NodeVisitors.h"
 #include "View/Selection.h"
 
 namespace TrenchBroom {

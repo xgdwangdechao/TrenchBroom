@@ -20,7 +20,7 @@
 #ifndef TrenchBroom_ModelUtils
 #define TrenchBroom_ModelUtils
 
-#include "Model/CollectUniqueNodesVisitor.h"
+#include "Model/NodeVisitors.h"
 #include "Model/ModelTypes.h"
 #include "Model/Node.h"
 

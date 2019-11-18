@@ -20,10 +20,8 @@
 #include "LayerEditor.h"
 
 #include "Model/Brush.h"
-#include "Model/CollectSelectableNodesVisitor.h"
 #include "Model/Entity.h"
-#include "Model/FindGroupVisitor.h"
-#include "Model/FindLayerVisitor.h"
+#include "Model/NodeVisitors.h"
 #include "Model/Group.h"
 #include "Model/Layer.h"
 #include "Model/World.h"

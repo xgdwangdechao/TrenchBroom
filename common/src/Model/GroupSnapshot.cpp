@@ -23,7 +23,7 @@
 #include "Model/Group.h"
 #include "Model/ModelTypes.h"
 #include "Model/Node.h"
-#include "Model/TakeSnapshotVisitor.h"
+#include "Model/NodeVisitors.h"
 
 namespace TrenchBroom {
     namespace Model {

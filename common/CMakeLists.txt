@@ -89,12 +89,9 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/IO/WalTextureReader.cpp
         ${COMMON_SOURCE_DIR}/IO/WorldReader.cpp
         ${COMMON_SOURCE_DIR}/IO/ZipFileSystem.cpp
-        ${COMMON_SOURCE_DIR}/Model/AssortNodesVisitor.cpp
         ${COMMON_SOURCE_DIR}/Model/AttributableNode.cpp
         ${COMMON_SOURCE_DIR}/Model/AttributableNodeIndex.cpp
         ${COMMON_SOURCE_DIR}/Model/AttributableNodeVariableStore.cpp
-        ${COMMON_SOURCE_DIR}/Model/BoundsContainsNodeVisitor.cpp
-        ${COMMON_SOURCE_DIR}/Model/BoundsIntersectsNodeVisitor.cpp
         ${COMMON_SOURCE_DIR}/Model/Brush.cpp
         ${COMMON_SOURCE_DIR}/Model/BrushBuilder.cpp
         ${COMMON_SOURCE_DIR}/Model/BrushFace.cpp
@@ -104,17 +101,10 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/Model/BrushFaceSnapshot.cpp
         ${COMMON_SOURCE_DIR}/Model/BrushSnapshot.cpp
         ${COMMON_SOURCE_DIR}/Model/ChangeBrushFaceAttributesRequest.cpp
-        ${COMMON_SOURCE_DIR}/Model/CollectAttributableNodesVisitor.cpp
-        ${COMMON_SOURCE_DIR}/Model/CollectMatchingNodesVisitor.cpp
-        ${COMMON_SOURCE_DIR}/Model/CollectNodesWithDescendantSelectionCountVisitor.cpp
-        ${COMMON_SOURCE_DIR}/Model/CollectRecursivelySelectedNodesVisitor.cpp
-        ${COMMON_SOURCE_DIR}/Model/CollectSelectableBrushFacesVisitor.cpp
-        ${COMMON_SOURCE_DIR}/Model/CollectSelectableNodesWithFilePositionVisitor.cpp
         ${COMMON_SOURCE_DIR}/Model/CompareHits.cpp
         ${COMMON_SOURCE_DIR}/Model/CompilationConfig.cpp
         ${COMMON_SOURCE_DIR}/Model/CompilationProfile.cpp
         ${COMMON_SOURCE_DIR}/Model/CompilationTask.cpp
-        ${COMMON_SOURCE_DIR}/Model/ComputeNodeBoundsVisitor.cpp
         ${COMMON_SOURCE_DIR}/Model/EditorContext.cpp
         ${COMMON_SOURCE_DIR}/Model/Entity.cpp
         ${COMMON_SOURCE_DIR}/Model/EntityAttributes.cpp
@@ -123,9 +113,6 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/Model/EntityColor.cpp
         ${COMMON_SOURCE_DIR}/Model/EntityRotationPolicy.cpp
         ${COMMON_SOURCE_DIR}/Model/EntitySnapshot.cpp
-        ${COMMON_SOURCE_DIR}/Model/FindContainerVisitor.cpp
-        ${COMMON_SOURCE_DIR}/Model/FindGroupVisitor.cpp
-        ${COMMON_SOURCE_DIR}/Model/FindLayerVisitor.cpp
         ${COMMON_SOURCE_DIR}/Model/Game.cpp
         ${COMMON_SOURCE_DIR}/Model/GameConfig.cpp
         ${COMMON_SOURCE_DIR}/Model/GameEngineConfig.cpp
@@ -147,9 +134,6 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/Model/Layer.cpp
         ${COMMON_SOURCE_DIR}/Model/MapFacade.cpp
         ${COMMON_SOURCE_DIR}/Model/MapFormat.cpp
-        ${COMMON_SOURCE_DIR}/Model/MatchNodesByVisibility.cpp
-        ${COMMON_SOURCE_DIR}/Model/MatchSelectableNodes.cpp
-        ${COMMON_SOURCE_DIR}/Model/MergeNodesIntoWorldVisitor.cpp
         ${COMMON_SOURCE_DIR}/Model/ModelFactory.cpp
         ${COMMON_SOURCE_DIR}/Model/ModelFactoryImpl.cpp
         ${COMMON_SOURCE_DIR}/Model/ModelUtils.cpp
@@ -158,6 +142,7 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/Model/NodePredicates.cpp
         ${COMMON_SOURCE_DIR}/Model/NodeSnapshot.cpp
         ${COMMON_SOURCE_DIR}/Model/NodeVisitor.cpp
+        ${COMMON_SOURCE_DIR}/Model/NodeVisitors.cpp
         ${COMMON_SOURCE_DIR}/Model/Object.cpp
         ${COMMON_SOURCE_DIR}/Model/ParallelTexCoordSystem.cpp
         ${COMMON_SOURCE_DIR}/Model/ParaxialTexCoordSystem.cpp
@@ -173,10 +158,8 @@ set(COMMON_SOURCE
         ${COMMON_SOURCE_DIR}/Model/TagManager.cpp
         ${COMMON_SOURCE_DIR}/Model/TagMatcher.cpp
         ${COMMON_SOURCE_DIR}/Model/TagVisitor.cpp
-        ${COMMON_SOURCE_DIR}/Model/TakeSnapshotVisitor.cpp
         ${COMMON_SOURCE_DIR}/Model/TexCoordSystem.cpp
         ${COMMON_SOURCE_DIR}/Model/TransformEntityAttributesQuickFix.cpp
-        ${COMMON_SOURCE_DIR}/Model/TransformObjectVisitor.cpp
         ${COMMON_SOURCE_DIR}/Model/World.cpp
         ${COMMON_SOURCE_DIR}/RecoverableExceptions.cpp
         ${COMMON_SOURCE_DIR}/Renderer/AllocationTracker.cpp
@@ -581,12 +564,9 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/IO/WalTextureReader.h
         ${COMMON_SOURCE_DIR}/IO/WorldReader.h
         ${COMMON_SOURCE_DIR}/IO/ZipFileSystem.h
-        ${COMMON_SOURCE_DIR}/Model/AssortNodesVisitor.h
         ${COMMON_SOURCE_DIR}/Model/AttributableNode.h
         ${COMMON_SOURCE_DIR}/Model/AttributableNodeIndex.h
         ${COMMON_SOURCE_DIR}/Model/AttributableNodeVariableStore.h
-        ${COMMON_SOURCE_DIR}/Model/BoundsContainsNodeVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/BoundsIntersectsNodeVisitor.h
         ${COMMON_SOURCE_DIR}/Model/Brush.h
         ${COMMON_SOURCE_DIR}/Model/BrushBuilder.h
         ${COMMON_SOURCE_DIR}/Model/BrushFace.h
@@ -597,26 +577,10 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/Model/BrushGeometry.h
         ${COMMON_SOURCE_DIR}/Model/BrushSnapshot.h
         ${COMMON_SOURCE_DIR}/Model/ChangeBrushFaceAttributesRequest.h
-        ${COMMON_SOURCE_DIR}/Model/CollectAttributableNodesVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectContainedNodesVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectMatchingBrushFacesVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectMatchingIssuesVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectMatchingNodesVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectNodesByVisibilityVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectNodesVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectNodesWithDescendantSelectionCountVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectRecursivelySelectedNodesVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectSelectableBrushFacesVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectSelectableNodesVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectSelectableNodesWithFilePositionVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectSelectedNodesVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectTouchingNodesVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/CollectUniqueNodesVisitor.h
         ${COMMON_SOURCE_DIR}/Model/CompareHits.h
         ${COMMON_SOURCE_DIR}/Model/CompilationConfig.h
         ${COMMON_SOURCE_DIR}/Model/CompilationProfile.h
         ${COMMON_SOURCE_DIR}/Model/CompilationTask.h
-        ${COMMON_SOURCE_DIR}/Model/ComputeNodeBoundsVisitor.h
         ${COMMON_SOURCE_DIR}/Model/EditorContext.h
         ${COMMON_SOURCE_DIR}/Model/Entity.h
         ${COMMON_SOURCE_DIR}/Model/EntityAttributes.h
@@ -625,10 +589,6 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/Model/EntityColor.h
         ${COMMON_SOURCE_DIR}/Model/EntityRotationPolicy.h
         ${COMMON_SOURCE_DIR}/Model/EntitySnapshot.h
-        ${COMMON_SOURCE_DIR}/Model/FindContainerVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/FindGroupVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/FindLayerVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/FindMatchingBrushFaceVisitor.h
         ${COMMON_SOURCE_DIR}/Model/Game.h
         ${COMMON_SOURCE_DIR}/Model/GameConfig.h
         ${COMMON_SOURCE_DIR}/Model/GameEngineConfig.h
@@ -650,10 +610,6 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/Model/Layer.h
         ${COMMON_SOURCE_DIR}/Model/MapFacade.h
         ${COMMON_SOURCE_DIR}/Model/MapFormat.h
-        ${COMMON_SOURCE_DIR}/Model/MatchNodesByVisibility.h
-        ${COMMON_SOURCE_DIR}/Model/MatchSelectableNodes.h
-        ${COMMON_SOURCE_DIR}/Model/MatchSelectedNodes.h
-        ${COMMON_SOURCE_DIR}/Model/MergeNodesIntoWorldVisitor.h
         ${COMMON_SOURCE_DIR}/Model/ModelFactory.h
         ${COMMON_SOURCE_DIR}/Model/ModelFactoryImpl.h
         ${COMMON_SOURCE_DIR}/Model/ModelTypes.h
@@ -663,6 +619,7 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/Model/NodePredicates.h
         ${COMMON_SOURCE_DIR}/Model/NodeSnapshot.h
         ${COMMON_SOURCE_DIR}/Model/NodeVisitor.h
+        ${COMMON_SOURCE_DIR}/Model/NodeVisitors.h
         ${COMMON_SOURCE_DIR}/Model/Object.h
         ${COMMON_SOURCE_DIR}/Model/ParallelTexCoordSystem.h
         ${COMMON_SOURCE_DIR}/Model/ParaxialTexCoordSystem.h
@@ -679,10 +636,8 @@ set(COMMON_HEADER
         ${COMMON_SOURCE_DIR}/Model/TagManager.h
         ${COMMON_SOURCE_DIR}/Model/TagMatcher.h
         ${COMMON_SOURCE_DIR}/Model/TagVisitor.h
-        ${COMMON_SOURCE_DIR}/Model/TakeSnapshotVisitor.h
         ${COMMON_SOURCE_DIR}/Model/TexCoordSystem.h
         ${COMMON_SOURCE_DIR}/Model/TransformEntityAttributesQuickFix.h
-        ${COMMON_SOURCE_DIR}/Model/TransformObjectVisitor.h
         ${COMMON_SOURCE_DIR}/Model/World.h
         ${COMMON_SOURCE_DIR}/Polyhedron.h
         ${COMMON_SOURCE_DIR}/Polyhedron_BrushGeometryPayload.h
