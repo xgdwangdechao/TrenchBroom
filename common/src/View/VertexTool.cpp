@@ -26,7 +26,7 @@
 #include "Renderer/RenderBatch.h"
 #include "View/Grid.h"
 #include "View/MapDocument.h"
-#include "View/VertexCommand.h"
+#include "View/Commands.h"
 
 #include <cassert>
 #include <tuple>

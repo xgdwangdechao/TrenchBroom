@@ -32,7 +32,7 @@
 #include "Model/NodeCollection.h"
 #include "Model/TexCoordSystem.h"
 #include "View/CachingLogger.h"
-#include "View/UndoableCommand.h"
+#include "View/Commands.h"
 #include "View/ViewTypes.h"
 
 #include <vecmath/forward.h>

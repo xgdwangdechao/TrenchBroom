@@ -27,7 +27,7 @@
 #include "Model/TexCoordSystem.h"
 #include "View/CommandProcessor.h"
 #include "View/MapDocument.h"
-#include "View/UndoableCommand.h"
+#include "View/Commands.h"
 
 #include <vecmath/segment.h>
 

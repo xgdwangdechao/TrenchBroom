@@ -21,7 +21,7 @@
 #define VertexTool_h
 
 #include "Renderer/PointGuideRenderer.h"
-#include "View/UndoableCommand.h"
+#include "View/Commands.h"
 #include "View/VertexToolBase.h"
 #include "View/VertexHandleManager.h"
 

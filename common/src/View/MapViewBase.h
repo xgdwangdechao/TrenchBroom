@@ -30,7 +30,7 @@
 #include "View/MapView.h"
 #include "View/RenderView.h"
 #include "View/ToolBoxConnector.h"
-#include "View/UndoableCommand.h"
+#include "View/Commands.h"
 #include "View/ViewTypes.h"
 
 #include <memory>

@@ -23,7 +23,7 @@
 #include "Notifier.h"
 #include "StringType.h"
 #include "View/Command.h"
-#include "View/UndoableCommand.h"
+#include "View/Commands.h"
 
 #include <vector>
 

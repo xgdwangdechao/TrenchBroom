@@ -35,18 +35,11 @@
 #include "Renderer/RenderService.h"
 #include "View/Lasso.h"
 #include "View/MapDocument.h"
-#include "View/MoveBrushVerticesCommand.h"
-#include "View/MoveBrushEdgesCommand.h"
-#include "View/MoveBrushFacesCommand.h"
-#include "View/RemoveBrushVerticesCommand.h"
-#include "View/RemoveBrushEdgesCommand.h"
-#include "View/RemoveBrushFacesCommand.h"
+#include "View/Commands.h"
 #include "View/Selection.h"
 #include "View/Tool.h"
-#include "View/VertexCommand.h"
 #include "View/VertexHandleManager.h"
 #include "View/ViewTypes.h"
-#include "AddBrushVerticesCommand.h"
 
 #include <vecmath/forward.h>
 #include <vecmath/vec.h>
