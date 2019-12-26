@@ -200,7 +200,7 @@ namespace TrenchBroom {
             return position - distance;
         }
 
-        void UVScaleTool::doRender(const InputState& inputState, Renderer::RenderContext&, Renderer::RenderBatch& renderBatch) {
+        void UVScaleTool::doRender(const InputState& inputState, Renderer::RenderContext& renderContext, Renderer::RenderBatch& renderBatch) {
             if (!m_helper.valid()) {
                 return;
             }
@@ -218,6 +218,27 @@ namespace TrenchBroom {
                 Renderer::DirectEdgeRenderer handleRenderer(Renderer::VertexArray::move(getHandleVertices(pickResult)), Renderer::PrimType::Lines);
                 handleRenderer.render(renderBatch, color, 0.5f);
             }
+
+            // eric
+            const auto pickRay = inputState.pickRay();
+            const auto& boundary = face->boundary();
+            const auto facePointDist = vm::intersect_ray_plane(pickRay, boundary);
+            const auto facePoint = vm::point_at_distance(pickRay, facePointDist);
+
+            const auto toTex = face->toTexCoordSystemMatrix(vm::vec2f::zero(), vm::vec2f::one(), true);
+            const auto toTexOther = face->toTexCoordSystemMatrix(face->offset(), face->scale(), true);
+            const auto facePointInTex = vm::vec2f(toTex * facePoint);
+            const auto facePointInTexOther = vm::vec2f(toTexOther * facePoint);
+            const auto facePointInView = m_helper.texToViewCoords(facePointInTexOther);
+
+            std::stringstream message;
+            message << "world:      " << facePoint << "\n";
+            message << "texZeroOne: " << facePointInTex << "\n";
+            message << "tex:        " << facePointInTexOther << "\n";
+            message << "view:       " << facePointInView;
+
+            Renderer::RenderService renderService(renderContext, renderBatch);
+            renderService.renderHeadsUp(message.str());
         }
 
         std::vector<UVScaleTool::EdgeVertex> UVScaleTool::getHandleVertices(const Model::PickResult& pickResult) const {
