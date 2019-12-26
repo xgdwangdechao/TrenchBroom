@@ -74,7 +74,7 @@ namespace TrenchBroom {
 
             const Camera& camera = renderContext.camera();
             const float distance = camera.perpendicularDistanceTo(position.position(camera));
-            if (distance <= 0.0f)
+            if (distance <= 0.0f && !onTop)
                 return;
 
             if (!isVisible(renderContext, string, position, distance, onTop))
