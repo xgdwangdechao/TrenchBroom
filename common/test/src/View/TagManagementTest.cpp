@@ -30,7 +30,7 @@
 #include "Model/BrushNode.h"
 #include "Model/BrushFace.h"
 #include "Model/ChangeBrushFaceAttributesRequest.h"
-#include "Model/Entity.h"
+#include "Model/EntityNode.h"
 #include "Model/LayerNode.h"
 #include "Model/Tag.h"
 #include "Model/TagMatcher.h"
@@ -302,11 +302,11 @@ namespace TrenchBroom {
             auto* matchingBrush = createBrush("asdf");
             auto* nonMatchingBrush = createBrush("asdf");
 
-            auto matchingEntity = std::make_unique<Model::Entity>();
+            auto matchingEntity = std::make_unique<Model::EntityNode>();
             matchingEntity->addOrUpdateAttribute("classname", "brush_entity");
             matchingEntity->addChild(matchingBrush);
 
-            auto nonMatchingEntity = std::make_unique<Model::Entity>();
+            auto nonMatchingEntity = std::make_unique<Model::EntityNode>();
             nonMatchingEntity->addOrUpdateAttribute("classname", "something");
             nonMatchingEntity->addChild(nonMatchingBrush);
 
@@ -334,7 +334,7 @@ namespace TrenchBroom {
         TEST_CASE_METHOD(TagManagementTest, "TagManagementTest.enableEntityClassnameTagRetainsAttributes") {
             auto* brush = createBrush("asdf");
 
-            auto* oldEntity = new Model::Entity();
+            auto* oldEntity = new Model::EntityNode();
             oldEntity->addOrUpdateAttribute("classname", "something");
             oldEntity->addOrUpdateAttribute("some_attr", "some_value");
 
@@ -359,7 +359,7 @@ namespace TrenchBroom {
         TEST_CASE_METHOD(TagManagementTest, "TagManagementTest.disableEntityClassnameTag") {
             auto* brush = createBrush("asdf");
 
-            auto* oldEntity = new Model::Entity();
+            auto* oldEntity = new Model::EntityNode();
             oldEntity->addOrUpdateAttribute("classname", "brush_entity");
 
             document->addNode(oldEntity, document->currentParent());
@@ -378,7 +378,7 @@ namespace TrenchBroom {
         }
 
         TEST_CASE_METHOD(TagManagementTest, "TagManagementTest.tagInitializeBrushTags") {
-            auto* entity = new Model::Entity();
+            auto* entity = new Model::EntityNode();
             entity->addOrUpdateAttribute("classname", "brush_entity");
             document->addNode(entity, document->currentParent());
 
@@ -390,7 +390,7 @@ namespace TrenchBroom {
         }
 
         TEST_CASE_METHOD(TagManagementTest, "TagManagementTest.tagRemoveBrushTags") {
-            auto* entity = new Model::Entity();
+            auto* entity = new Model::EntityNode();
             entity->addOrUpdateAttribute("classname", "brush_entity");
             document->addNode(entity, document->currentParent());
 
@@ -407,7 +407,7 @@ namespace TrenchBroom {
             auto* brush = createBrush("some_texture");
             document->addNode(brush, document->currentParent());
 
-            auto* entity = new Model::Entity();
+            auto* entity = new Model::EntityNode();
             entity->addOrUpdateAttribute("classname", "brush_entity");
             document->addNode(entity, document->currentParent());
 
@@ -419,11 +419,11 @@ namespace TrenchBroom {
         }
 
         TEST_CASE_METHOD(TagManagementTest, "TagManagementTest.tagUpdateBrushTagsAfterReparenting") {
-            auto* lightEntity = new Model::Entity();
+            auto* lightEntity = new Model::EntityNode();
             lightEntity->addOrUpdateAttribute("classname", "brush_entity");
             document->addNode(lightEntity, document->currentParent());
 
-            auto* otherEntity = new Model::Entity();
+            auto* otherEntity = new Model::EntityNode();
             otherEntity->addOrUpdateAttribute("classname", "other");
             document->addNode(otherEntity, document->currentParent());
 
@@ -438,7 +438,7 @@ namespace TrenchBroom {
         }
 
         TEST_CASE_METHOD(TagManagementTest, "TagManagementTest.tagUpdateBrushTagsAfterChangingClassname") {
-            auto* lightEntity = new Model::Entity();
+            auto* lightEntity = new Model::EntityNode();
             lightEntity->addOrUpdateAttribute("classname", "asdf");
             document->addNode(lightEntity, document->currentParent());
 
