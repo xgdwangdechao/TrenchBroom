@@ -21,6 +21,7 @@
 
 #include "Model/Brush.h"
 #include "Model/BrushFace.h"
+#include "Model/BrushFaceHandle.h"
 #include "Model/BrushNode.h"
 #include "Model/HitAdapter.h"
 #include "Model/HitQuery.h"
@@ -76,13 +77,16 @@ namespace TrenchBroom {
 
             auto document = kdl::mem_lock(m_document);
 
-            const std::vector<Model::BrushFace*> selectedFaces = document->selectedBrushFaces();
+            const auto selectedFaces = document->selectedBrushFaces();
+            assert(!selectedFaces.empty());
+
             const Model::Hit& hit = inputState.pickResult().query().pickable().type(Model::BrushNode::BrushHitType).occluded().first();
 
-            Model::BrushFace* source = selectedFaces.front();
+            Model::BrushNode* sourceBrush = selectedFaces.front().node();
+            Model::BrushFace* sourceFace = selectedFaces.front().face();
+            Model::BrushNode* targetBrush = Model::hitToBrush(hit);
             Model::BrushFace* targetFace = Model::hitToFace(hit);
-            Model::BrushNode* targetBrush = targetFace->brush()->node();
-            const std::vector<Model::BrushFace*> targetList = applyToBrush ? targetBrush->faces() : std::vector<Model::BrushFace*>({ targetFace });
+            const auto targetList = applyToBrush ? Model::toHandles(targetBrush) : std::vector<Model::BrushFaceHandle>{Model::BrushFaceHandle(targetBrush, targetFace)};
 
             const Model::WrapStyle wrapStyle = inputState.modifierKeysDown(ModifierKeys::MKShift) ? Model::WrapStyle::Rotation : Model::WrapStyle::Projection;
 
@@ -90,16 +94,16 @@ namespace TrenchBroom {
             document->deselectAll();
             document->select(targetList);
             if (copyAllAttributes(inputState)) {
-                auto snapshot = source->takeTexCoordSystemSnapshot();
-                document->setFaceAttributes(source->attribs());
+                auto snapshot = sourceFace->takeTexCoordSystemSnapshot();
+                document->setFaceAttributes(sourceFace->attribs());
                 if (snapshot != nullptr) {
-                    document->copyTexCoordSystemFromFace(*snapshot, source->attribs().takeSnapshot(), source->boundary(), wrapStyle);
+                    document->copyTexCoordSystemFromFace(*snapshot, sourceFace->attribs().takeSnapshot(), sourceFace->boundary(), wrapStyle);
                 }
             } else {
-                document->setTexture(source->texture());
+                document->setTexture(sourceFace->texture());
             }
             document->deselectAll();
-            document->select(source);
+            document->select({ sourceBrush, sourceFace });
         }
 
         bool SetBrushFaceAttributesTool::canCopyAttributesFromSelection(const InputState& inputState) const {
@@ -108,7 +112,7 @@ namespace TrenchBroom {
 
             auto document = kdl::mem_lock(m_document);
 
-            const std::vector<Model::BrushFace*> selectedFaces = document->selectedBrushFaces();
+            const auto selectedFaces = document->selectedBrushFaces();
             if (selectedFaces.size() != 1)
                 return false;
 
