@@ -47,16 +47,12 @@ namespace TrenchBroom {
             using VertexList = BrushVertexList;
             using EdgeList = BrushEdgeList;
         private:
-            // TODO: get rid of this
-            BrushNode* m_node;
-
             std::vector<BrushFace*> m_faces;
             BrushGeometry* m_geometry;
 
             mutable bool m_transparent;
         public:
             Brush();
-            Brush(BrushNode* node, const vm::bbox3& worldBounds, const std::vector<BrushFace*>& faces);
             Brush(const vm::bbox3& worldBounds, const std::vector<BrushFace*>& faces);
 
             Brush(const Brush& other);
@@ -69,8 +65,6 @@ namespace TrenchBroom {
         private:
             void cleanup();
         public:
-            void setNode(BrushNode* node);
-
             const vm::bbox3& bounds() const;
         public: // face management:
             BrushFace* findFace(const std::string& textureName) const;
@@ -85,8 +79,6 @@ namespace TrenchBroom {
 
             bool closed() const;
             bool fullySpecified() const;
-
-            void faceDidChange();
         private:
             void addFaces(const std::vector<BrushFace*>& faces);
             template <typename I>
