@@ -76,7 +76,7 @@ namespace TrenchBroom {
             auto document = kdl::mem_lock(m_document);
 
             const std::vector<Model::BrushFace*>& selectedFaces = document->selectedBrushFaces();
-            const Model::Hit& hit = inputState.pickResult().query().pickable().type(Model::BrushNode::BrushHit).occluded().first();
+            const Model::Hit& hit = inputState.pickResult().query().pickable().type(Model::BrushNode::BrushHitType).occluded().first();
 
             Model::BrushFace* source = selectedFaces.front();
             Model::BrushFace* targetFace = Model::hitToFace(hit);
@@ -111,7 +111,7 @@ namespace TrenchBroom {
             if (selectedFaces.size() != 1)
                 return false;
 
-            const Model::Hit& hit = inputState.pickResult().query().pickable().type(Model::BrushNode::BrushHit).occluded().first();
+            const Model::Hit& hit = inputState.pickResult().query().pickable().type(Model::BrushNode::BrushHitType).occluded().first();
             if (!hit.isMatch())
                 return false;
 
