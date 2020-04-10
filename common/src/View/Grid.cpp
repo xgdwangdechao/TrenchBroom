@@ -26,6 +26,8 @@
 #include "Model/BrushGeometry.h"
 #include "Model/Polyhedron.h"
 
+#include <kdl/vector_utils.h>
+
 #include <vecmath/vec.h>
 #include <vecmath/ray.h>
 #include <vecmath/intersection.h>
@@ -213,15 +215,16 @@ namespace TrenchBroom {
             return actualDelta;
         }
 
-        vm::vec3 Grid::moveDelta(const Model::BrushFace* face, const vm::vec3& delta) const {
-            const auto dist = dot(delta, face->boundary().normal);
+        vm::vec3 Grid::moveDelta(const Model::Brush& brush, const Model::BrushFace& face, const vm::vec3& delta) const {
+            assert(kdl::vec_contains(brush.faces(), &face));
+            
+            const auto dist = dot(delta, face.boundary().normal);
             if (vm::is_zero(dist, vm::C::almost_zero())) {
                 return vm::vec3::zero();
             }
 
-            const auto* brush = face->brush();
-            const auto& brushEdges = brush->edges();
-            const auto faceVertices = face->vertices();
+            const auto& brushEdges = brush.edges();
+            const auto faceVertices = face.vertices();
 
             // the edge rays indicate the direction into which each vertex of the given face moves if the face is dragged
             std::vector<vm::ray3> edgeRays;
@@ -269,7 +272,7 @@ namespace TrenchBroom {
                 }
             }
 
-            auto normDelta = face->boundary().normal * dist;
+            auto normDelta = face.boundary().normal * dist;
             /**
              * Scalar projection of normDelta onto the nearest axial normal vector.
              */
@@ -296,7 +299,7 @@ namespace TrenchBroom {
                     const auto& ray = edgeRays[i];
                     const auto vertexDist = intersectWithRay(ray, gridSkip);
                     const auto vertexDelta = ray.direction * vertexDist;
-                    const auto vertexNormDist = dot(vertexDelta, face->boundary().normal);
+                    const auto vertexNormDist = dot(vertexDelta, face.boundary().normal);
 
                     const auto normDistDelta = vm::abs(vertexNormDist - dist);
                     if (normDistDelta < minDistDelta) {
@@ -307,7 +310,7 @@ namespace TrenchBroom {
                 ++gridSkip;
             } while (actualDist == std::numeric_limits<FloatType>::max());
 
-            normDelta = face->boundary().normal * actualDist;
+            normDelta = face.boundary().normal * actualDist;
             const auto deltaNormalized = normalize(delta);
             return deltaNormalized * dot(normDelta, deltaNormalized);
         }

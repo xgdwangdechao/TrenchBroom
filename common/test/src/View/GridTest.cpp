@@ -206,9 +206,9 @@ namespace TrenchBroom {
             ASSERT_DOUBLE_EQ(64.0, topFace->boundsCenter().z());
 
             // try to move almost 4 grid increments up -> snaps to 3
-            ASSERT_EQ(vm::vec3(0,0,48), grid16.moveDelta(topFace, vm::vec3(0, 0, 63)));
-            ASSERT_EQ(vm::vec3(0,0,64), grid16.moveDelta(topFace, vm::vec3(0, 0, 64)));
-            ASSERT_EQ(vm::vec3(0,0,64), grid16.moveDelta(topFace, vm::vec3(0, 0, 65)));
+            ASSERT_EQ(vm::vec3(0,0,48), grid16.moveDelta(cube, *topFace, vm::vec3(0, 0, 63)));
+            ASSERT_EQ(vm::vec3(0,0,64), grid16.moveDelta(cube, *topFace, vm::vec3(0, 0, 64)));
+            ASSERT_EQ(vm::vec3(0,0,64), grid16.moveDelta(cube, *topFace, vm::vec3(0, 0, 65)));
         }
 
         TEST_CASE("GridTest.moveDeltaForFace_SubInteger", "[GridTest]") {
@@ -220,9 +220,9 @@ namespace TrenchBroom {
             ASSERT_DOUBLE_EQ(64.0, topFace->boundsCenter().z());
 
             // try to move almost 4 grid increments up -> snaps to 3
-            ASSERT_EQ(vm::vec3(0,0,1.5), grid05.moveDelta(topFace, vm::vec3(0, 0, 1.9)));
-            ASSERT_EQ(vm::vec3(0,0,2), grid05.moveDelta(topFace, vm::vec3(0, 0, 2)));
-            ASSERT_EQ(vm::vec3(0,0,2), grid05.moveDelta(topFace, vm::vec3(0, 0, 2.1)));
+            ASSERT_EQ(vm::vec3(0,0,1.5), grid05.moveDelta(cube, *topFace, vm::vec3(0, 0, 1.9)));
+            ASSERT_EQ(vm::vec3(0,0,2), grid05.moveDelta(cube, *topFace, vm::vec3(0, 0, 2)));
+            ASSERT_EQ(vm::vec3(0,0,2), grid05.moveDelta(cube, *topFace, vm::vec3(0, 0, 2.1)));
         }
     }
 }
