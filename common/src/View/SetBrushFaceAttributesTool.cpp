@@ -20,7 +20,7 @@
 #include "SetBrushFaceAttributesTool.h"
 
 #include "Model/BrushFace.h"
-#include "Model/Brush.h"
+#include "Model/BrushNode.h"
 #include "Model/HitAdapter.h"
 #include "Model/HitQuery.h"
 #include "Model/TexCoordSystem.h"
@@ -72,15 +72,15 @@ namespace TrenchBroom {
 
         void SetBrushFaceAttributesTool::copyAttributesFromSelection(const InputState& inputState, const bool applyToBrush) {
             assert(canCopyAttributesFromSelection(inputState));
-            
+
             auto document = kdl::mem_lock(m_document);
 
             const std::vector<Model::BrushFace*>& selectedFaces = document->selectedBrushFaces();
-            const Model::Hit& hit = inputState.pickResult().query().pickable().type(Model::Brush::BrushHit).occluded().first();
+            const Model::Hit& hit = inputState.pickResult().query().pickable().type(Model::BrushNode::BrushHit).occluded().first();
 
             Model::BrushFace* source = selectedFaces.front();
             Model::BrushFace* targetFace = Model::hitToFace(hit);
-            Model::Brush* targetBrush = targetFace->brush();
+            Model::BrushNode* targetBrush = targetFace->brush();
             const std::vector<Model::BrushFace*> targetList = applyToBrush ? targetBrush->faces() : std::vector<Model::BrushFace*>({ targetFace });
 
             const Model::WrapStyle wrapStyle = inputState.modifierKeysDown(ModifierKeys::MKShift) ? Model::WrapStyle::Rotation : Model::WrapStyle::Projection;
@@ -111,10 +111,10 @@ namespace TrenchBroom {
             if (selectedFaces.size() != 1)
                 return false;
 
-            const Model::Hit& hit = inputState.pickResult().query().pickable().type(Model::Brush::BrushHit).occluded().first();
+            const Model::Hit& hit = inputState.pickResult().query().pickable().type(Model::BrushNode::BrushHit).occluded().first();
             if (!hit.isMatch())
                 return false;
-            
+
             return true;
         }
 
