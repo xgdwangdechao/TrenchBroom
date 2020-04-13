@@ -42,11 +42,11 @@ namespace TrenchBroom {
 
             struct CachedFace {
                 const Assets::Texture* texture;
-                Model::BrushFace* face;
+                const Model::BrushFace* face;
                 size_t vertexCount;
                 size_t indexOfFirstVertexRelativeToBrush;
 
-                CachedFace(Model::BrushFace* i_face,
+                CachedFace(const Model::BrushFace* i_face,
                            size_t i_indexOfFirstVertexRelativeToBrush);
             };
 

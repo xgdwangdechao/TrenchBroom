@@ -33,10 +33,10 @@ namespace TrenchBroom {
         BrushFaceSnapshot::~BrushFaceSnapshot() = default;
 
         void BrushFaceSnapshot::restore() {
-            const auto faceHandle = m_faceRef.resolve();
-            faceHandle.face()->setAttributes(m_faceAttributes);
+            auto faceHandle = m_faceRef.resolve();
+            faceHandle.setAttributes(m_faceAttributes);
             if (m_coordSystemSnapshot != nullptr) {
-                faceHandle.face()->restoreTexCoordSystemSnapshot(*m_coordSystemSnapshot);
+                faceHandle.restoreTexCoordSystemSnapshot(*m_coordSystemSnapshot);
             }
         }
     }

@@ -31,6 +31,7 @@
 #include "Model/BrushNode.h"
 #include "Model/BrushBuilder.h"
 #include "Model/BrushFace.h"
+#include "Model/BrushFaceHandle.h"
 #include "Model/BrushSnapshot.h"
 #include "Model/Hit.h"
 #include "Model/HitAdapter.h"
@@ -288,38 +289,19 @@ namespace TrenchBroom {
                     m_face(face) {}
 
             bool operator()(const BrushFace* candidate) const {
-                for (size_t i = 0; i < 3; ++i)
-                    if (candidate->points()[i] != m_face.points()[i])
+                for (size_t i = 0; i < 3; ++i) {
+                    if (candidate->points()[i] != m_face.points()[i]) {
                         return false;
-                if (candidate->selected() != m_face.selected())
-                    return false;
-                if (candidate->attributes().textureName() != m_face.attributes().textureName())
-                    return false;
-                if (candidate->texture() != m_face.texture())
-                    return false;
-                if (candidate->attributes().xOffset() != m_face.attributes().xOffset())
-                    return false;
-                if (candidate->attributes().yOffset() != m_face.attributes().yOffset())
-                    return false;
-                if (candidate->attributes().rotation() != m_face.attributes().rotation())
-                    return false;
-                if (candidate->attributes().xScale() != m_face.attributes().xScale())
-                    return false;
-                if (candidate->attributes().yScale() != m_face.attributes().yScale())
-                    return false;
-                if (candidate->attributes().surfaceContents() != m_face.attributes().surfaceContents())
-                    return false;
-                if (candidate->attributes().surfaceFlags() != m_face.attributes().surfaceFlags())
-                    return false;
-                if (candidate->attributes().surfaceValue() != m_face.attributes().surfaceValue())
-                    return false;
-                return true;
+                    }
+                }
+                
+                return m_face.attributes() == candidate->attributes();
             }
         };
 
         static void assertHasFace(const BrushNode& brushNode, const BrushFace& face) {
-            const std::vector<BrushFace*>& faces = brushNode.brush().faces();
-            const std::vector<BrushFace*>::const_iterator it = std::find_if(std::begin(faces), std::end(faces), MatchFace(face));
+            const auto faces = brushNode.brush().faces();
+            const auto it = std::find_if(std::begin(faces), std::end(faces), MatchFace(face));
             ASSERT_TRUE(it != std::end(faces));
         }
 
@@ -510,8 +492,8 @@ namespace TrenchBroom {
             // Temporarily set a texture on `cube`, take a snapshot, then clear the texture
             {
                 Assets::Texture texture("testTexture", 64, 64);
-                for (BrushFace* face : cube->brush().faces()) {
-                    face->setTexture(&texture);
+                for (BrushFaceHandle faceHandle : cube->faceHandles()) {
+                    faceHandle.setTexture(&texture);
                 }
                 ASSERT_EQ(6U, texture.usageCount());
 
@@ -519,21 +501,21 @@ namespace TrenchBroom {
                 ASSERT_NE(nullptr, snapshot);
                 ASSERT_EQ(6U, texture.usageCount());
 
-                for (BrushFace* face : cube->brush().faces()) {
-                    face->setTexture(nullptr);
+                for (BrushFaceHandle faceHandle : cube->faceHandles()) {
+                    faceHandle.setTexture(nullptr);
                 }
                 ASSERT_EQ(0U, texture.usageCount());
             }
 
             // Check all textures are cleared
-            for (BrushFace* face : cube->brush().faces()) {
+            for (const BrushFace* face : cube->brush().faces()) {
                 EXPECT_EQ(nullptr, face->texture());
             }
 
             snapshot->restore(worldBounds);
 
             // Check just the texture names are restored
-            for (BrushFace* face : cube->brush().faces()) {
+            for (const BrushFace* face : cube->brush().faces()) {
                 EXPECT_EQ("testTexture", face->attributes().textureName());
                 EXPECT_EQ(nullptr, face->texture());
             }

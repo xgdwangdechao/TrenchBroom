@@ -39,8 +39,8 @@
 
 namespace TrenchBroom {
     namespace IO {
-        inline Model::BrushFace* findFaceByPoints(const std::vector<Model::BrushFace*>& faces, const vm::vec3& point0, const vm::vec3& point1, const vm::vec3& point2) {
-            for (Model::BrushFace* face : faces) {
+        inline const Model::BrushFace* findFaceByPoints(const std::vector<const Model::BrushFace*>& faces, const vm::vec3& point0, const vm::vec3& point1, const vm::vec3& point2) {
+            for (const Model::BrushFace* face : faces) {
                 if (face->points()[0] == point0 &&
                     face->points()[1] == point1 &&
                     face->points()[2] == point2)
@@ -57,7 +57,7 @@ namespace TrenchBroom {
         }
 
         inline void checkBrushTexCoordSystem(const Model::BrushNode* brushNode, const bool expectParallel) {
-            const std::vector<Model::BrushFace*> faces = brushNode->brush().faces();
+            const std::vector<const Model::BrushFace*> faces = brushNode->brush().faces();
             ASSERT_EQ(6u, faces.size());
             checkFaceTexCoordSystem(faces[0], expectParallel);
             checkFaceTexCoordSystem(faces[1], expectParallel);
@@ -205,7 +205,7 @@ namespace TrenchBroom {
 
             Model::BrushNode* brushNode = static_cast<Model::BrushNode*>(defaultLayer->children().front());
             checkBrushTexCoordSystem(brushNode, false);
-            const std::vector<Model::BrushFace*>& faces = brushNode->brush().faces();
+            const std::vector<const Model::BrushFace*> faces = brushNode->brush().faces();
             ASSERT_EQ(6u, faces.size());
 
             const Model::BrushFace* face1 = findFaceByPoints(faces, vm::vec3(0.0, 0.0, -16.0), vm::vec3(0.0, 0.0, 0.0),
@@ -256,11 +256,11 @@ namespace TrenchBroom {
 
             Model::BrushNode* brushNode = static_cast<Model::BrushNode*>(defaultLayer->children().front());
             checkBrushTexCoordSystem(brushNode, false);
-            const std::vector<Model::BrushFace*>& faces = brushNode->brush().faces();
+            const std::vector<const Model::BrushFace*> faces = brushNode->brush().faces();
             ASSERT_EQ(6u, faces.size());
 
-            Model::BrushFace* face = findFaceByPoints(faces, vm::vec3(0.0, 0.0, -16.0), vm::vec3(0.0, 0.0, 0.0),
-                                                      vm::vec3(64.0, 0.0, -16.0));
+            const Model::BrushFace* face = findFaceByPoints(faces, vm::vec3(0.0, 0.0, -16.0), vm::vec3(0.0, 0.0, 0.0),
+                                                            vm::vec3(64.0, 0.0, -16.0));
             ASSERT_TRUE(face != nullptr);
             ASSERT_FLOAT_EQ(22.0f, face->attributes().xOffset());
             ASSERT_FLOAT_EQ(22.0f, face->attributes().xOffset());
@@ -295,7 +295,7 @@ namespace TrenchBroom {
 
             Model::BrushNode* brushNode = static_cast<Model::BrushNode*>(defaultLayer->children().front());
             checkBrushTexCoordSystem(brushNode, false);
-            const std::vector<Model::BrushFace*> faces = brushNode->brush().faces();
+            const std::vector<const Model::BrushFace*> faces = brushNode->brush().faces();
             ASSERT_EQ(6u, faces.size());
 
             ASSERT_TRUE(findFaceByPoints(faces, vm::vec3(0.0, 0.0, -16.0), vm::vec3(0.0, 0.0, 0.0),
@@ -338,7 +338,7 @@ namespace TrenchBroom {
 
             Model::BrushNode* brushNode = static_cast<Model::BrushNode*>(defaultLayer->children().front());
             checkBrushTexCoordSystem(brushNode, false);
-            const std::vector<Model::BrushFace*> faces = brushNode->brush().faces();
+            const std::vector<const Model::BrushFace*> faces = brushNode->brush().faces();
             ASSERT_EQ(6u, faces.size());
             ASSERT_TRUE(findFaceByPoints(faces, vm::vec3(308.0, 108.0, 176.0), vm::vec3(308.0, 132.0, 176.0),
                                          vm::vec3(252.0, 132.0, 176.0)) != nullptr);
@@ -1099,7 +1099,7 @@ common/caulk
             REQUIRE(brushNode != nullptr);
 
             CHECK(vm::bbox3(vm::vec3(-512, -512, -64), vm::vec3(512, 512, 0)) == brushNode->logicalBounds());
-            for (Model::BrushFace* face : brushNode->brush().faces()) {
+            for (const Model::BrushFace* face : brushNode->brush().faces()) {
                 CHECK("general/sand1" == face->attributes().textureName());
             }
         }

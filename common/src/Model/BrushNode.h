@@ -32,21 +32,29 @@
 #include <vecmath/forward.h>
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
 namespace TrenchBroom {
+    namespace Assets {
+        class Texture;
+    }
+    
     namespace Renderer {
         class BrushRendererBrushCache;
     }
 
     namespace Model {
         class BrushFace;
+        class BrushFaceAttributes;
+        class BrushFaceHandle;
         class BrushFaceSnapshot;
         class GroupNode;
         class LayerNode;
-
         class ModelFactory;
+        class TexCoordSystemSnapshot;
+        enum class WrapStyle;
 
         class BrushNode : public Node, public Object {
         public:
@@ -69,8 +77,24 @@ namespace TrenchBroom {
             const Brush& brush() const;
             void setBrush(Brush brush);
 
+            std::vector<BrushFaceHandle> faceHandles();
+            
             using Node::takeSnapshot;
-            BrushFaceSnapshot* takeSnapshot(BrushFace* face);
+            BrushFaceSnapshot* takeSnapshot(const BrushFace* face);
+        public: // brush face manipulation
+            void setFaceAttributes(BrushFace* face, const BrushFaceAttributes& attribs);
+
+            void copyTexCoordSystemFromFace(BrushFace* face, const TexCoordSystemSnapshot& coordSystemSnapshot, const BrushFaceAttributes& attribs, const vm::plane3& sourceFacePlane, WrapStyle wrapStyle);
+            void restoreTexCoordSystemSnapshot(BrushFace* face, const TexCoordSystemSnapshot& snapshot);
+            void resetTextureAxes(BrushFace* face);
+
+            void moveTexture(BrushFace* face, const vm::vec3& up, const vm::vec3& right, const vm::vec2f& offset);
+            void rotateTexture(BrushFace* face, float angle);
+            void shearTexture(BrushFace* face, const vm::vec2f& factors);
+            
+            void setTexture(BrushFace* face, Assets::Texture* texture);
+            
+            void updateFaceTags(BrushFace* face, TagManager& tagManager);
         private: // implement Node interface
             const std::string& doGetName() const override;
             const vm::bbox3& doGetLogicalBounds() const override;
@@ -94,14 +118,7 @@ namespace TrenchBroom {
             void doPick(const vm::ray3& ray, PickResult& pickResult) override;
             void doFindNodesContaining(const vm::vec3& point, std::vector<Node*>& result) override;
 
-            struct BrushFaceHit {
-                BrushFace* face;
-                FloatType distance;
-                BrushFaceHit();
-                BrushFaceHit(BrushFace* i_face, FloatType i_distance);
-            };
-
-            BrushFaceHit findFaceHit(const vm::ray3& ray) const;
+            std::optional<std::tuple<size_t, FloatType>> findFaceHit(const vm::ray3& ray) const;
 
             Node* doGetContainer() const override;
             LayerNode* doGetLayer() const override;

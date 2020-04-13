@@ -83,11 +83,13 @@ namespace TrenchBroom {
 
             const Model::Hit& hit = inputState.pickResult().query().pickable().type(Model::BrushNode::BrushHitType).occluded().first();
 
-            Model::BrushNode* sourceBrush = selectedFaces.front().node();
-            Model::BrushFace* sourceFace = selectedFaces.front().face();
-            Model::BrushNode* targetBrush = Model::hitToBrush(hit);
-            Model::BrushFace* targetFace = Model::hitToFace(hit);
-            const auto targetList = applyToBrush ? Model::toHandles(targetBrush) : std::vector<Model::BrushFaceHandle>{Model::BrushFaceHandle(targetBrush, targetFace)};
+            const auto sourceFaceHandle = Model::hitToFaceHandle(hit);
+            const auto targetFaceHandle = Model::hitToFaceHandle(hit);
+            assert(sourceFaceHandle.has_value());
+            assert(targetFaceHandle.has_value());
+            
+            const auto* sourceFace = sourceFaceHandle->face();
+            const auto targetList = applyToBrush ? targetFaceHandle->node()->faceHandles() : std::vector<Model::BrushFaceHandle>{*targetFaceHandle};
 
             const Model::WrapStyle wrapStyle = inputState.modifierKeysDown(ModifierKeys::MKShift) ? Model::WrapStyle::Rotation : Model::WrapStyle::Projection;
 
@@ -108,7 +110,7 @@ namespace TrenchBroom {
                 }
             }
             document->deselectAll();
-            document->select({ sourceBrush, sourceFace });
+            document->select(*sourceFaceHandle);
         }
 
         bool SetBrushFaceAttributesTool::canCopyAttributesFromSelection(const InputState& inputState) const {

@@ -26,6 +26,7 @@
 #include "Model/BrushBuilder.h"
 #include "Model/BrushFace.h"
 #include "Model/BrushFaceAttributes.h"
+#include "Model/BrushFaceHandle.h"
 #include "Model/GroupNode.h"
 #include "Model/LayerNode.h"
 #include "Model/MapFormat.h"
@@ -78,8 +79,10 @@ namespace TrenchBroom {
 
             Model::BrushBuilder builder(&map, worldBounds);
             Model::BrushNode* brushNode1 = map.createBrush(builder.createCube(64.0, "none"));
-            for (auto* face : brushNode1->brush().faces()) {
-                face->attributes().setColor(Color(1.0f, 2.0f, 3.0f));
+            for (auto faceHandle : brushNode1->faceHandles()) {
+                auto attributes = faceHandle.attributes();
+                attributes.setColor(Color(1.0f, 2.0f, 3.0f));
+                faceHandle.setAttributes(attributes);
             }
             map.defaultLayer()->addChild(brushNode1);
 
@@ -127,8 +130,10 @@ R"(// entity 0
 
             Model::BrushBuilder builder(&map, worldBounds);
             Model::BrushNode* brushNode1 = map.createBrush(builder.createCube(64.0, "none"));
-            for (auto* face : brushNode1->brush().faces()) {
-                face->attributes().setSurfaceValue(32.0f);
+            for (auto faceHandle : brushNode1->faceHandles()) {
+                auto attributes = faceHandle.attributes();
+                attributes.setSurfaceValue(32.0f);
+                faceHandle.setAttributes(attributes);
             }
             map.defaultLayer()->addChild(brushNode1);
 

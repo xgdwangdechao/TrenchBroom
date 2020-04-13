@@ -80,7 +80,8 @@ namespace TrenchBroom {
             BrushFace* findFace(const std::vector<vm::polygon3>& candidates, FloatType epsilon = static_cast<FloatType>(0.0)) const;
 
             size_t faceCount() const;
-            const std::vector<BrushFace*>& faces() const;
+            std::vector<BrushFace*>& faces();
+            std::vector<const BrushFace*> faces() const;
 
             bool closed() const;
             bool fullySpecified() const;
@@ -126,7 +127,7 @@ namespace TrenchBroom {
             const EdgeList& edges() const;
             bool containsPoint(const vm::vec3& point) const;
 
-            std::vector<BrushFace*> incidentFaces(const BrushVertex* vertex) const;
+            std::vector<const BrushFace*> incidentFaces(const BrushVertex* vertex) const;
 
             // vertex operations
             bool canMoveVertices(const vm::bbox3& worldBounds, const std::vector<vm::vec3>& vertices, const vm::vec3& delta) const;

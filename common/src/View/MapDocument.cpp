@@ -36,6 +36,7 @@
 #include "Model/AttributeNameWithDoubleQuotationMarksIssueGenerator.h"
 #include "Model/AttributeValueWithDoubleQuotationMarksIssueGenerator.h"
 #include "Model/Brush.h"
+#include "Model/BrushFaceHandle.h"
 #include "Model/BrushNode.h"
 #include "Model/BrushBuilder.h"
 #include "Model/BrushGeometry.h"
@@ -635,12 +636,12 @@ namespace TrenchBroom {
         }
 
         void MapDocument::selectFacesWithTexture(const Assets::Texture* texture) {
-            Model::CollectSelectableBrushFacesVisitor visitor(*m_editorContext, [=](const Model::BrushNode* brush, const Model::BrushFace* face) {
+            Model::CollectSelectableBrushFacesVisitor visitor(*m_editorContext, [=](const Model::BrushFaceHandle& faceHandle) {
                 // FIXME: we shouldn't need this extra check here to prevent hidden brushes from being included; fix it in EditorContext
-                if (brush->hidden()) {
+                if (faceHandle.node()->hidden()) {
                     return false;
                 }
-                return face->texture() == texture;
+                return faceHandle.face()->texture() == texture;
             });
             m_world->acceptAndRecurse(visitor);
 
@@ -1701,10 +1702,9 @@ namespace TrenchBroom {
             void doVisit(Model::GroupNode*) override   {}
             void doVisit(Model::EntityNode*) override {}
             void doVisit(Model::BrushNode* brushNode) override   {
-                const Model::Brush& brush = brushNode->brush();
-                for (Model::BrushFace* face : brush.faces()) {
-                    Assets::Texture* texture = m_manager.texture(face->attributes().textureName());
-                    face->setTexture(texture);
+                for (Model::BrushFaceHandle& handle : brushNode->faceHandles()) {
+                    Assets::Texture* texture = m_manager.texture(handle.attributes().textureName());
+                    handle.setTexture(texture);
                 }
             }
         };
@@ -1716,9 +1716,8 @@ namespace TrenchBroom {
             void doVisit(Model::GroupNode*) override   {}
             void doVisit(Model::EntityNode*) override {}
             void doVisit(Model::BrushNode* brushNode) override   {
-                const Model::Brush& brush = brushNode->brush();
-                for (Model::BrushFace* face : brush.faces()) {
-                    face->setTexture(nullptr);
+                for (Model::BrushFaceHandle& handle : brushNode->faceHandles()) {
+                    handle.setTexture(nullptr);
                 }
             }
         };
@@ -1733,10 +1732,10 @@ namespace TrenchBroom {
             Model::Node::acceptAndRecurse(std::begin(nodes), std::end(nodes), visitor);
         }
 
-        void MapDocument::setTextures(const std::vector<Model::BrushFace*>& faces) {
-            for (Model::BrushFace* face : faces) {
-                Assets::Texture* texture = m_textureManager->texture(face->attributes().textureName());
-                face->setTexture(texture);
+        void MapDocument::setTextures(std::vector<Model::BrushFaceHandle> faceHandles) {
+            for (auto& faceHandle : faceHandles) {
+                auto* texture = m_textureManager->texture(faceHandle.attributes().textureName());
+                faceHandle.setTexture(texture);
             }
         }
 
@@ -2002,9 +2001,9 @@ namespace TrenchBroom {
             }
         }
 
-        void MapDocument::updateFaceTags(const std::vector<Model::BrushFace*>& faces) {
-            for (auto* face : faces) {
-                face->updateTags(*m_tagManager);
+        void MapDocument::updateFaceTags(const std::vector<Model::BrushFaceHandle>& faceHandles) {
+            for (Model::BrushFaceHandle faceHandle : faceHandles) {
+                faceHandle.updateFaceTags(*m_tagManager);
             }
         }
 

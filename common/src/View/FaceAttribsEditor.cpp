@@ -411,7 +411,7 @@ namespace TrenchBroom {
             updateControls();
         }
 
-        void FaceAttribsEditor::brushFacesDidChange(const std::vector<Model::BrushFace*>&) {
+        void FaceAttribsEditor::brushFacesDidChange(const std::vector<Model::BrushFaceHandle>&) {
             auto document = kdl::mem_lock(m_document);
             m_faces = Model::toFaces(document->allSelectedBrushFaces());
             updateControls();
@@ -498,7 +498,7 @@ namespace TrenchBroom {
 
 
                 for (size_t i = 1; i < m_faces.size(); i++) {
-                    Model::BrushFace* face = m_faces[i];
+                    const Model::BrushFace* face = m_faces[i];
                     textureMulti            |= (textureName     != face->attributes().textureName());
                     xOffsetMulti            |= (xOffset         != face->attributes().xOffset());
                     yOffsetMulti            |= (yOffset         != face->attributes().yOffset());

@@ -40,8 +40,8 @@ namespace TrenchBroom {
         public:
             static const IssueType Type;
         public:
-            explicit InvalidTextureScaleIssue(BrushNode* node, BrushFace* face) :
-            BrushFaceIssue(node, face) {}
+            explicit InvalidTextureScaleIssue(const BrushFaceHandle& faceHandle) :
+            BrushFaceIssue(faceHandle) {}
 
             IssueType doGetType() const override {
                 return Type;
@@ -65,9 +65,8 @@ namespace TrenchBroom {
                 std::vector<BrushFaceHandle> faceHandles;
                 for (const auto* issue : issues) {
                     if (issue->type() == InvalidTextureScaleIssue::Type) {
-                        BrushNode* node = static_cast<BrushNode*>(issue->node());
-                        BrushFace* face = static_cast<const InvalidTextureScaleIssue*>(issue)->face();
-                        faceHandles.push_back(BrushFaceHandle(node, face));
+                        const BrushFaceHandle handle = static_cast<const InvalidTextureScaleIssue*>(issue)->faceHandle();
+                        faceHandles.push_back(handle);
                     }
                 }
 
@@ -86,10 +85,9 @@ namespace TrenchBroom {
         }
 
         void InvalidTextureScaleIssueGenerator::doGenerate(BrushNode* brushNode, IssueList& issues) const {
-            const Brush& brush = brushNode->brush();
-            for (BrushFace* face : brush.faces()) {
-                if (!face->attributes().valid()) {
-                    issues.push_back(new InvalidTextureScaleIssue(brushNode, face));
+            for (const BrushFaceHandle& faceHandle : brushNode->faceHandles()) {
+                if (!faceHandle.attributes().valid()) {
+                    issues.push_back(new InvalidTextureScaleIssue(faceHandle));
                 }
             }
         }

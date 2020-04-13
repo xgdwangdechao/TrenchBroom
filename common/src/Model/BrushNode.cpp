@@ -120,9 +120,94 @@ namespace TrenchBroom {
             invalidateVertexCache();
         }
 
-        BrushFaceSnapshot* BrushNode::takeSnapshot(BrushFace* face) {
+        std::vector<BrushFaceHandle> BrushNode::faceHandles() {
+            return kdl::vec_transform(m_brush.faces(), [&](BrushFace* face) { return BrushFaceHandle(this, face); });
+        }
+
+        BrushFaceSnapshot* BrushNode::takeSnapshot(const BrushFace* face) {
             ensure(face != nullptr, "face must not be null");
             return new BrushFaceSnapshot(this, face);
+        }
+
+        void BrushNode::setFaceAttributes(BrushFace* face, const BrushFaceAttributes& attribs) {
+            const NotifyNodeChange nodeChange(this);
+
+            face->setAttributes(attribs);
+            
+            invalidateIssues();
+            invalidateVertexCache();
+        }
+
+        void BrushNode::copyTexCoordSystemFromFace(BrushFace* face, const TexCoordSystemSnapshot& coordSystemSnapshot, const BrushFaceAttributes& attribs, const vm::plane3& sourceFacePlane, const WrapStyle wrapStyle) {
+            const NotifyNodeChange nodeChange(this);
+
+            face->copyTexCoordSystemFromFace(coordSystemSnapshot, attribs, sourceFacePlane, wrapStyle);
+            
+            invalidateIssues();
+            invalidateVertexCache();
+        }
+
+        void BrushNode::restoreTexCoordSystemSnapshot(BrushFace* face, const TexCoordSystemSnapshot& snapshot) {
+            const NotifyNodeChange nodeChange(this);
+
+            face->restoreTexCoordSystemSnapshot(snapshot);
+            
+            invalidateIssues();
+            invalidateVertexCache();
+        }
+
+        void BrushNode::resetTextureAxes(BrushFace* face) {
+            const NotifyNodeChange nodeChange(this);
+
+            face->resetTextureAxes();
+            
+            invalidateIssues();
+            invalidateVertexCache();
+        }
+
+        void BrushNode::moveTexture(BrushFace* face, const vm::vec3& up, const vm::vec3& right, const vm::vec2f& offset) {
+            const NotifyNodeChange nodeChange(this);
+
+            face->moveTexture(up, right, offset);
+            
+            invalidateIssues();
+            invalidateVertexCache();
+        }
+        
+        void BrushNode::rotateTexture(BrushFace* face, const float angle) {
+            const NotifyNodeChange nodeChange(this);
+
+            face->rotateTexture(angle);
+            
+            invalidateIssues();
+            invalidateVertexCache();
+        }
+        
+        void BrushNode::shearTexture(BrushFace* face, const vm::vec2f& factors) {
+            const NotifyNodeChange nodeChange(this);
+
+            face->shearTexture(factors);
+            
+            invalidateIssues();
+            invalidateVertexCache();
+        }
+
+        void BrushNode::setTexture(BrushFace* face, Assets::Texture* texture) {
+            const NotifyNodeChange nodeChange(this);
+
+            face->setTexture(texture);
+            
+            invalidateIssues();
+            invalidateVertexCache();
+        }
+
+        void BrushNode::updateFaceTags(BrushFace* face, TagManager& tagManager) {
+            const NotifyNodeChange nodeChange(this);
+
+            face->updateTags(tagManager);
+            
+            invalidateIssues();
+            invalidateVertexCache();
         }
 
         const std::string& BrushNode::doGetName() const {
@@ -175,11 +260,15 @@ namespace TrenchBroom {
         }
 
         void BrushNode::doPick(const vm::ray3& ray, PickResult& pickResult) {
-            const auto hit = findFaceHit(ray);
-            if (hit.face != nullptr) {
-                ensure(!vm::is_nan(hit.distance), "nan hit distance");
-                const auto hitPoint = vm::point_at_distance(ray, hit.distance);
-                pickResult.addHit(Hit(BrushHitType, hit.distance, hitPoint, BrushFaceHandle(this, hit.face)));
+            if (const auto hit = findFaceHit(ray)) {
+                const auto [index, distance] = *hit;
+                
+                assert(!vm::is_nan(distance));
+                const auto hitPoint = vm::point_at_distance(ray, distance);
+                
+                const auto& faces = m_brush.faces();
+                assert(index < faces.size());
+                pickResult.addHit(Hit(BrushHitType, distance, hitPoint, BrushFaceHandle(this, faces[index])));
             }
         }
 
@@ -189,22 +278,21 @@ namespace TrenchBroom {
             }
         }
 
-        BrushNode::BrushFaceHit::BrushFaceHit() : face(nullptr), distance(vm::nan<FloatType>()) {}
-
-        BrushNode::BrushFaceHit::BrushFaceHit(BrushFace* i_face, const FloatType i_distance) : face(i_face), distance(i_distance) {}
-
-        BrushNode::BrushFaceHit BrushNode::findFaceHit(const vm::ray3& ray) const {
+        std::optional<std::tuple<size_t, FloatType>> BrushNode::findFaceHit(const vm::ray3& ray) const {
             if (vm::is_nan(vm::intersect_ray_bbox(ray, logicalBounds()))) {
-                return BrushFaceHit();
+                return std::nullopt;
             }
 
-            for (auto* face : m_brush.faces()) {
+            const auto faces = m_brush.faces();
+            for (size_t i = 0u; i < faces.size(); ++i) {
+                const BrushFace* face = faces[i];
                 const auto distance = face->intersectWithRay(ray);
                 if (!vm::is_nan(distance)) {
-                    return BrushFaceHit(face, distance);
+                    return std::make_tuple(i, distance);
                 }
             }
-            return BrushFaceHit();
+            
+            return std::nullopt;
         }
 
         Node* BrushNode::doGetContainer() const {

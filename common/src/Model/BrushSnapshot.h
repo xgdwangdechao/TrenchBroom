@@ -37,7 +37,6 @@ namespace TrenchBroom {
             BrushSnapshot(BrushNode* brushNode);
             ~BrushSnapshot() override;
         private:
-            void takeSnapshot(BrushNode* brushNode);
             void doRestore(const vm::bbox3& worldBounds) override;
         };
     }

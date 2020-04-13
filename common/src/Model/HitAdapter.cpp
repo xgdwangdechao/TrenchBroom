@@ -57,17 +57,25 @@ namespace TrenchBroom {
             }
         }
 
-        BrushNode* hitToBrush(const Hit& hit) {
+        std::optional<BrushFaceHandle> hitToFaceHandle(const Hit& hit) {
             if (hit.type() == BrushNode::BrushHitType) {
-                return hit.target<BrushFaceHandle>().node();
+                return hit.target<BrushFaceHandle>();
+            } else {
+                return std::nullopt;;
+            }
+        }
+
+        BrushNode* hitToBrush(const Hit& hit) {
+            if (auto handle = hitToFaceHandle(hit)) {
+                return handle->node();
             } else {
                 return nullptr;
             }
         }
 
-        BrushFace* hitToFace(const Hit& hit) {
-            if (hit.type() == BrushNode::BrushHitType) {
-                return hit.target<BrushFaceHandle>().face();
+        const BrushFace* hitToFace(const Hit& hit) {
+            if (auto handle = hitToFaceHandle(hit)) {
+                return handle->face();
             } else {
                 return nullptr;
             }

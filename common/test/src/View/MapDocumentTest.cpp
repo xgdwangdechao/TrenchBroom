@@ -343,13 +343,10 @@ namespace TrenchBroom {
             document->addNode(brushNode2, document->currentParent());
             ASSERT_EQ(1u, entity->children().size());
 
-            auto* face1 = brushNode1->brush().faces().front();
-            auto* face2 = brushNode2->brush().faces().front();
+            auto face1Handle = brushNode1->faceHandles().front();
+            auto face2Handle = brushNode2->faceHandles().front();
 
-            document->select({
-                { brushNode1, face1 },
-                { brushNode2, face2 }
-            });
+            document->select({ face1Handle, face2Handle });
             ASSERT_TRUE(document->csgConvexMerge());
             ASSERT_EQ(2u, entity->children().size()); // added to the parent of the first brush, original brush is not deleted
 
@@ -359,8 +356,8 @@ namespace TrenchBroom {
             assert(brush3 != brushNode1);
             assert(brush3 != brushNode2);
 
-            const auto face1Verts = face1->vertexPositions();
-            const auto face2Verts = face2->vertexPositions();
+            const auto face1Verts = face1Handle.face()->vertexPositions();
+            const auto face2Verts = face2Handle.face()->vertexPositions();
 
             const auto bounds = vm::merge(
                 vm::bbox3::merge_all(std::begin(face1Verts), std::end(face1Verts)),

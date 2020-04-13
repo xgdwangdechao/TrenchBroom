@@ -98,17 +98,17 @@ namespace TrenchBroom {
             invalidateSelectionBounds();
         }
 
-        void MapDocumentCommandFacade::performSelect(const std::vector<Model::BrushFaceHandle>& faces) {
+        void MapDocumentCommandFacade::performSelect(std::vector<Model::BrushFaceHandle> faces) {
             selectionWillChangeNotifier();
 
             std::vector<Model::BrushFaceHandle> selected;
             selected.reserve(faces.size());
 
-            for (const auto& handle : faces) {
+            for (auto& handle : faces) {
                 Model::BrushNode* node = handle.node();
-                Model::BrushFace* face = handle.face();
+                const Model::BrushFace* face = handle.face();
                 if (!face->selected() && m_editorContext->selectable(node, face)) {
-                    face->select();
+                    handle.selectFace();
                     selected.push_back(handle);
                 }
             }
@@ -174,16 +174,16 @@ namespace TrenchBroom {
             invalidateSelectionBounds();
         }
 
-        void MapDocumentCommandFacade::performDeselect(const std::vector<Model::BrushFaceHandle>& faces) {
+        void MapDocumentCommandFacade::performDeselect(std::vector<Model::BrushFaceHandle> faces) {
             selectionWillChangeNotifier();
 
             std::vector<Model::BrushFaceHandle> deselected;
             deselected.reserve(faces.size());
 
-            for (const auto& handle : faces) {
-                Model::BrushFace* face = handle.face();
+            for (auto& handle : faces) {
+                const Model::BrushFace* face = handle.face();
                 if (face->selected()) {
-                    face->deselect();
+                    handle.deselectFace();
                     deselected.push_back(handle);
                 }
             }
@@ -223,8 +223,8 @@ namespace TrenchBroom {
         void MapDocumentCommandFacade::deselectAllBrushFaces() {
             selectionWillChangeNotifier();
 
-            for (const auto& handle : m_selectedBrushFaces) {
-                handle.face()->deselect();
+            for (auto& handle : m_selectedBrushFaces) {
+                handle.deselectFace();
             }
 
             Selection selection;
@@ -663,42 +663,39 @@ namespace TrenchBroom {
         }
 
         void MapDocumentCommandFacade::performMoveTextures(const vm::vec3f& cameraUp, const vm::vec3f& cameraRight, const vm::vec2f& delta) {
-            const auto faces = Model::toFaces(m_selectedBrushFaces);
-            for (auto* face : faces) {
-                face->moveTexture(vm::vec3(cameraUp), vm::vec3(cameraRight), delta);
+            for (auto& faceHandle : m_selectedBrushFaces) {
+                faceHandle.moveTexture(vm::vec3(cameraUp), vm::vec3(cameraRight), delta);
             }
-            brushFacesDidChangeNotifier(faces);
+            brushFacesDidChangeNotifier(m_selectedBrushFaces);
         }
 
         void MapDocumentCommandFacade::performRotateTextures(const float angle) {
-            const auto faces = Model::toFaces(m_selectedBrushFaces);
-            for (auto* face : faces) {
-                face->rotateTexture(angle);
+            for (auto& faceHandle : m_selectedBrushFaces) {
+                faceHandle.rotateTexture(angle);
             }
-            brushFacesDidChangeNotifier(faces);
+            brushFacesDidChangeNotifier(m_selectedBrushFaces);
         }
 
         void MapDocumentCommandFacade::performShearTextures(const vm::vec2f& factors) {
-            const auto faces = Model::toFaces(m_selectedBrushFaces);
-            for (auto* face : faces) {
-                face->shearTexture(factors);
+            for (auto& faceHandle : m_selectedBrushFaces) {
+                faceHandle.shearTexture(factors);
             }
-            brushFacesDidChangeNotifier(faces);
+            brushFacesDidChangeNotifier(m_selectedBrushFaces);
         }
 
         void MapDocumentCommandFacade::performCopyTexCoordSystemFromFace(const Model::TexCoordSystemSnapshot& coordSystemSnapshot, const Model::BrushFaceAttributes& attribs, const vm::plane3& sourceFacePlane, const Model::WrapStyle wrapStyle) {
             const auto faces = Model::toFaces(m_selectedBrushFaces);
-            for (auto* face : faces) {
-                face->copyTexCoordSystemFromFace(coordSystemSnapshot, attribs, sourceFacePlane, wrapStyle);
+            for (auto& faceHandle : m_selectedBrushFaces) {
+                faceHandle.copyTexCoordSystemFromFace(coordSystemSnapshot, attribs, sourceFacePlane, wrapStyle);
             }
-            brushFacesDidChangeNotifier(faces);
+            brushFacesDidChangeNotifier(m_selectedBrushFaces);
         }
 
         void MapDocumentCommandFacade::performChangeBrushFaceAttributes(const Model::ChangeBrushFaceAttributesRequest& request) {
-            const auto faces = Model::toFaces(allSelectedBrushFaces());
-            if (request.evaluate(faces)) {
-                setTextures(faces);
-                brushFacesDidChangeNotifier(faces);
+            const auto selectedFaceHandles = allSelectedBrushFaces();
+            if (request.evaluate(selectedFaceHandles)) {
+                setTextures(selectedFaceHandles);
+                brushFacesDidChangeNotifier(selectedFaceHandles);
             }
         }
 
@@ -876,11 +873,11 @@ namespace TrenchBroom {
                 invalidateSelectionBounds();
             }
 
-            const auto faces = Model::toFaces(allSelectedBrushFaces());
-            if (!faces.empty()) {
+            const auto selectedFaceHandles = allSelectedBrushFaces();
+            if (!selectedFaceHandles.empty()) {
                 snapshot->restoreBrushFaces();
-                setTextures(faces);
-                brushFacesDidChangeNotifier(faces);
+                setTextures(selectedFaceHandles);
+                brushFacesDidChangeNotifier(selectedFaceHandles);
             }
         }
 

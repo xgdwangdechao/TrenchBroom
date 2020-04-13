@@ -56,8 +56,8 @@ namespace TrenchBroom {
             const vm::vec3 p1(1.0,  0.0, 4.0);
             const vm::vec3 p2(0.0, -1.0, 4.0);
 
-            const BrushFaceAttributes attribs("");
-            BrushFace face(p0, p1, p2, attribs, std::make_unique<ParaxialTexCoordSystem>(p0, p1, p2, attribs));
+            const BrushFaceAttributes attributes("");
+            BrushFace face(p0, p1, p2, attributes, std::make_unique<ParaxialTexCoordSystem>(p0, p1, p2, attributes));
             ASSERT_VEC_EQ(p0, face.points()[0]);
             ASSERT_VEC_EQ(p1, face.points()[1]);
             ASSERT_VEC_EQ(p2, face.points()[2]);
@@ -70,8 +70,8 @@ namespace TrenchBroom {
             const vm::vec3 p1(1.0, 0.0, 4.0);
             const vm::vec3 p2(2.0, 0.0, 4.0);
 
-            const BrushFaceAttributes attribs("");
-            ASSERT_THROW(new BrushFace(p0, p1, p2, attribs, std::make_unique<ParaxialTexCoordSystem>(p0, p1, p2, attribs)), GeometryException);
+            const BrushFaceAttributes attributes("");
+            ASSERT_THROW(new BrushFace(p0, p1, p2, attributes, std::make_unique<ParaxialTexCoordSystem>(p0, p1, p2, attributes)), GeometryException);
         }
 
         TEST_CASE("BrushFaceTest.textureUsageCount", "[BrushFaceTest]") {
@@ -84,10 +84,10 @@ namespace TrenchBroom {
             EXPECT_EQ(0u, texture.usageCount());
             EXPECT_EQ(0u, texture2.usageCount());
 
-            BrushFaceAttributes attribs("");
+            BrushFaceAttributes attributes("");
             {
                 // test constructor
-                BrushFace face(p0, p1, p2, attribs, std::make_unique<ParaxialTexCoordSystem>(p0, p1, p2, attribs));
+                BrushFace face(p0, p1, p2, attributes, std::make_unique<ParaxialTexCoordSystem>(p0, p1, p2, attributes));
                 EXPECT_EQ(0u, texture.usageCount());
 
                 // test setTexture
@@ -431,11 +431,8 @@ namespace TrenchBroom {
             WorldNode world(MapFormat::Standard);
 
             BrushBuilder builder(&world, worldBounds);
-            const Brush cube = builder.createCube(128.0, "");
-            const std::vector<BrushFace*>& faces = cube.faces();
-
-            for (size_t i = 0; i < faces.size(); ++i) {
-                BrushFace *face = faces[i];
+            Brush cube = builder.createCube(128.0, "");
+            for (BrushFace* face : cube.faces()) {
                 face->setTexture(&texture);
                 checkTextureLockForFace(face, false);
             }
@@ -450,11 +447,8 @@ namespace TrenchBroom {
             WorldNode world(MapFormat::Valve);
 
             BrushBuilder builder(&world, worldBounds);
-            const Brush cube = builder.createCube(128.0, "");
-            const std::vector<BrushFace*>& faces = cube.faces();
-
-            for (size_t i = 0; i < faces.size(); ++i) {
-                BrushFace *face = faces[i];
+            Brush cube = builder.createCube(128.0, "");
+            for (BrushFace* face : cube.faces()) {
                 face->setTexture(&texture);
                 checkTextureLockForFace(face, true);
             }
@@ -526,33 +520,33 @@ namespace TrenchBroom {
             ASSERT_NE(nullptr, pyramidLight);
 
             // find the faces
-            BrushFace* negXFace = nullptr;
-            for (BrushFace* face : pyramidLight->brush().faces()) {
-                if (vm::get_abs_max_component_axis(face->boundary().normal) == vm::vec3::neg_x()) {
-                    ASSERT_EQ(negXFace, nullptr);
-                    negXFace = face;
+            std::optional<BrushFaceHandle> negXFaceHandle;
+            for (BrushFaceHandle faceHandle : pyramidLight->faceHandles()) {
+                if (vm::get_abs_max_component_axis(faceHandle.face()->boundary().normal) == vm::vec3::neg_x()) {
+                    ASSERT_FALSE(negXFaceHandle.has_value());
+                    negXFaceHandle = faceHandle;
                 }
             }
-            ASSERT_NE(nullptr, negXFace);
+            ASSERT_TRUE(negXFaceHandle.has_value());
 
-            ASSERT_EQ(vm::vec3::pos_y(), negXFace->textureXAxis());
-            ASSERT_EQ(vm::vec3::neg_z(), negXFace->textureYAxis());
+            ASSERT_EQ(vm::vec3::pos_y(), negXFaceHandle->face()->textureXAxis());
+            ASSERT_EQ(vm::vec3::neg_z(), negXFaceHandle->face()->textureYAxis());
 
             // This face's texture normal is in the same direction as the face normal
-            const vm::vec3 textureNormal = normalize(cross(negXFace->textureXAxis(), negXFace->textureYAxis()));
-            ASSERT_GT(dot(textureNormal, vm::vec3(negXFace->boundary().normal)), 0.0);
+            const vm::vec3 textureNormal = normalize(cross(negXFaceHandle->face()->textureXAxis(), negXFaceHandle->face()->textureYAxis()));
+            ASSERT_GT(dot(textureNormal, vm::vec3(negXFaceHandle->face()->boundary().normal)), 0.0);
 
             const vm::quat3 rot45(textureNormal, vm::to_radians(45.0));
-            const vm::vec3 newXAxis(rot45 * negXFace->textureXAxis());
-            const vm::vec3 newYAxis(rot45 * negXFace->textureYAxis());
+            const vm::vec3 newXAxis(rot45 * negXFaceHandle->face()->textureXAxis());
+            const vm::vec3 newYAxis(rot45 * negXFaceHandle->face()->textureYAxis());
 
             // Rotate by 45 degrees CCW
-            ASSERT_FLOAT_EQ(0.0f, negXFace->attributes().rotation());
-            negXFace->rotateTexture(45.0);
-            ASSERT_FLOAT_EQ(45.0f, negXFace->attributes().rotation());
+            ASSERT_FLOAT_EQ(0.0f, negXFaceHandle->face()->attributes().rotation());
+            negXFaceHandle->rotateTexture(45.0);
+            ASSERT_FLOAT_EQ(45.0f, negXFaceHandle->face()->attributes().rotation());
 
-            ASSERT_VEC_EQ(newXAxis, negXFace->textureXAxis());
-            ASSERT_VEC_EQ(newYAxis, negXFace->textureYAxis());
+            ASSERT_VEC_EQ(newXAxis, negXFaceHandle->face()->textureXAxis());
+            ASSERT_VEC_EQ(newYAxis, negXFaceHandle->face()->textureYAxis());
 
             kdl::vec_clear_and_delete(nodes);
         }
@@ -582,34 +576,34 @@ namespace TrenchBroom {
             ASSERT_NE(nullptr, pyramidLight);
 
             // find the faces
-            BrushFace* negYFace = nullptr;
-            BrushFace* posXFace = nullptr;
-            for (BrushFace* face : pyramidLight->brush().faces()) {
-                if (vm::get_abs_max_component_axis(face->boundary().normal) == vm::vec3::neg_y()) {
-                    ASSERT_EQ(negYFace, nullptr);
-                    negYFace = face;
-                } else if (vm::get_abs_max_component_axis(face->boundary().normal) == vm::vec3::pos_x()) {
-                    ASSERT_EQ(posXFace, nullptr);
-                    posXFace = face;
+            std::optional<BrushFaceHandle> negYFaceHandle;
+            std::optional<BrushFaceHandle> posXFaceHandle;
+            for (BrushFaceHandle faceHandle : pyramidLight->faceHandles()) {
+                if (vm::get_abs_max_component_axis(faceHandle.face()->boundary().normal) == vm::vec3::neg_y()) {
+                    ASSERT_FALSE(negYFaceHandle.has_value());
+                    negYFaceHandle = faceHandle;
+                } else if (vm::get_abs_max_component_axis(faceHandle.face()->boundary().normal) == vm::vec3::pos_x()) {
+                    ASSERT_FALSE(posXFaceHandle.has_value());
+                    posXFaceHandle = faceHandle;
                 }
             }
-            ASSERT_NE(nullptr, negYFace);
-            ASSERT_NE(nullptr, posXFace);
+            ASSERT_TRUE(negYFaceHandle.has_value());
+            ASSERT_TRUE(posXFaceHandle.has_value());
 
-            ASSERT_EQ(vm::vec3::pos_x(), negYFace->textureXAxis());
-            ASSERT_EQ(vm::vec3::neg_z(), negYFace->textureYAxis());
+            ASSERT_EQ(vm::vec3::pos_x(), negYFaceHandle->face()->textureXAxis());
+            ASSERT_EQ(vm::vec3::neg_z(), negYFaceHandle->face()->textureYAxis());
 
-            auto snapshot = negYFace->takeTexCoordSystemSnapshot();
+            auto snapshot = negYFaceHandle->face()->takeTexCoordSystemSnapshot();
 
             // copy texturing from the negYFace to posXFace using the rotation method
-            posXFace->copyTexCoordSystemFromFace(*snapshot, negYFace->attributes(), negYFace->boundary(), WrapStyle::Rotation);
-            ASSERT_VEC_EQ(vm::vec3(0.030303030303030123, 0.96969696969696961, -0.24242424242424243), posXFace->textureXAxis());
-            ASSERT_VEC_EQ(vm::vec3(-0.0037296037296037088, -0.24242424242424243, -0.97016317016317011), posXFace->textureYAxis());
+            posXFaceHandle->copyTexCoordSystemFromFace(*snapshot, negYFaceHandle->face()->attributes(), negYFaceHandle->face()->boundary(), WrapStyle::Rotation);
+            ASSERT_VEC_EQ(vm::vec3(0.030303030303030123, 0.96969696969696961, -0.24242424242424243), posXFaceHandle->face()->textureXAxis());
+            ASSERT_VEC_EQ(vm::vec3(-0.0037296037296037088, -0.24242424242424243, -0.97016317016317011), posXFaceHandle->face()->textureYAxis());
 
             // copy texturing from the negYFace to posXFace using the projection method
-            posXFace->copyTexCoordSystemFromFace(*snapshot, negYFace->attributes(), negYFace->boundary(), WrapStyle::Projection);
-            ASSERT_VEC_EQ(vm::vec3::neg_y(), posXFace->textureXAxis());
-            ASSERT_VEC_EQ(vm::vec3::neg_z(), posXFace->textureYAxis());
+            posXFaceHandle->copyTexCoordSystemFromFace(*snapshot, negYFaceHandle->face()->attributes(), negYFaceHandle->face()->boundary(), WrapStyle::Projection);
+            ASSERT_VEC_EQ(vm::vec3::neg_y(), posXFaceHandle->face()->textureXAxis());
+            ASSERT_VEC_EQ(vm::vec3::neg_z(), posXFaceHandle->face()->textureYAxis());
 
             kdl::vec_clear_and_delete(nodes);
         }

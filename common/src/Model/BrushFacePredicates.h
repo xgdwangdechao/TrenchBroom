@@ -22,16 +22,15 @@
 
 namespace TrenchBroom {
     namespace Model {
-        class BrushFace;
-        class BrushNode;
+        class BrushFaceHandle;
 
         namespace BrushFacePredicates {
             struct True {
-                bool operator()(const Model::BrushNode* brush, const BrushFace* face) const;
+                bool operator()(const BrushFaceHandle& faceHandle) const;
             };
 
             struct False {
-                bool operator()(const Model::BrushNode* brush, const BrushFace* face) const;
+                bool operator()(const BrushFaceHandle& faceHandle) const;
             };
 
             template <typename P>
@@ -42,8 +41,7 @@ namespace TrenchBroom {
                 explicit Not(const P& p) :
                 m_p(p) {}
 
-                bool operator()(const Model::BrushNode* brush, const BrushFace* face) const { return !m_p(brush, face);  }
-                bool operator()(Model::BrushNode* brush, BrushFace* face) const       { return !m_p(brush, face);  }
+                bool operator()(const BrushFaceHandle& faceHandle) const { return !m_p(faceHandle);  }
             };
 
             template <typename P1, typename P2>
@@ -56,8 +54,7 @@ namespace TrenchBroom {
                 m_p1(p1),
                 m_p2(p2) {}
 
-                bool operator()(const Model::BrushNode* brush, const BrushFace* face) const { return m_p1(brush, face) && m_p2(brush, face);  }
-                bool operator()(Model::BrushNode* brush, BrushFace* face) const       { return m_p1(brush, face) && m_p2(brush, face);  }
+                bool operator()(const BrushFaceHandle& faceHandle) const { return m_p1(faceHandle) && m_p2(faceHandle);  }
             };
 
             template <typename P1, typename P2>
@@ -70,8 +67,7 @@ namespace TrenchBroom {
                 m_p1(p1),
                 m_p2(p2) {}
 
-                bool operator()(const Model::BrushNode* brush, const BrushFace* face) const { return m_p1(brush, face) || m_p2(brush, face);  }
-                bool operator()(Model::BrushNode* brush, BrushFace* face) const       { return m_p1(brush, face) || m_p2(brush, face);  }
+                bool operator()(const BrushFaceHandle& faceHandle) const { return m_p1(faceHandle) || m_p2(faceHandle);  }
             };
         }
     }

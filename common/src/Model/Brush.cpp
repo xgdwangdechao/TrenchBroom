@@ -298,8 +298,12 @@ namespace TrenchBroom {
             return m_faces.size();
         }
 
-        const std::vector<BrushFace*>& Brush::faces() const {
+        std::vector<BrushFace*>& Brush::faces() {
             return m_faces;
+        }
+
+        std::vector<const BrushFace*> Brush::faces() const {
+            return kdl::vec_transform(m_faces, [](const BrushFace* face) { return face; });
         }
 
         bool Brush::closed() const {
@@ -488,8 +492,8 @@ namespace TrenchBroom {
             }
         }
 
-        std::vector<BrushFace*> Brush::incidentFaces(const BrushVertex* vertex) const {
-            std::vector<BrushFace*> result;
+        std::vector<const BrushFace*> Brush::incidentFaces(const BrushVertex* vertex) const {
+            std::vector<const BrushFace*> result;
             result.reserve(m_faces.size());
 
             auto* first = vertex->leaving();

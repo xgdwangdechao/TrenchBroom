@@ -20,6 +20,7 @@
 #ifndef TrenchBroom_Issue
 #define TrenchBroom_Issue
 
+#include "Model/BrushFaceHandle.h"
 #include "Model/IssueType.h"
 
 #include <string>
@@ -27,7 +28,6 @@
 
 namespace TrenchBroom {
     namespace Model {
-        class BrushFace;
         class BrushNode;
         class EditorContext;
         class Node;
@@ -65,12 +65,12 @@ namespace TrenchBroom {
 
         class BrushFaceIssue : public Issue {
         private:
-            BrushFace* const m_face;
+            BrushFaceHandle m_faceHandle;
         protected:
-            explicit BrushFaceIssue(BrushNode* node, BrushFace* face);
+            explicit BrushFaceIssue(const BrushFaceHandle& faceHandle);
         public:
             ~BrushFaceIssue() override;
-            BrushFace* face() const;
+            BrushFaceHandle faceHandle() const;
         private:
             size_t doGetLineNumber() const override;
         };

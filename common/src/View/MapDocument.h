@@ -50,6 +50,7 @@ namespace TrenchBroom {
 
     namespace Model {
         class BrushFaceAttributes;
+        class BrushFaceHandle;
         class EditorContext;
         enum class ExportFormat;
         class Game;
@@ -154,7 +155,7 @@ namespace TrenchBroom {
             Notifier<Model::GroupNode*> groupWasOpenedNotifier;
             Notifier<Model::GroupNode*> groupWasClosedNotifier;
 
-            Notifier<const std::vector<Model::BrushFace*>&> brushFacesDidChangeNotifier;
+            Notifier<const std::vector<Model::BrushFaceHandle>&> brushFacesDidChangeNotifier;
 
             Notifier<> textureCollectionsWillChangeNotifier;
             Notifier<> textureCollectionsDidChangeNotifier;
@@ -462,7 +463,7 @@ namespace TrenchBroom {
             class UnsetTextures;
             void setTextures();
             void setTextures(const std::vector<Model::Node*>& nodes);
-            void setTextures(const std::vector<Model::BrushFace*>& faces);
+            void setTextures(std::vector<Model::BrushFaceHandle> faceHandles);
             void unsetTextures();
             void unsetTextures(const std::vector<Model::Node*>& nodes);
 
@@ -511,7 +512,7 @@ namespace TrenchBroom {
             void updateNodeTags(const std::vector<Model::Node*>& nodes);
 
             class InitializeFaceTagsVisitor;
-            void updateFaceTags(const std::vector<Model::BrushFace*>& faces);
+            void updateFaceTags(const std::vector<Model::BrushFaceHandle>& faceHandles);
             void updateAllFaceTags();
         public: // document path
             bool persistent() const;

@@ -87,19 +87,19 @@ namespace TrenchBroom {
             doEndFile();
         }
 
-        void NodeSerializer::defaultLayer(Model::WorldNode& world) {
+        void NodeSerializer::defaultLayer(const Model::WorldNode& world) {
             entity(&world, world.attributes(), {}, world.defaultLayer());
         }
 
-        void NodeSerializer::customLayer(Model::LayerNode* layer) {
+        void NodeSerializer::customLayer(const Model::LayerNode* layer) {
             entity(layer, layerAttributes(layer), {}, layer);
         }
 
-        void NodeSerializer::group(Model::GroupNode* group, const std::vector<Model::EntityAttribute>& parentAttributes) {
+        void NodeSerializer::group(const Model::GroupNode* group, const std::vector<Model::EntityAttribute>& parentAttributes) {
             entity(group, groupAttributes(group), parentAttributes, group);
         }
 
-        void NodeSerializer::entity(Model::Node* node, const std::vector<Model::EntityAttribute>& attributes, const std::vector<Model::EntityAttribute>& parentAttributes, Model::Node* brushParent) {
+        void NodeSerializer::entity(const Model::Node* node, const std::vector<Model::EntityAttribute>& attributes, const std::vector<Model::EntityAttribute>& parentAttributes, const Model::Node* brushParent) {
             beginEntity(node, attributes, parentAttributes);
 
             BrushSerializer brushSerializer(*this);
@@ -108,7 +108,7 @@ namespace TrenchBroom {
             endEntity(node);
         }
 
-        void NodeSerializer::entity(Model::Node* node, const std::vector<Model::EntityAttribute>& attributes, const std::vector<Model::EntityAttribute>& parentAttributes, const std::vector<Model::BrushNode*>& entityBrushes) {
+        void NodeSerializer::entity(const Model::Node* node, const std::vector<Model::EntityAttribute>& attributes, const std::vector<Model::EntityAttribute>& parentAttributes, const std::vector<Model::BrushNode*>& entityBrushes) {
             beginEntity(node, attributes, parentAttributes);
             brushes(entityBrushes);
             endEntity(node);
@@ -125,7 +125,7 @@ namespace TrenchBroom {
             doBeginEntity(node);
         }
 
-        void NodeSerializer::endEntity(Model::Node* node) {
+        void NodeSerializer::endEntity(const Model::Node* node) {
             doEndEntity(node);
             ++m_entityNo;
         }
@@ -146,7 +146,7 @@ namespace TrenchBroom {
             }
         }
 
-        void NodeSerializer::brush(Model::BrushNode* brushNode) {
+        void NodeSerializer::brush(const Model::BrushNode* brushNode) {
             beginBrush(brushNode);
             brushFaces(brushNode->brush().faces());
             endBrush(brushNode);
@@ -156,18 +156,18 @@ namespace TrenchBroom {
             doBeginBrush(brushNode);
         }
 
-        void NodeSerializer::endBrush(Model::BrushNode* brushNode) {
+        void NodeSerializer::endBrush(const Model::BrushNode* brushNode) {
             doEndBrush(brushNode);
             ++m_brushNo;
         }
 
-        void NodeSerializer::brushFaces(const std::vector<Model::BrushFace*>& faces) {
+        void NodeSerializer::brushFaces(const std::vector<const Model::BrushFace*>& faces) {
             for (auto* face : faces) {
                 brushFace(face);
             }
         }
 
-        void NodeSerializer::brushFace(Model::BrushFace* face) {
+        void NodeSerializer::brushFace(const Model::BrushFace* face) {
             doBrushFace(face);
         }
 

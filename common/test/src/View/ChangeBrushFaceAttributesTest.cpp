@@ -45,33 +45,32 @@ namespace TrenchBroom {
             Model::BrushNode* brushNode = createBrushNode();
             document->addNode(brushNode, document->currentParent());
 
-            Model::BrushFace* face = brushNode->brush().faces().front();
-            const vm::vec3 initialX = face->textureXAxis();
-            const vm::vec3 initialY = face->textureYAxis();
+            const Model::BrushFaceHandle faceHandle = brushNode->faceHandles().front();
+            const vm::vec3 initialX = faceHandle.face()->textureXAxis();
+            const vm::vec3 initialY = faceHandle.face()->textureYAxis();
 
-            document->select(Model::BrushFaceHandle(brushNode, face));
+            document->select(faceHandle);
 
-            const Model::BrushFaceAttributes originalAttribs = face->attributes();
             Model::ChangeBrushFaceAttributesRequest rotate;
             rotate.addRotation(2.0);
             for (size_t i = 0; i < 5; ++i)
                 document->setFaceAttributes(rotate);
 
-            ASSERT_FLOAT_EQ(10.0, face->attributes().rotation());
+            ASSERT_FLOAT_EQ(10.0, faceHandle.attributes().rotation());
 
             Model::ChangeBrushFaceAttributesRequest reset;
             reset.resetAll();
 
             document->setFaceAttributes(reset);
 
-            ASSERT_FLOAT_EQ(0.0f, face->attributes().xOffset());
-            ASSERT_FLOAT_EQ(0.0f, face->attributes().yOffset());
-            ASSERT_FLOAT_EQ(0.0f, face->attributes().rotation());
-            ASSERT_FLOAT_EQ(1.0f, face->attributes().xScale());
-            ASSERT_FLOAT_EQ(1.0f, face->attributes().yScale());
+            ASSERT_FLOAT_EQ(0.0f, faceHandle.attributes().xOffset());
+            ASSERT_FLOAT_EQ(0.0f, faceHandle.attributes().yOffset());
+            ASSERT_FLOAT_EQ(0.0f, faceHandle.attributes().rotation());
+            ASSERT_FLOAT_EQ(1.0f, faceHandle.attributes().xScale());
+            ASSERT_FLOAT_EQ(1.0f, faceHandle.attributes().yScale());
 
-            ASSERT_VEC_EQ(initialX, face->textureXAxis());
-            ASSERT_VEC_EQ(initialY, face->textureYAxis());
+            ASSERT_VEC_EQ(initialX, faceHandle.face()->textureXAxis());
+            ASSERT_VEC_EQ(initialY, faceHandle.face()->textureYAxis());
         }
     }
 }

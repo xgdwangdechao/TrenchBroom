@@ -20,12 +20,22 @@ along with TrenchBroom. If not, see <http://www.gnu.org/licenses/>.
 #ifndef BrushFaceHandle_hpp
 #define BrushFaceHandle_hpp
 
+#include "FloatType.h"
+
 #include <vector>
 
 namespace TrenchBroom {
+    namespace Assets {
+        class Texture;
+    }
+    
     namespace Model {
-        class BrushNode;
         class BrushFace;
+        class BrushFaceAttributes;
+        class BrushNode;
+        class TagManager;
+        class TexCoordSystemSnapshot;
+        enum class WrapStyle;
 
         /**
          * A brush face handle represents a brush face and additionally gives access to its containing brush node.
@@ -54,8 +64,26 @@ namespace TrenchBroom {
             /**
              * Returns the brush face.
              */
-            BrushFace* face() const;
+            const BrushFace* face() const;
 
+            void selectFace();
+            void deselectFace();
+            
+            const BrushFaceAttributes& attributes() const;
+            void setAttributes(const BrushFaceAttributes& attribs);
+            
+            void copyTexCoordSystemFromFace(const TexCoordSystemSnapshot& coordSystemSnapshot, const BrushFaceAttributes& attribs, const vm::plane3& sourceFacePlane, WrapStyle wrapStyle);
+            void restoreTexCoordSystemSnapshot(const TexCoordSystemSnapshot& snapshot);
+            void resetTextureAxes();
+
+            void moveTexture(const vm::vec3& up, const vm::vec3& right, const vm::vec2f& offset);
+            void rotateTexture(float angle);
+            void shearTexture(const vm::vec2f& factors);
+
+            void setTexture(Assets::Texture* texture);
+            
+            void updateFaceTags(TagManager& tagManager);
+            
             /**
              * Returns true if the given handles represent the same face.
              */
@@ -70,12 +98,7 @@ namespace TrenchBroom {
         /**
          * Returns a vector containing the faces represented by the given handles.
          */
-        std::vector<BrushFace*> toFaces(const std::vector<BrushFaceHandle>& handles);
-
-        /**
-         * Returns a vector containing handles representing the faces of the given brush.
-         */
-        std::vector<BrushFaceHandle> toHandles(BrushNode* brushNode);
+        std::vector<const BrushFace*> toFaces(const std::vector<BrushFaceHandle>& handles);
     }
 }
 

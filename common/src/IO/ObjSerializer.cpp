@@ -129,7 +129,7 @@ namespace TrenchBroom {
         }
 
         void ObjFileSerializer::doBeginEntity(const Model::Node* /* node */) {}
-        void ObjFileSerializer::doEndEntity(Model::Node* /* node */) {}
+        void ObjFileSerializer::doEndEntity(const Model::Node* /* node */) {}
         void ObjFileSerializer::doEntityAttribute(const Model::EntityAttribute& /* attribute */) {}
 
         void ObjFileSerializer::doBeginBrush(const Model::BrushNode* /* brush */) {
@@ -139,12 +139,12 @@ namespace TrenchBroom {
             m_vertices.clearIndices();
         }
 
-        void ObjFileSerializer::doEndBrush(Model::BrushNode* /* brush */) {
+        void ObjFileSerializer::doEndBrush(const Model::BrushNode* /* brush */) {
             m_objects.push_back(m_currentObject);
             m_currentObject.faces.clear();
         }
 
-        void ObjFileSerializer::doBrushFace(Model::BrushFace* face) {
+        void ObjFileSerializer::doBrushFace(const Model::BrushFace* face) {
             const vm::vec3& normal = face->boundary().normal;
             const size_t normalIndex = m_normals.index(normal);
 

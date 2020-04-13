@@ -27,7 +27,7 @@
 namespace TrenchBroom {
     namespace Model {
         template <typename P>
-        class FindMatchingBrushFaceVisitor : public NodeVisitor, public NodeQuery<BrushFace*> {
+        class FindMatchingBrushFaceVisitor : public NodeVisitor, public NodeQuery<BrushFaceHandle> {
         private:
             P m_p;
         public:
@@ -38,10 +38,9 @@ namespace TrenchBroom {
             void doVisit(GroupNode*)  override {}
             void doVisit(EntityNode*) override {}
             void doVisit(BrushNode* brushNode)   override {
-                const Brush& brush = brushNode->brush();
-                for (BrushFace* face : brush.faces()) {
-                    if (m_p(brushNode, face)) {
-                        setResult(face);
+                for (const BrushFaceHandle& faceHandle : brushNode->faceHandles()) {
+                    if (m_p(faceHandle)) {
+                        setResult(faceHandle);
                         cancel();
                         return;
                     }

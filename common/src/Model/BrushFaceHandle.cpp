@@ -21,6 +21,7 @@ along with TrenchBroom. If not, see <http://www.gnu.org/licenses/>.
 
 #include "Ensure.h"
 #include "Model/Brush.h"
+#include "Model/BrushFace.h"
 #include "Model/BrushNode.h"
 
 #include <kdl/vector_utils.h>
@@ -39,20 +40,64 @@ namespace TrenchBroom {
             return m_node;
         }
 
-        BrushFace* BrushFaceHandle::face() const {
+        const BrushFace* BrushFaceHandle::face() const {
             return m_face;
+        }
+
+        void BrushFaceHandle::selectFace() {
+            m_face->select();
+        }
+
+        void BrushFaceHandle::deselectFace() {
+            m_face->deselect();
+        }
+
+        const BrushFaceAttributes& BrushFaceHandle::attributes() const {
+            return m_face->attributes();
+        }
+
+        void BrushFaceHandle::setAttributes(const BrushFaceAttributes& attribs) {
+            m_node->setFaceAttributes(m_face, attribs);
+        }
+
+        void BrushFaceHandle::copyTexCoordSystemFromFace(const TexCoordSystemSnapshot& coordSystemSnapshot, const BrushFaceAttributes& attribs, const vm::plane3& sourceFacePlane, const WrapStyle wrapStyle) {
+            m_node->copyTexCoordSystemFromFace(m_face, coordSystemSnapshot, attribs, sourceFacePlane, wrapStyle);
+        }
+
+        void BrushFaceHandle::restoreTexCoordSystemSnapshot(const TexCoordSystemSnapshot& snapshot) {
+            m_node->restoreTexCoordSystemSnapshot(m_face, snapshot);
+        }
+
+        void BrushFaceHandle::moveTexture(const vm::vec3& up, const vm::vec3& right, const vm::vec2f& offset) {
+            m_node->moveTexture(m_face, up, right, offset);
+        }
+        
+        void BrushFaceHandle::rotateTexture(const float angle) {
+            m_node->rotateTexture(m_face, angle);
+        }
+        
+        void BrushFaceHandle::shearTexture(const vm::vec2f& factors) {
+            m_node->shearTexture(m_face, factors);
+        }
+
+        void BrushFaceHandle::resetTextureAxes() {
+            m_node->resetTextureAxes(m_face);
+        }
+
+        void BrushFaceHandle::setTexture(Assets::Texture* texture) {
+            m_node->setTexture(m_face, texture);
+        }
+
+        void BrushFaceHandle::updateFaceTags(TagManager& tagManager) {
+            m_node->updateFaceTags(m_face, tagManager);
         }
 
         bool operator==(const BrushFaceHandle& lhs, const BrushFaceHandle& rhs) {
             return lhs.m_node == rhs.m_node && lhs.m_face == rhs.m_face;
         }
 
-        std::vector<BrushFace*> toFaces(const std::vector<BrushFaceHandle>& handles) {
+        std::vector<const BrushFace*> toFaces(const std::vector<BrushFaceHandle>& handles) {
             return kdl::vec_transform(handles, [](const auto& handle) { return handle.face(); });
-        }
-
-        std::vector<BrushFaceHandle> toHandles(BrushNode* brushNode) {
-            return kdl::vec_transform(brushNode->brush().faces(), [&](auto* face) { return BrushFaceHandle(brushNode, face); });
         }
     }
 }

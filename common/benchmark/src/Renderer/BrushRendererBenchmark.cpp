@@ -24,9 +24,10 @@
 #include "BenchmarkUtils.h"
 
 #include "Assets/Texture.h"
-#include "Model/BrushNode.h"
 #include "Model/BrushBuilder.h"
 #include "Model/BrushFace.h"
+#include "Model/BrushFaceHandle.h"
+#include "Model/BrushNode.h"
 #include "Model/WorldNode.h"
 #include "Model/MapFormat.h"
 #include "Renderer/BrushRenderer.h"
@@ -63,8 +64,8 @@ namespace TrenchBroom {
             size_t currentTextureIndex = 0;
             for (size_t i = 0; i < NumBrushes; ++i) {
                 Model::BrushNode* brushNode = world.createBrush(builder.createCube(64.0, ""));
-                for (auto* face : brushNode->brush().faces()) {
-                    face->setTexture(textures.at((currentTextureIndex++) % NumTextures));
+                for (auto faceHandle : brushNode->faceHandles()) {
+                    faceHandle.setTexture(textures.at((currentTextureIndex++) % NumTextures));
                 }
                 result.push_back(brushNode);
             }

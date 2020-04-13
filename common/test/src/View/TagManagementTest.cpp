@@ -133,15 +133,15 @@ namespace TrenchBroom {
             const auto& tag = document->smartTag("texture");
             ASSERT_TRUE(tag.canEnable());
 
-            auto* face = nonMatchingBrushNode->brush().faces().front();
-            ASSERT_FALSE(tag.matches(*face));
+            const auto faceHandle = nonMatchingBrushNode->faceHandles().front();
+            ASSERT_FALSE(tag.matches(*faceHandle.face()));
 
-            document->select({ nonMatchingBrushNode, face });
+            document->select(faceHandle);
 
             TestCallback callback(0);
             tag.enable(callback, *document);
 
-            ASSERT_TRUE(tag.matches(*face));
+            ASSERT_TRUE(tag.matches(*faceHandle.face()));
         }
 
         TEST_CASE_METHOD(TagManagementTest, "TagManagementTest.disableTextureNameTag") {
@@ -156,8 +156,8 @@ namespace TrenchBroom {
             auto matchingBrushNode = std::unique_ptr<Model::BrushNode>(createBrushNode("some_texture"));
             auto nonMatchingBrushNode = std::unique_ptr<Model::BrushNode>(createBrushNode("asdf"));
 
-            for (auto* face : matchingBrushNode->brush().faces()) {
-                face->setTexture(texture.get());
+            for (auto faceHandle : matchingBrushNode->faceHandles()) {
+                faceHandle.setTexture(texture.get());
             }
 
             const auto& tag = document->smartTag("surfaceparm");
@@ -183,11 +183,15 @@ namespace TrenchBroom {
             auto matchingBrushNode = std::unique_ptr<Model::BrushNode>(createBrushNode("asdf"));
             auto nonMatchingBrushNode = std::unique_ptr<Model::BrushNode>(createBrushNode("asdf"));
 
-            for (auto* face : matchingBrushNode->brush().faces()) {
-                face->attributes().setSurfaceContents(1);
+            for (auto faceHandle : matchingBrushNode->faceHandles()) {
+                auto attributes = faceHandle.attributes();
+                attributes.setSurfaceContents(1);
+                faceHandle.setAttributes(attributes);
             }
-            for (auto* face : nonMatchingBrushNode->brush().faces()) {
-                face->attributes().setSurfaceContents(2);
+            for (auto faceHandle : nonMatchingBrushNode->faceHandles()) {
+                auto attributes = faceHandle.attributes();
+                attributes.setSurfaceContents(2);
+                faceHandle.setAttributes(attributes);
             }
 
             const auto& tag = document->smartTag("contentflags");
@@ -206,21 +210,23 @@ namespace TrenchBroom {
             const auto& tag = document->smartTag("contentflags");
             ASSERT_TRUE(tag.canEnable());
 
-            auto* face = nonMatchingBrushNode->brush().faces().front();
-            ASSERT_FALSE(tag.matches(*face));
+            const auto faceHandle = nonMatchingBrushNode->faceHandles().front();
+            ASSERT_FALSE(tag.matches(*faceHandle.face()));
 
-            document->select({ nonMatchingBrushNode, face });
+            document->select(faceHandle);
 
             TestCallback callback(0);
             tag.enable(callback, *document);
 
-            ASSERT_TRUE(tag.matches(*face));
+            ASSERT_TRUE(tag.matches(*faceHandle.face()));
         }
 
         TEST_CASE_METHOD(TagManagementTest, "TagManagementTest.disableContentFlagsTag") {
             auto* matchingBrushNode = createBrushNode("asdf");
-            for (auto* face : matchingBrushNode->brush().faces()) {
-                face->attributes().setSurfaceContents(1);
+            for (auto faceHandle : matchingBrushNode->faceHandles()) {
+                auto attributes = faceHandle.attributes();
+                attributes.setSurfaceContents(1);
+                faceHandle.setAttributes(attributes);
             }
 
             document->addNode(matchingBrushNode, document->currentParent());
@@ -228,26 +234,30 @@ namespace TrenchBroom {
             const auto& tag = document->smartTag("contentflags");
             ASSERT_TRUE(tag.canDisable());
 
-            auto* face = matchingBrushNode->brush().faces().front();
-            ASSERT_TRUE(tag.matches(*face));
+            const auto faceHandle = matchingBrushNode->faceHandles().front();
+            ASSERT_TRUE(tag.matches(*faceHandle.face()));
 
-            document->select({ matchingBrushNode, face });
+            document->select(faceHandle);
 
             TestCallback callback(0);
             tag.disable(callback, *document);
 
-            ASSERT_FALSE(tag.matches(*face));
+            ASSERT_FALSE(tag.matches(*faceHandle.face()));
         }
 
         TEST_CASE_METHOD(TagManagementTest, "TagManagementTest.matchSurfaceFlagsTag") {
             auto matchingBrushNode = std::unique_ptr<Model::BrushNode>(createBrushNode("asdf"));
             auto nonMatchingBrushNode = std::unique_ptr<Model::BrushNode>(createBrushNode("asdf"));
 
-            for (auto* face : matchingBrushNode->brush().faces()) {
-                face->attributes().setSurfaceFlags(1);
+            for (auto faceHandle : matchingBrushNode->faceHandles()) {
+                auto attributes = faceHandle.attributes();
+                attributes.setSurfaceFlags(1);
+                faceHandle.setAttributes(attributes);
             }
-            for (auto* face : nonMatchingBrushNode->brush().faces()) {
-                face->attributes().setSurfaceFlags(2);
+            for (auto faceHandle : nonMatchingBrushNode->faceHandles()) {
+                auto attributes = faceHandle.attributes();
+                attributes.setSurfaceFlags(2);
+                faceHandle.setAttributes(attributes);
             }
 
             const auto& tag = document->smartTag("surfaceflags");
@@ -266,21 +276,23 @@ namespace TrenchBroom {
             const auto& tag = document->smartTag("surfaceflags");
             ASSERT_TRUE(tag.canEnable());
 
-            auto* face = nonMatchingBrushNode->brush().faces().front();
-            ASSERT_FALSE(tag.matches(*face));
+            const auto faceHandle = nonMatchingBrushNode->faceHandles().front();
+            ASSERT_FALSE(tag.matches(*faceHandle.face()));
 
-            document->select({ nonMatchingBrushNode, face });
+            document->select(faceHandle);
 
             TestCallback callback(0);
             tag.enable(callback, *document);
 
-            ASSERT_TRUE(tag.matches(*face));
+            ASSERT_TRUE(tag.matches(*faceHandle.face()));
         }
 
         TEST_CASE_METHOD(TagManagementTest, "TagManagementTest.disableSurfaceFlagsTag") {
             auto* matchingBrushNode = createBrushNode("asdf");
-            for (auto* face : matchingBrushNode->brush().faces()) {
-                face->attributes().setSurfaceFlags(1);
+            for (auto faceHandle : matchingBrushNode->faceHandles()) {
+                auto attributes = faceHandle.attributes();
+                attributes.setSurfaceFlags(1);
+                faceHandle.setAttributes(attributes);
             }
 
             document->addNode(matchingBrushNode, document->currentParent());
@@ -288,15 +300,15 @@ namespace TrenchBroom {
             const auto& tag = document->smartTag("surfaceflags");
             ASSERT_TRUE(tag.canDisable());
 
-            auto* face = matchingBrushNode->brush().faces().front();
-            ASSERT_TRUE(tag.matches(*face));
+            const auto faceHandle = matchingBrushNode->faceHandles().front();
+            ASSERT_TRUE(tag.matches(*faceHandle.face()));
 
-            document->select({ matchingBrushNode, face });
+            document->select(faceHandle);
 
             TestCallback callback(0);
             tag.disable(callback, *document);
 
-            ASSERT_FALSE(tag.matches(*face));
+            ASSERT_FALSE(tag.matches(*faceHandle.face()));
         }
 
         TEST_CASE_METHOD(TagManagementTest, "TagManagementTest.matchEntityClassnameTag") {
@@ -490,18 +502,18 @@ namespace TrenchBroom {
 
             const auto& tag = document->smartTag("contentflags");
 
-            auto* face = brushNode->brush().faces().front();
-            ASSERT_FALSE(face->hasTag(tag));
+            const auto faceHandle = brushNode->faceHandles().front();
+            ASSERT_FALSE(faceHandle.face()->hasTag(tag));
 
             Model::ChangeBrushFaceAttributesRequest request;
             request.setContentFlag(0);
 
-            document->select({ brushNode, face });
+            document->select(faceHandle);
             document->setFaceAttributes(request);
             document->deselectAll();
 
             for (const auto* f : brushNode->brush().faces()) {
-                if (f == face) {
+                if (f == faceHandle.face()) {
                     ASSERT_TRUE(f->hasTag(tag));
                 } else {
                     ASSERT_FALSE(f->hasTag(tag));
