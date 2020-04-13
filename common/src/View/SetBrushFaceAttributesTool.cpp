@@ -95,9 +95,9 @@ namespace TrenchBroom {
             document->select(targetList);
             if (copyAllAttributes(inputState)) {
                 auto snapshot = sourceFace->takeTexCoordSystemSnapshot();
-                document->setFaceAttributes(sourceFace->attribs());
+                document->setFaceAttributes(sourceFace->attributes());
                 if (snapshot != nullptr) {
-                    document->copyTexCoordSystemFromFace(*snapshot, sourceFace->attribs().takeSnapshot(), sourceFace->boundary(), wrapStyle);
+                    document->copyTexCoordSystemFromFace(*snapshot, sourceFace->attributes().takeSnapshot(), sourceFace->boundary(), wrapStyle);
                 }
             } else {
                 document->setTexture(sourceFace->texture());
