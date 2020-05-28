@@ -93,8 +93,17 @@ namespace TrenchBroom {
         }
 
         void CellView::scrollToCellInternal(const Cell& cell) {
-            const float top = cell.cellBounds().top();
-            m_scrollBar->setSliderPosition(static_cast<int>(top));
+            const auto visibleRect = this->visibleRect();
+            const int top = static_cast<int>(cell.cellBounds().top());
+            const int bottom = static_cast<int>(cell.cellBounds().bottom());
+
+            if (top >= visibleRect.top() && bottom <= visibleRect.bottom()) {
+                return;
+            }
+
+            const int rowMargin = static_cast<int>(m_layout.rowMargin());
+            const auto newPosition = top < visibleRect.top() ? top - rowMargin : visibleRect.top() + bottom - visibleRect.bottom();
+            m_scrollBar->setSliderPosition(newPosition);
         }
 
         void CellView::onScrollBarValueChanged() {
