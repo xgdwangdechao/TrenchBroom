@@ -457,7 +457,7 @@ namespace TrenchBroom {
             }
         }
 
-        static size_t countMarkedEdgeIndices(const Model::BrushNode* brush, const BrushRenderer::Filter::EdgeRenderPolicy policy) {
+        static size_t countMarkedEdgeIndices(const BrushRendererBrushCache& brushCache, const BrushRenderer::Filter::EdgeRenderPolicy policy) {
             using EdgeRenderPolicy = BrushRenderer::Filter::EdgeRenderPolicy;
 
             if (policy == EdgeRenderPolicy::RenderNone) {
@@ -465,7 +465,7 @@ namespace TrenchBroom {
             }
 
             size_t indexCount = 0;
-            for (const auto& edge : brush->brushRendererBrushCache().cachedEdges()) {
+            for (const auto& edge : brushCache.cachedEdges()) {
                 if (shouldRenderEdge(edge, policy)) {
                     indexCount += 2;
                 }
@@ -473,7 +473,7 @@ namespace TrenchBroom {
             return indexCount;
         }
 
-        static void getMarkedEdgeIndices(const Model::BrushNode* brush,
+        static void getMarkedEdgeIndices(const BrushRendererBrushCache& brushCache,
                                          const BrushRenderer::Filter::EdgeRenderPolicy policy,
                                          const GLuint brushVerticesStartIndex,
                                          GLuint* dest) {
@@ -484,7 +484,7 @@ namespace TrenchBroom {
             }
 
             size_t i = 0;
-            for (const auto& edge : brush->brushRendererBrushCache().cachedEdges()) {
+            for (const auto& edge : brushCache.cachedEdges()) {
                 if (shouldRenderEdge(edge, policy)) {
                     dest[i++] = static_cast<GLuint>(brushVerticesStartIndex + edge.vertexIndex1RelativeToBrush);
                     dest[i++] = static_cast<GLuint>(brushVerticesStartIndex + edge.vertexIndex2RelativeToBrush);
@@ -532,7 +532,7 @@ namespace TrenchBroom {
             BrushInfo& info = m_brushInfo[brush];
 
             // collect vertices
-            auto& brushCache = brush->brushRendererBrushCache();
+            BrushRendererBrushCache brushCache;
             brushCache.validateVertexCache(brush);
             const auto& cachedVertices = brushCache.cachedVertices();
             ensure(!cachedVertices.empty(), "Brush must have cached vertices");
@@ -547,11 +547,11 @@ namespace TrenchBroom {
 
             // insert edge indices into VBO
             {
-                const size_t edgeIndexCount = countMarkedEdgeIndices(brush, edgePolicy);
+                const size_t edgeIndexCount = countMarkedEdgeIndices(brushCache, edgePolicy);
                 if (edgeIndexCount > 0) {
                     auto [key, insertDest] = m_edgeIndices->getPointerToInsertElementsAt(edgeIndexCount);
                     info.edgeIndicesKey = key;
-                    getMarkedEdgeIndices(brush, edgePolicy, brushVerticesStartIndex, insertDest);
+                    getMarkedEdgeIndices(brushCache, edgePolicy, brushVerticesStartIndex, insertDest);
                 } else {
                     // it's possible to have no edges to render
                     // e.g. select all faces of a brush, and the unselected brush renderer
