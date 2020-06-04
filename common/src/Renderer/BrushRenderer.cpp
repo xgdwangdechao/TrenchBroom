@@ -540,6 +540,7 @@ namespace TrenchBroom {
             assert(m_vertexArray != nullptr);
             auto [vertBlock, dest] = m_vertexArray->getPointerToInsertVerticesAt(cachedVertices.size());
             std::memcpy(dest, cachedVertices.data(), cachedVertices.size() * sizeof(*dest));
+            static_assert(sizeof(dest[0]) == sizeof(cachedVertices.data()[0]));
             info.vertexHolderKey = vertBlock;
 
             const auto brushVerticesStartIndex = static_cast<GLuint>(vertBlock->pos);
