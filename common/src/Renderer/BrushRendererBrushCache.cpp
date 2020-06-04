@@ -44,10 +44,14 @@ namespace TrenchBroom {
                   vertexIndex1RelativeToBrush(i_vertexIndex1RelativeToBrush),
                   vertexIndex2RelativeToBrush(i_vertexIndex2RelativeToBrush) {}
 
-        BrushRendererBrushCache::BrushRendererBrushCache() {}
+        std::tuple<std::vector<BrushRendererBrushCache::Vertex>,
+                   std::vector<BrushRendererBrushCache::CachedFace>,
+                   std::vector<BrushRendererBrushCache::CachedEdge>> validateVertexCache(const Model::BrushNode* brushNode) {
 
-
-        void BrushRendererBrushCache::validateVertexCache(const Model::BrushNode* brushNode) {
+             std::vector<BrushRendererBrushCache::Vertex> m_cachedVertices;
+             std::vector<BrushRendererBrushCache::CachedFace> m_cachedFacesSortedByTexture;
+             std::vector<BrushRendererBrushCache::CachedEdge> m_cachedEdges;
+        
             // build vertex cache and face cache
             const Model::Brush& brush = brushNode->brush();
 
@@ -89,7 +93,7 @@ namespace TrenchBroom {
 
             std::sort(m_cachedFacesSortedByTexture.begin(),
                       m_cachedFacesSortedByTexture.end(),
-                      [](const CachedFace& a, const CachedFace& b){ return a.texture < b.texture; });
+                      [](const BrushRendererBrushCache::CachedFace& a, const BrushRendererBrushCache::CachedFace& b){ return a.texture < b.texture; });
 
             // Build edge index cache
 
@@ -109,18 +113,8 @@ namespace TrenchBroom {
 
                 m_cachedEdges.emplace_back(&face1, &face2, vertexIndex1RelativeToBrush, vertexIndex2RelativeToBrush);
             }
-        }
 
-        const std::vector<BrushRendererBrushCache::Vertex>& BrushRendererBrushCache::cachedVertices() const {
-            return m_cachedVertices;
-        }
-
-        const std::vector<BrushRendererBrushCache::CachedFace>& BrushRendererBrushCache::cachedFacesSortedByTexture() const {
-            return m_cachedFacesSortedByTexture;
-        }
-
-        const std::vector<BrushRendererBrushCache::CachedEdge>& BrushRendererBrushCache::cachedEdges() const {
-            return m_cachedEdges;
+            return { m_cachedVertices, m_cachedFacesSortedByTexture, m_cachedEdges };
         }
     }
 }

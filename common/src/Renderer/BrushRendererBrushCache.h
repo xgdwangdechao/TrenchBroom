@@ -23,6 +23,7 @@
 #include "Renderer/GLVertexType.h"
 
 #include <vector>
+#include <tuple>
 
 namespace TrenchBroom {
     namespace Assets {
@@ -35,11 +36,10 @@ namespace TrenchBroom {
     }
 
     namespace Renderer {
-        class BrushRendererBrushCache {
-        public:
+        namespace BrushRendererBrushCache {
             using VertexSpec = Renderer::GLVertexTypes::P3NT2C4;
             using Vertex = VertexSpec::Vertex;
-
+            
             struct CachedFace {
                 const Assets::Texture* texture;
                 const Model::BrushFace* face;
@@ -61,32 +61,11 @@ namespace TrenchBroom {
                            size_t i_vertexIndex1RelativeToBrush,
                            size_t i_vertexIndex2RelativeToBrush);
             };
+        }
 
-        private:
-            std::vector<Vertex> m_cachedVertices;
-            std::vector<CachedEdge> m_cachedEdges;
-            std::vector<CachedFace> m_cachedFacesSortedByTexture;
-            
-        public:
-            BrushRendererBrushCache();
-
-            /**
-             * Call this before cachedVertices()/cachedFacesSortedByTexture()/cachedEdges()
-             *
-             * NOTE: The reason for having this cache is we often need to re-upload the brush to VBO's when the brush
-             * itself hasn't changed, but we're moving it between VBO's for different rendering styles
-             * (default/selected/locked), or need to re-evaluate the BrushRenderer::Filter to exclude certain
-             * faces/edges.
-             */
-            void validateVertexCache(const Model::BrushNode* brushNode);
-
-            /**
-             * Returns all vertices for all faces of the brush.
-             */
-            const std::vector<Vertex>& cachedVertices() const;
-            const std::vector<CachedFace>& cachedFacesSortedByTexture() const;
-            const std::vector<CachedEdge>& cachedEdges() const;
-        };
+        std::tuple<std::vector<BrushRendererBrushCache::Vertex>,
+                   std::vector<BrushRendererBrushCache::CachedFace>,
+                   std::vector<BrushRendererBrushCache::CachedEdge>> validateVertexCache(const Model::BrushNode* brushNode);       
     }
 }
 
