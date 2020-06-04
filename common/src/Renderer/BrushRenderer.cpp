@@ -123,6 +123,80 @@ namespace TrenchBroom {
                                    EdgeRenderPolicy::RenderAll);
         }
 
+        // SelectedBrushRendererFilter
+
+        BrushRenderer::SelectedBrushRendererFilter::SelectedBrushRendererFilter(const Model::EditorContext& context) :
+        DefaultFilter(context) {}
+
+        BrushRenderer::Filter::RenderSettings BrushRenderer::SelectedBrushRendererFilter::markFaces(const Model::BrushNode* brushNode) const {
+            if (!(visible(brushNode) && editable(brushNode))) {
+                return renderNothing();
+            }
+
+            const bool brushSelected = selected(brushNode);
+            const Model::Brush& brush = brushNode->brush();
+            for (const Model::BrushFace& face : brush.faces()) {
+                face.setMarked(brushSelected || selected(brushNode, face));
+            }
+            return std::make_tuple(FaceRenderPolicy::RenderMarked, EdgeRenderPolicy::RenderIfEitherFaceMarked);
+        }
+
+        // LockedBrushRendererFilter
+
+        BrushRenderer::LockedBrushRendererFilter::LockedBrushRendererFilter(const Model::EditorContext& context) :
+        DefaultFilter(context) {}
+
+        BrushRenderer::Filter::RenderSettings BrushRenderer::LockedBrushRendererFilter::markFaces(const Model::BrushNode* brushNode) const {
+            if (!visible(brushNode)) {
+                return renderNothing();
+            }
+
+            const Model::Brush& brush = brushNode->brush();
+            for (const Model::BrushFace& face : brush.faces()) {
+                face.setMarked(true);
+            }
+
+            return std::make_tuple(FaceRenderPolicy::RenderMarked,
+                                   EdgeRenderPolicy::RenderAll);
+        }
+
+        // UnselectedBrushRendererFilter
+        
+        BrushRenderer::UnselectedBrushRendererFilter::UnselectedBrushRendererFilter(const Model::EditorContext& context) :
+        DefaultFilter(context) {}
+
+        BrushRenderer::Filter::RenderSettings BrushRenderer::UnselectedBrushRendererFilter::markFaces(const Model::BrushNode* brushNode) const {
+            const bool brushVisible = visible(brushNode);
+            const bool brushEditable = editable(brushNode);
+
+            const bool renderFaces = (brushVisible && brushEditable);
+                  bool renderEdges = (brushVisible && !selected(brushNode));
+
+            if (!renderFaces && !renderEdges) {
+                return renderNothing();
+            }
+
+            const Model::Brush& brush = brushNode->brush();
+            
+            bool anyFaceVisible = false;
+            for (const Model::BrushFace& face : brush.faces()) {
+                const bool faceVisible = !selected(brushNode, face) && visible(brushNode, face);
+                face.setMarked(faceVisible);
+                anyFaceVisible |= faceVisible;
+            }
+
+            if (!anyFaceVisible) {
+                return renderNothing();
+            }
+
+            // Render all edges if only one face is visible.
+            renderEdges |= anyFaceVisible;
+
+            return std::make_tuple(renderFaces ? FaceRenderPolicy::RenderMarked : FaceRenderPolicy::RenderNone,
+                                   renderEdges ? EdgeRenderPolicy::RenderAll : EdgeRenderPolicy::RenderNone);
+        }
+        
+
         // BrushRenderer
 
         BrushRenderer::BrushRenderer() :

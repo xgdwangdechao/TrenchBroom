@@ -113,6 +113,24 @@ namespace TrenchBroom {
             private:
                 deleteCopyAndMove(NoFilter)
             };
+
+            class SelectedBrushRendererFilter : public DefaultFilter {
+            public:
+                SelectedBrushRendererFilter(const Model::EditorContext& context);
+                RenderSettings markFaces(const Model::BrushNode* brushNode) const override;
+            };
+
+            class LockedBrushRendererFilter : public DefaultFilter {
+            public:
+                LockedBrushRendererFilter(const Model::EditorContext& context);
+                RenderSettings markFaces(const Model::BrushNode* brushNode) const override;
+            };
+
+            class UnselectedBrushRendererFilter : public DefaultFilter {
+            public:
+                UnselectedBrushRendererFilter(const Model::EditorContext& context);
+                RenderSettings markFaces(const Model::BrushNode* brushNode) const override;
+            };
         private:
             class FilterWrapper;
         private:

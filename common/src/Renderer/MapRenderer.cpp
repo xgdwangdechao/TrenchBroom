@@ -49,82 +49,6 @@
 
 namespace TrenchBroom {
     namespace Renderer {
-        class MapRenderer::SelectedBrushRendererFilter : public BrushRenderer::DefaultFilter {
-        public:
-            SelectedBrushRendererFilter(const Model::EditorContext& context) :
-            DefaultFilter(context) {}
-
-            RenderSettings markFaces(const Model::BrushNode* brushNode) const override {
-                if (!(visible(brushNode) && editable(brushNode))) {
-                    return renderNothing();
-                }
-
-                const bool brushSelected = selected(brushNode);
-                const Model::Brush& brush = brushNode->brush();
-                for (const Model::BrushFace& face : brush.faces()) {
-                    face.setMarked(brushSelected || selected(brushNode, face));
-                }
-                return std::make_tuple(FaceRenderPolicy::RenderMarked, EdgeRenderPolicy::RenderIfEitherFaceMarked);
-            }
-        };
-
-        class MapRenderer::LockedBrushRendererFilter : public BrushRenderer::DefaultFilter {
-        public:
-            LockedBrushRendererFilter(const Model::EditorContext& context) :
-            DefaultFilter(context) {}
-
-            RenderSettings markFaces(const Model::BrushNode* brushNode) const override {
-                if (!visible(brushNode)) {
-                    return renderNothing();
-                }
-
-                const Model::Brush& brush = brushNode->brush();
-                for (const Model::BrushFace& face : brush.faces()) {
-                    face.setMarked(true);
-                }
-
-                return std::make_tuple(FaceRenderPolicy::RenderMarked,
-                                       EdgeRenderPolicy::RenderAll);
-            }
-        };
-
-        class MapRenderer::UnselectedBrushRendererFilter : public BrushRenderer::DefaultFilter {
-        public:
-            UnselectedBrushRendererFilter(const Model::EditorContext& context) :
-            DefaultFilter(context) {}
-
-            RenderSettings markFaces(const Model::BrushNode* brushNode) const override {
-                const bool brushVisible = visible(brushNode);
-                const bool brushEditable = editable(brushNode);
-
-                const bool renderFaces = (brushVisible && brushEditable);
-                      bool renderEdges = (brushVisible && !selected(brushNode));
-
-                if (!renderFaces && !renderEdges) {
-                    return renderNothing();
-                }
-
-                const Model::Brush& brush = brushNode->brush();
-                
-                bool anyFaceVisible = false;
-                for (const Model::BrushFace& face : brush.faces()) {
-                    const bool faceVisible = !selected(brushNode, face) && visible(brushNode, face);
-                    face.setMarked(faceVisible);
-                    anyFaceVisible |= faceVisible;
-                }
-
-                if (!anyFaceVisible) {
-                    return renderNothing();
-                }
-
-                // Render all edges if only one face is visible.
-                renderEdges |= anyFaceVisible;
-
-                return std::make_tuple(renderFaces ? FaceRenderPolicy::RenderMarked : FaceRenderPolicy::RenderNone,
-                                       renderEdges ? EdgeRenderPolicy::RenderAll : EdgeRenderPolicy::RenderNone);
-            }
-        };
-
         MapRenderer::MapRenderer(std::weak_ptr<View::MapDocument> document) :
         m_document(document),
         m_defaultRenderer(createDefaultRenderer(m_document)),
@@ -145,7 +69,7 @@ namespace TrenchBroom {
                 *kdl::mem_lock(document),
                 kdl::mem_lock(document)->entityModelManager(),
                 kdl::mem_lock(document)->editorContext(),
-                UnselectedBrushRendererFilter(kdl::mem_lock(document)->editorContext()));
+                BrushRenderer::UnselectedBrushRendererFilter(kdl::mem_lock(document)->editorContext()));
         }
 
         std::unique_ptr<ObjectRenderer> MapRenderer::createSelectionRenderer(std::weak_ptr<View::MapDocument> document) {
@@ -153,7 +77,7 @@ namespace TrenchBroom {
                 *kdl::mem_lock(document),
                 kdl::mem_lock(document)->entityModelManager(),
                 kdl::mem_lock(document)->editorContext(),
-                SelectedBrushRendererFilter(kdl::mem_lock(document)->editorContext()));
+                BrushRenderer::SelectedBrushRendererFilter(kdl::mem_lock(document)->editorContext()));
         }
 
         std::unique_ptr<ObjectRenderer> MapRenderer::createLockRenderer(std::weak_ptr<View::MapDocument> document) {
@@ -161,7 +85,7 @@ namespace TrenchBroom {
                 *kdl::mem_lock(document),
                 kdl::mem_lock(document)->entityModelManager(),
                 kdl::mem_lock(document)->editorContext(),
-                LockedBrushRendererFilter(kdl::mem_lock(document)->editorContext()));
+                BrushRenderer::LockedBrushRendererFilter(kdl::mem_lock(document)->editorContext()));
         }
 
         void MapRenderer::clear() {
