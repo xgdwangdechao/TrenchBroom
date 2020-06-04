@@ -74,7 +74,7 @@ namespace TrenchBroom {
                     vertex->setPayload(static_cast<GLuint>(currentIndex));
 
                     const auto& position = vertex->position();
-                    m_cachedVertices.emplace_back(vm::vec3f(position), vm::vec3f(face.boundary().normal), face.textureCoords(position));
+                    m_cachedVertices.emplace_back(vm::vec3f(position), vm::vec3f(face.boundary().normal), face.textureCoords(position), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
 
                     current = current->previous();
                 }
