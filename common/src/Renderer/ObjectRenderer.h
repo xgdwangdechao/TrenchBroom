@@ -35,7 +35,6 @@ namespace TrenchBroom {
     }
 
     namespace Model {
-        class BrushNode;
         class EditorContext;
         class EntityNode;
         class GroupNode;
@@ -49,17 +48,13 @@ namespace TrenchBroom {
         private:
             GroupRenderer m_groupRenderer;
             EntityRenderer m_entityRenderer;
-            BrushRenderer m_brushRenderer;
         public:
-            template <typename BrushFilterT>
-            ObjectRenderer(Logger& logger, Assets::EntityModelManager& entityModelManager, const Model::EditorContext& editorContext, const BrushFilterT& brushFilter) :
+            ObjectRenderer(Logger& logger, Assets::EntityModelManager& entityModelManager, const Model::EditorContext& editorContext) :
             m_groupRenderer(editorContext),
-            m_entityRenderer(logger, entityModelManager, editorContext),
-            m_brushRenderer(brushFilter) {}
+            m_entityRenderer(logger, entityModelManager, editorContext) {}
         public: // object management
-            void setObjects(const std::vector<Model::GroupNode*>& groups, const std::vector<Model::EntityNode*>& entities, const std::vector<Model::BrushNode*>& brushes);
+            void setObjects(const std::vector<Model::GroupNode*>& groups, const std::vector<Model::EntityNode*>& entities);
             void invalidate();
-            void invalidateBrushes(const std::vector<Model::BrushNode*>& brushes);
             void clear();
             void reloadModels();
         public: // configuration
@@ -74,8 +69,6 @@ namespace TrenchBroom {
             void setShowOccludedObjects(bool showOccludedObjects);
             void setOccludedEdgeColor(const Color& occludedEdgeColor);
 
-            void setTransparencyAlpha(float transparencyAlpha);
-
             void setShowEntityAngles(bool showAngles);
             void setEntityAngleColor(const Color& color);
 
@@ -85,14 +78,9 @@ namespace TrenchBroom {
             void setOverrideEntityBoundsColor(bool overrideEntityBoundsColor);
             void setEntityBoundsColor(const Color& color);
 
-            void setShowBrushEdges(bool showBrushEdges);
-            void setBrushFaceColor(const Color& brushFaceColor);
-            void setBrushEdgeColor(const Color& brushEdgeColor);
-
             void setShowHiddenObjects(bool showHiddenObjects);
         public: // rendering
             void renderOpaque(RenderContext& renderContext, RenderBatch& renderBatch);
-            void renderTransparent(RenderContext& renderContext, RenderBatch& renderBatch);
         private:
             ObjectRenderer(const ObjectRenderer&);
             ObjectRenderer& operator=(const ObjectRenderer&);

@@ -68,24 +68,21 @@ namespace TrenchBroom {
             return std::make_unique<ObjectRenderer>(
                 *kdl::mem_lock(document),
                 kdl::mem_lock(document)->entityModelManager(),
-                kdl::mem_lock(document)->editorContext(),
-                BrushRenderer::UnselectedBrushRendererFilter(kdl::mem_lock(document)->editorContext()));
+                kdl::mem_lock(document)->editorContext());
         }
 
         std::unique_ptr<ObjectRenderer> MapRenderer::createSelectionRenderer(std::weak_ptr<View::MapDocument> document) {
             return std::make_unique<ObjectRenderer>(
                 *kdl::mem_lock(document),
                 kdl::mem_lock(document)->entityModelManager(),
-                kdl::mem_lock(document)->editorContext(),
-                BrushRenderer::SelectedBrushRendererFilter(kdl::mem_lock(document)->editorContext()));
+                kdl::mem_lock(document)->editorContext());
         }
 
         std::unique_ptr<ObjectRenderer> MapRenderer::createLockRenderer(std::weak_ptr<View::MapDocument> document) {
             return std::make_unique<ObjectRenderer>(
                 *kdl::mem_lock(document),
                 kdl::mem_lock(document)->entityModelManager(),
-                kdl::mem_lock(document)->editorContext(),
-                BrushRenderer::LockedBrushRendererFilter(kdl::mem_lock(document)->editorContext()));
+                kdl::mem_lock(document)->editorContext());
         }
 
         void MapRenderer::clear() {
@@ -101,7 +98,7 @@ namespace TrenchBroom {
             const Color tintColor = pref(Preferences::SelectedFaceColor).mixed(color, mix);
 
             m_selectionRenderer->setEntityBoundsColor(edgeColor);
-            m_selectionRenderer->setBrushEdgeColor(edgeColor);
+            //m_selectionRenderer->setBrushEdgeColor(edgeColor);
             m_selectionRenderer->setOccludedEdgeColor(occludedEdgeColor);
             m_selectionRenderer->setTintColor(tintColor);
         }
@@ -151,7 +148,7 @@ namespace TrenchBroom {
 
         void MapRenderer::renderDefaultTransparent(RenderContext& renderContext, RenderBatch& renderBatch) {
             m_defaultRenderer->setShowOverlays(renderContext.render3D());
-            m_defaultRenderer->renderTransparent(renderContext, renderBatch);
+            //m_defaultRenderer->renderTransparent(renderContext, renderBatch);
         }
 
         void MapRenderer::renderSelectionOpaque(RenderContext& renderContext, RenderBatch& renderBatch) {
@@ -161,9 +158,9 @@ namespace TrenchBroom {
         }
 
         void MapRenderer::renderSelectionTransparent(RenderContext& renderContext, RenderBatch& renderBatch) {
-            if (!renderContext.hideSelection()) {
-                m_selectionRenderer->renderTransparent(renderContext, renderBatch);
-            }
+            // if (!renderContext.hideSelection()) {
+            //     m_selectionRenderer->renderTransparent(renderContext, renderBatch);
+            // }
         }
 
         void MapRenderer::renderLockedOpaque(RenderContext& renderContext, RenderBatch& renderBatch) {
@@ -173,7 +170,7 @@ namespace TrenchBroom {
 
         void MapRenderer::renderLockedTransparent(RenderContext& renderContext, RenderBatch& renderBatch) {
             m_lockedRenderer->setShowOverlays(renderContext.render3D());
-            m_lockedRenderer->renderTransparent(renderContext, renderBatch);
+            //m_lockedRenderer->renderTransparent(renderContext, renderBatch);
         }
 
         void MapRenderer::renderEntityLinks(RenderContext& renderContext, RenderBatch& renderBatch) {
@@ -192,20 +189,20 @@ namespace TrenchBroom {
             renderer.setGroupOverlayTextColor(pref(Preferences::GroupInfoOverlayTextColor));
             renderer.setOverlayBackgroundColor(pref(Preferences::InfoOverlayBackgroundColor));
             renderer.setTint(false);
-            renderer.setTransparencyAlpha(pref(Preferences::TransparentFaceAlpha));
+            // renderer.setTransparencyAlpha(pref(Preferences::TransparentFaceAlpha));
 
             renderer.setGroupBoundsColor(pref(Preferences::DefaultGroupColor));
             renderer.setEntityBoundsColor(pref(Preferences::UndefinedEntityColor));
 
-            renderer.setBrushFaceColor(pref(Preferences::FaceColor));
-            renderer.setBrushEdgeColor(pref(Preferences::EdgeColor));
+            // renderer.setBrushFaceColor(pref(Preferences::FaceColor));
+            // renderer.setBrushEdgeColor(pref(Preferences::EdgeColor));
         }
 
         void MapRenderer::setupSelectionRenderer(ObjectRenderer& renderer) {
             renderer.setEntityOverlayTextColor(pref(Preferences::SelectedInfoOverlayTextColor));
             renderer.setGroupOverlayTextColor(pref(Preferences::SelectedInfoOverlayTextColor));
             renderer.setOverlayBackgroundColor(pref(Preferences::SelectedInfoOverlayBackgroundColor));
-            renderer.setShowBrushEdges(true);
+            // renderer.setShowBrushEdges(true);
             renderer.setShowOccludedObjects(true);
             renderer.setOccludedEdgeColor(pref(Preferences::OccludedSelectedEdgeColor));
             renderer.setTint(true);
@@ -219,8 +216,8 @@ namespace TrenchBroom {
             renderer.setShowEntityAngles(true);
             renderer.setEntityAngleColor(pref(Preferences::AngleIndicatorColor));
 
-            renderer.setBrushFaceColor(pref(Preferences::FaceColor));
-            renderer.setBrushEdgeColor(pref(Preferences::SelectedEdgeColor));
+            // renderer.setBrushFaceColor(pref(Preferences::FaceColor));
+            // renderer.setBrushEdgeColor(pref(Preferences::SelectedEdgeColor));
         }
 
         void MapRenderer::setupLockedRenderer(ObjectRenderer& renderer) {
@@ -230,7 +227,7 @@ namespace TrenchBroom {
             renderer.setShowOccludedObjects(false);
             renderer.setTint(true);
             renderer.setTintColor(pref(Preferences::LockedFaceColor));
-            renderer.setTransparencyAlpha(pref(Preferences::TransparentFaceAlpha));
+            // renderer.setTransparencyAlpha(pref(Preferences::TransparentFaceAlpha));
 
             renderer.setOverrideGroupBoundsColor(true);
             renderer.setGroupBoundsColor(pref(Preferences::LockedEdgeColor));
@@ -239,8 +236,8 @@ namespace TrenchBroom {
             renderer.setEntityBoundsColor(pref(Preferences::LockedEdgeColor));
             renderer.setShowEntityAngles(false);
 
-            renderer.setBrushFaceColor(pref(Preferences::FaceColor));
-            renderer.setBrushEdgeColor(pref(Preferences::LockedEdgeColor));
+            // renderer.setBrushFaceColor(pref(Preferences::FaceColor));
+            // renderer.setBrushEdgeColor(pref(Preferences::LockedEdgeColor));
         }
 
         void MapRenderer::setupEntityLinkRenderer() {
@@ -311,18 +308,15 @@ namespace TrenchBroom {
 
             if ((renderers & Renderer_Default) != 0) {
                 m_defaultRenderer->setObjects(collect.defaultNodes().groups(),
-                                              collect.defaultNodes().entities(),
-                                              collect.defaultNodes().brushes());
+                                              collect.defaultNodes().entities());
             }
             if ((renderers & Renderer_Selection) != 0) {
                 m_selectionRenderer->setObjects(collect.selectedNodes().groups(),
-                                                collect.selectedNodes().entities(),
-                                                collect.selectedNodes().brushes());
+                                                collect.selectedNodes().entities());
             }
             if ((renderers& Renderer_Locked) != 0) {
                 m_lockedRenderer->setObjects(collect.lockedNodes().groups(),
-                                             collect.lockedNodes().entities(),
-                                             collect.lockedNodes().brushes());
+                                             collect.lockedNodes().entities());
             }
             invalidateEntityLinkRenderer();
         }
@@ -337,15 +331,15 @@ namespace TrenchBroom {
         }
 
         void MapRenderer::invalidateBrushesInRenderers(Renderer renderers, const std::vector<Model::BrushNode*>& brushes) {
-            if ((renderers & Renderer_Default) != 0) {
-                m_defaultRenderer->invalidateBrushes(brushes);
-            }
-            if ((renderers & Renderer_Selection) != 0) {
-                m_selectionRenderer->invalidateBrushes(brushes);
-            }
-            if ((renderers& Renderer_Locked) != 0) {
-                m_lockedRenderer->invalidateBrushes(brushes);
-            }
+            // if ((renderers & Renderer_Default) != 0) {
+            //     m_defaultRenderer->invalidateBrushes(brushes);
+            // }
+            // if ((renderers & Renderer_Selection) != 0) {
+            //     m_selectionRenderer->invalidateBrushes(brushes);
+            // }
+            // if ((renderers& Renderer_Locked) != 0) {
+            //     m_lockedRenderer->invalidateBrushes(brushes);
+            // }
         }
 
         void MapRenderer::invalidateEntityLinkRenderer() {

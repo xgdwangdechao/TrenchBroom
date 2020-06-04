@@ -23,26 +23,19 @@
 
 namespace TrenchBroom {
     namespace Renderer {
-        void ObjectRenderer::setObjects(const std::vector<Model::GroupNode*>& groups, const std::vector<Model::EntityNode*>& entities, const std::vector<Model::BrushNode*>& brushes) {
+        void ObjectRenderer::setObjects(const std::vector<Model::GroupNode*>& groups, const std::vector<Model::EntityNode*>& entities) {
             m_groupRenderer.setGroups(groups);
             m_entityRenderer.setEntities(entities);
-            m_brushRenderer.setBrushes(brushes);
         }
 
         void ObjectRenderer::invalidate() {
             m_groupRenderer.invalidate();
             m_entityRenderer.invalidate();
-            m_brushRenderer.invalidate();
-        }
-
-        void ObjectRenderer::invalidateBrushes(const std::vector<Model::BrushNode*>& brushes) {
-            m_brushRenderer.invalidateBrushes(brushes);
         }
 
         void ObjectRenderer::clear() {
             m_groupRenderer.clear();
             m_entityRenderer.clear();
-            m_brushRenderer.clear();
         }
 
         void ObjectRenderer::reloadModels() {
@@ -69,12 +62,10 @@ namespace TrenchBroom {
 
         void ObjectRenderer::setTint(const bool tint) {
             m_entityRenderer.setTint(tint);
-            m_brushRenderer.setTint(tint);
         }
 
         void ObjectRenderer::setTintColor(const Color& tintColor) {
             m_entityRenderer.setTintColor(tintColor);
-            m_brushRenderer.setTintColor(tintColor);
         }
 
         void ObjectRenderer::setShowOccludedObjects(const bool showOccludedObjects) {
@@ -82,17 +73,11 @@ namespace TrenchBroom {
             m_groupRenderer.setShowOccludedOverlays(showOccludedObjects);
             m_entityRenderer.setShowOccludedBounds(showOccludedObjects);
             m_entityRenderer.setShowOccludedOverlays(showOccludedObjects);
-            m_brushRenderer.setShowOccludedEdges(showOccludedObjects);
         }
 
         void ObjectRenderer::setOccludedEdgeColor(const Color& occludedEdgeColor) {
             m_groupRenderer.setOccludedBoundsColor(occludedEdgeColor);
             m_entityRenderer.setOccludedBoundsColor(occludedEdgeColor);
-            m_brushRenderer.setOccludedEdgeColor(occludedEdgeColor);
-        }
-
-        void ObjectRenderer::setTransparencyAlpha(const float transparencyAlpha) {
-            m_brushRenderer.setTransparencyAlpha(transparencyAlpha);
         }
 
         void ObjectRenderer::setShowEntityAngles(const bool showAngles) {
@@ -119,31 +104,13 @@ namespace TrenchBroom {
             m_entityRenderer.setBoundsColor(color);
         }
 
-        void ObjectRenderer::setShowBrushEdges(const bool showBrushEdges) {
-            m_brushRenderer.setShowEdges(showBrushEdges);
-        }
-
-        void ObjectRenderer::setBrushFaceColor(const Color& brushFaceColor) {
-            m_brushRenderer.setFaceColor(brushFaceColor);
-        }
-
-        void ObjectRenderer::setBrushEdgeColor(const Color& brushEdgeColor) {
-            m_brushRenderer.setEdgeColor(brushEdgeColor);
-        }
-
         void ObjectRenderer::setShowHiddenObjects(const bool showHiddenObjects) {
             m_entityRenderer.setShowHiddenEntities(showHiddenObjects);
-            m_brushRenderer.setShowHiddenBrushes(showHiddenObjects);
         }
 
         void ObjectRenderer::renderOpaque(RenderContext& renderContext, RenderBatch& renderBatch) {
-            m_brushRenderer.renderOpaque(renderContext, renderBatch);
             m_entityRenderer.render(renderContext, renderBatch);
             m_groupRenderer.render(renderContext, renderBatch);
-        }
-
-        void ObjectRenderer::renderTransparent(RenderContext& renderContext, RenderBatch& renderBatch) {
-            m_brushRenderer.renderTransparent(renderContext, renderBatch);
         }
     }
 }
