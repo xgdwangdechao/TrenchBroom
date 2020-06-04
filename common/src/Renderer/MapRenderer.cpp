@@ -54,7 +54,8 @@ namespace TrenchBroom {
         m_defaultRenderer(createDefaultRenderer(m_document)),
         m_selectionRenderer(createSelectionRenderer(m_document)),
         m_lockedRenderer(createLockRenderer(m_document)),
-        m_entityLinkRenderer(std::make_unique<EntityLinkRenderer>(m_document)) {
+        m_entityLinkRenderer(std::make_unique<EntityLinkRenderer>(m_document)),
+        m_brushRenderer(std::make_unique<BrushRenderer>()) {
             bindObservers();
             setupRenderers();
         }
@@ -90,6 +91,7 @@ namespace TrenchBroom {
             m_selectionRenderer->clear();
             m_lockedRenderer->clear();
             m_entityLinkRenderer->invalidate();
+            m_brushRenderer->clear();
         }
 
         void MapRenderer::overrideSelectionColors(const Color& color, const float mix) {
@@ -113,10 +115,12 @@ namespace TrenchBroom {
             renderDefaultOpaque(renderContext, renderBatch);
             renderLockedOpaque(renderContext, renderBatch);
             renderSelectionOpaque(renderContext, renderBatch);
+            m_brushRenderer->renderOpaque(renderContext, renderBatch);
 
             renderDefaultTransparent(renderContext, renderBatch);
             renderLockedTransparent(renderContext, renderBatch);
             renderSelectionTransparent(renderContext, renderBatch);
+            m_brushRenderer->renderTransparent(renderContext, renderBatch);
 
             renderEntityLinks(renderContext, renderBatch);
         }
@@ -319,6 +323,13 @@ namespace TrenchBroom {
                                              collect.lockedNodes().entities());
             }
             invalidateEntityLinkRenderer();
+
+            // FIXME: hack
+            std::vector<Model::BrushNode*> brushes;
+            kdl::vec_append(brushes, collect.defaultNodes().brushes());
+            kdl::vec_append(brushes, collect.selectedNodes().brushes());
+            kdl::vec_append(brushes, collect.lockedNodes().brushes());
+            m_brushRenderer->setBrushes(brushes);
         }
 
         void MapRenderer::invalidateRenderers(Renderer renderers) {
@@ -328,9 +339,13 @@ namespace TrenchBroom {
                 m_selectionRenderer->invalidate();
             if ((renderers& Renderer_Locked) != 0)
                 m_lockedRenderer->invalidate();
+
+            // FIXME: invalidate specific brushes
+            m_brushRenderer->invalidate();
         }
 
         void MapRenderer::invalidateBrushesInRenderers(Renderer renderers, const std::vector<Model::BrushNode*>& brushes) {
+            m_brushRenderer->invalidateBrushes(brushes);
             // if ((renderers & Renderer_Default) != 0) {
             //     m_defaultRenderer->invalidateBrushes(brushes);
             // }
