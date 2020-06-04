@@ -66,15 +66,10 @@ namespace TrenchBroom {
             std::vector<Vertex> m_cachedVertices;
             std::vector<CachedEdge> m_cachedEdges;
             std::vector<CachedFace> m_cachedFacesSortedByTexture;
-            bool m_rendererCacheValid;
-
+            
         public:
             BrushRendererBrushCache();
 
-            /**
-             * Only exposed to be called by BrushFace
-             */
-            void invalidateVertexCache();
             /**
              * Call this before cachedVertices()/cachedFacesSortedByTexture()/cachedEdges()
              *

@@ -314,7 +314,6 @@ namespace TrenchBroom {
         }
 
         void BrushNode::invalidateVertexCache() {
-            m_brushRendererBrushCache->invalidateVertexCache();
         }
 
         Renderer::BrushRendererBrushCache& BrushNode::brushRendererBrushCache() const {

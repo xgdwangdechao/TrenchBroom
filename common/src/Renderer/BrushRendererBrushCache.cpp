@@ -44,21 +44,10 @@ namespace TrenchBroom {
                   vertexIndex1RelativeToBrush(i_vertexIndex1RelativeToBrush),
                   vertexIndex2RelativeToBrush(i_vertexIndex2RelativeToBrush) {}
 
-        BrushRendererBrushCache::BrushRendererBrushCache()
-                : m_rendererCacheValid(false) {}
+        BrushRendererBrushCache::BrushRendererBrushCache() {}
 
-        void BrushRendererBrushCache::invalidateVertexCache() {
-            m_rendererCacheValid = false;
-            m_cachedVertices.clear();
-            m_cachedEdges.clear();
-            m_cachedFacesSortedByTexture.clear();
-        }
 
         void BrushRendererBrushCache::validateVertexCache(const Model::BrushNode* brushNode) {
-            if (m_rendererCacheValid) {
-                return;
-            }
-
             // build vertex cache and face cache
             const Model::Brush& brush = brushNode->brush();
 
@@ -119,22 +108,17 @@ namespace TrenchBroom {
 
                 m_cachedEdges.emplace_back(&face1, &face2, vertexIndex1RelativeToBrush, vertexIndex2RelativeToBrush);
             }
-
-            m_rendererCacheValid = true;
         }
 
         const std::vector<BrushRendererBrushCache::Vertex>& BrushRendererBrushCache::cachedVertices() const {
-            assert(m_rendererCacheValid);
             return m_cachedVertices;
         }
 
         const std::vector<BrushRendererBrushCache::CachedFace>& BrushRendererBrushCache::cachedFacesSortedByTexture() const {
-            assert(m_rendererCacheValid);
             return m_cachedFacesSortedByTexture;
         }
 
         const std::vector<BrushRendererBrushCache::CachedEdge>& BrushRendererBrushCache::cachedEdges() const {
-            assert(m_rendererCacheValid);
             return m_cachedEdges;
         }
     }
