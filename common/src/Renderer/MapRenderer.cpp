@@ -193,13 +193,13 @@ namespace TrenchBroom {
             renderer.setGroupOverlayTextColor(pref(Preferences::GroupInfoOverlayTextColor));
             renderer.setOverlayBackgroundColor(pref(Preferences::InfoOverlayBackgroundColor));
             renderer.setTint(false);
-            // renderer.setTransparencyAlpha(pref(Preferences::TransparentFaceAlpha));
+            m_brushRenderer->setTransparencyAlpha(pref(Preferences::TransparentFaceAlpha));
 
             renderer.setGroupBoundsColor(pref(Preferences::DefaultGroupColor));
             renderer.setEntityBoundsColor(pref(Preferences::UndefinedEntityColor));
 
-            // renderer.setBrushFaceColor(pref(Preferences::FaceColor));
-            // renderer.setBrushEdgeColor(pref(Preferences::EdgeColor));
+            m_brushRenderer->setFaceColor(pref(Preferences::FaceColor));
+            m_brushRenderer->setEdgeColor(pref(Preferences::EdgeColor));
         }
 
         void MapRenderer::setupSelectionRenderer(ObjectRenderer& renderer) {
