@@ -385,7 +385,7 @@ namespace TrenchBroom {
             if (m_showOccludedEdges) {
                 m_edgeRenderer.renderOnTop(renderBatch, m_occludedEdgeColor);
             }
-            m_edgeRenderer.render(renderBatch, m_edgeColor);
+            m_edgeRenderer.render(renderBatch); //, m_edgeColor); -- disable uniform color 
         }
 
         class BrushRenderer::FilterWrapper : public BrushRenderer::Filter {

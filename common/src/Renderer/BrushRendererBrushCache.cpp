@@ -52,13 +52,14 @@ namespace TrenchBroom {
             const Model::Brush& brush = brushNode->brush();
 
             m_cachedVertices.clear();
-            m_cachedVertices.reserve(brush.vertexCount());
+            m_cachedVertices.reserve(brush.vertexCount()); // FIXME: too small reserve size
 
             m_cachedFacesSortedByTexture.clear();
             m_cachedFacesSortedByTexture.reserve(brush.faceCount());
 
             for (const Model::BrushFace& face : brush.faces()) {
                 const auto indexOfFirstVertexRelativeToBrush = m_cachedVertices.size();
+                const vm::vec3f faceNormal = vm::vec3f(face.boundary().normal);
 
                 // The boundary is in CCW order, but the renderer expects CW order:
                 auto& boundary = face.geometry()->boundary();
@@ -74,7 +75,7 @@ namespace TrenchBroom {
                     vertex->setPayload(static_cast<GLuint>(currentIndex));
 
                     const auto& position = vertex->position();
-                    m_cachedVertices.emplace_back(vm::vec3f(position), vm::vec3f(face.boundary().normal), face.textureCoords(position), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+                    m_cachedVertices.emplace_back(vm::vec3f(position), faceNormal, face.textureCoords(position), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
 
                     current = current->previous();
                 }
