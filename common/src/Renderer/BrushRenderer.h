@@ -134,8 +134,6 @@ namespace TrenchBroom {
         private:
             class FilterWrapper;
         private:
-            std::unique_ptr<Filter> m_filter;
-
             struct BrushInfo {
                 AllocationTracker::Block* vertexHolderKey;
                 AllocationTracker::Block* edgeIndicesKey;

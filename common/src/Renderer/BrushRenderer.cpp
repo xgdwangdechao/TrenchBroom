@@ -200,7 +200,6 @@ namespace TrenchBroom {
         // BrushRenderer
 
         BrushRenderer::BrushRenderer() :
-        m_filter(std::make_unique<NoFilter>()),
         m_showEdges(false),
         m_grayscale(false),
         m_tint(false),
@@ -517,7 +516,8 @@ namespace TrenchBroom {
             assert(m_invalidBrushes.find(brush) != std::end(m_invalidBrushes));
             assert(m_brushInfo.find(brush) == std::end(m_brushInfo));
 
-            const FilterWrapper wrapper(*m_filter, m_showHiddenBrushes);
+            const NoFilter filter;
+            const FilterWrapper wrapper(filter, m_showHiddenBrushes);
 
             // evaluate filter. only evaluate the filter once per brush.
             const auto settings = wrapper.markFaces(brush);
