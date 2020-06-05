@@ -100,7 +100,47 @@ namespace TrenchBroom {
             void doRender(RenderBatch& renderBatch, const EdgeRenderer::Params& params) override;
         };
 
-        class IndexedEdgeRenderer : public EdgeRenderer {
+        // Only used by BrushRenderer
+
+        class BrushEdgeRenderer {
+        public:
+            struct Params {
+                float width;
+                double offset;
+                bool onTop;
+                bool useColor;
+                Color color;
+                Params(float i_width, double i_offset, bool i_onTop);
+                Params(float i_width, double i_offset, bool i_onTop, const Color& i_color);
+                Params(float i_width, double i_offset, bool i_onTop, bool i_useColor, const Color& i_color);
+            };
+
+            class RenderBase {
+            private:
+                const Params m_params;
+            public:
+                RenderBase(const Params& params);
+                virtual ~RenderBase();
+            protected:
+                void renderEdges(RenderContext& renderContext);
+            private:
+                virtual void doRenderVertices(RenderContext& renderContext) = 0;
+            };
+        public:
+            virtual ~BrushEdgeRenderer();
+
+            void render(RenderBatch& renderBatch, float width = 1.0f, double offset = 0.0);
+            void render(RenderBatch& renderBatch, const Color& color, float width = 1.0f, double offset = 0.0);
+            void render(RenderBatch& renderBatch, bool useColor, const Color& color, float width = 1.0f, double offset = 0.0);
+            void renderOnTop(RenderBatch& renderBatch, float width = 1.0f, double offset = 0.2);
+            void renderOnTop(RenderBatch& renderBatch, const Color& color, float width = 1.0f, double offset = 0.2);
+            void renderOnTop(RenderBatch& renderBatch, bool useColor, const Color& color, float width = 1.0f, double offset = 0.2);
+            void render(RenderBatch& renderBatch, bool useColor, const Color& color, bool onTop, float width, double offset);
+        private:
+            virtual void doRender(RenderBatch& renderBatch, const Params& params) = 0;
+        };
+
+        class IndexedEdgeRenderer : public BrushEdgeRenderer {
         private:
             class Render : public RenderBase, public IndexedRenderable {
             private:
@@ -125,7 +165,7 @@ namespace TrenchBroom {
 
             friend void swap(IndexedEdgeRenderer& left, IndexedEdgeRenderer& right);
         private:
-            void doRender(RenderBatch& renderBatch, const EdgeRenderer::Params& params) override;
+            void doRender(RenderBatch& renderBatch, const BrushEdgeRenderer::Params& params) override;
         };
     }
 }
