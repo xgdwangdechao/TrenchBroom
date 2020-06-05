@@ -40,6 +40,12 @@ namespace TrenchBroom {
     }
 
     namespace Renderer {
+        namespace BrushRenderFlags {
+            constexpr uint32_t Default  = 0u;
+            constexpr uint32_t Selected = 1u << 0;
+            constexpr uint32_t Locked   = 1u << 1;
+        }
+
         class BrushRenderer {
         public:
             class Filter {
