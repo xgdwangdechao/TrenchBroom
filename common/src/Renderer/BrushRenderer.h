@@ -93,14 +93,12 @@ namespace TrenchBroom {
 
                 bool visible(const Model::BrushNode* brush) const;
                 bool visible(const Model::BrushNode* brush, const Model::BrushFace& face) const;
-                bool visible(const Model::BrushNode* brush, const Model::BrushEdge* edge) const;
 
                 bool editable(const Model::BrushNode* brush) const;
                 bool editable(const Model::BrushNode* brush, const Model::BrushFace& face) const;
 
                 bool selected(const Model::BrushNode* brush) const;
                 bool selected(const Model::BrushNode* brush, const Model::BrushFace& face) const;
-                bool selected(const Model::BrushNode* brush, const Model::BrushEdge* edge) const;
                 bool hasSelectedFaces(const Model::BrushNode* brush) const;
             private:
                 DefaultFilter& operator=(const DefaultFilter& other);
