@@ -19,18 +19,12 @@
  along with TrenchBroom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-uniform vec4 Color;
-uniform bool UseUniformColor;
-
 varying vec4 worldCoordinates;
 varying vec4 vertexColor;
 
 void main(void) {
-    if (UseUniformColor) {
-        vertexColor = Color;
-    } else {
-        vertexColor = gl_Color;
-    }
+    vertexColor = gl_Color;
+
     gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;
     // Brushes are assumed to be in world space already (Face.vertsh also assumes this)
     worldCoordinates = gl_Vertex;
