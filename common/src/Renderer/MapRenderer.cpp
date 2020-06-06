@@ -94,6 +94,9 @@ namespace TrenchBroom {
             m_brushRenderer->clear();
         }
 
+        /**
+         * Used to flash the selection color e.g. when duplicating
+         */
         void MapRenderer::overrideSelectionColors(const Color& color, const float mix) {
             const Color edgeColor = pref(Preferences::SelectedEdgeColor).mixed(color, mix);
             const Color occludedEdgeColor = pref(Preferences::SelectedFaceColor).mixed(color, mix);
