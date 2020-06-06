@@ -152,57 +152,5 @@ namespace TrenchBroom {
         void BrushIndexArray::cleanupIndices() {
             m_indexHolder.unbindBlock();
         }
-
-        // BrushVertexArray
-
-        BrushVertexArray::BrushVertexArray() : m_vertexHolder(),
-                                               m_allocationTracker(0) {}
-
-        std::pair<AllocationTracker::Block*, BrushVertexArray::Vertex*> BrushVertexArray::getPointerToInsertVerticesAt(const size_t vertexCount) {
-            auto block = m_allocationTracker.allocate(vertexCount);
-            if (block != nullptr) {
-                Vertex* dest = m_vertexHolder.getPointerToWriteElementsTo(block->pos, vertexCount);
-                return {block, dest};
-            }
-
-            // retry
-            const size_t newSize = std::max(2 * m_allocationTracker.capacity(),
-                                            m_allocationTracker.capacity() + vertexCount);
-            m_allocationTracker.expand(newSize);
-            m_vertexHolder.resize(newSize);
-
-            // insert again
-            block = m_allocationTracker.allocate(vertexCount);
-            assert(block != nullptr);
-
-            Vertex* dest = m_vertexHolder.getPointerToWriteElementsTo(block->pos, vertexCount);
-            return {block, dest};
-        }
-
-        void BrushVertexArray::deleteVerticesWithKey(AllocationTracker::Block* key) {
-            m_allocationTracker.free(key);
-
-            // there's no need to actually delete the vertices from the VBO.
-            // because we only ever do indexed drawing from it.
-            // Marking the space free in m_allocationTracker will allow
-            // us to re-use the space later
-        }
-
-        bool BrushVertexArray::setupVertices() {
-            return m_vertexHolder.setupVertices();
-        }
-
-        void BrushVertexArray::cleanupVertices() {
-            m_vertexHolder.cleanupVertices();
-        }
-
-        bool BrushVertexArray::prepared() const {
-            return m_vertexHolder.prepared();
-        }
-
-        void BrushVertexArray::prepare(VboManager& vboManager) {
-            m_vertexHolder.prepare(vboManager);
-            assert(m_vertexHolder.prepared());
-        }
     }
 }

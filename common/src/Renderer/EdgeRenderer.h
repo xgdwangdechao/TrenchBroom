@@ -24,13 +24,12 @@
 #include "Renderer/IndexRangeMap.h"
 #include "Renderer/Renderable.h"
 #include "Renderer/VertexArray.h"
+#include "Renderer/BrushRendererArrays.h"
 
 #include <memory>
 
 namespace TrenchBroom {
     namespace Renderer {
-        class BrushIndexArray;
-        class BrushVertexArray;
         class RenderBatch;
 
         class EdgeRenderer {

@@ -312,15 +312,20 @@ namespace TrenchBroom {
          * Same as BrushIndexArray but for vertices instead of indices.
          * The only difference is deleteVerticesWithKey() doesn't need to zero out
          * the deleted memory in the VBO, while BrushIndexArray's does.
+         *
+         * @tparam V vertex class
          */
-        class BrushVertexArray {
+        template <class V>
+        class TrackedVertexArray {
         private:
-            using Vertex = Renderer::GLVertexTypes::P3NT2C4::Vertex;
+            using Vertex = V;
 
             VertexHolder<Vertex> m_vertexHolder;
             AllocationTracker m_allocationTracker;
         public:
-            BrushVertexArray();
+            TrackedVertexArray() :
+            m_vertexHolder(),
+            m_allocationTracker(0) {}
 
             /**
              * Call this to request writing the given number of vertices.
@@ -330,18 +335,55 @@ namespace TrenchBroom {
              * Returns a AllocationTracker::Block pointer which can be used later in a call to deleteVerticesWithKey(),
              * and also a Vertex pointer where the caller should write `elementCount` Vertex objects.
              */
-            std::pair<AllocationTracker::Block*, Vertex*> getPointerToInsertVerticesAt(size_t vertexCount);
+            std::pair<AllocationTracker::Block*, Vertex*> getPointerToInsertVerticesAt(const size_t vertexCount){
+                auto block = m_allocationTracker.allocate(vertexCount);
+                if (block != nullptr) {
+                    Vertex* dest = m_vertexHolder.getPointerToWriteElementsTo(block->pos, vertexCount);
+                    return {block, dest};
+                }
 
-            void deleteVerticesWithKey(AllocationTracker::Block* key);
+                // retry
+                const size_t newSize = std::max(2 * m_allocationTracker.capacity(),
+                                                m_allocationTracker.capacity() + vertexCount);
+                m_allocationTracker.expand(newSize);
+                m_vertexHolder.resize(newSize);
+
+                // insert again
+                block = m_allocationTracker.allocate(vertexCount);
+                assert(block != nullptr);
+
+                Vertex* dest = m_vertexHolder.getPointerToWriteElementsTo(block->pos, vertexCount);
+                return {block, dest};
+            }
+
+            void deleteVerticesWithKey(AllocationTracker::Block* key) {
+                m_allocationTracker.free(key);
+
+                // there's no need to actually delete the vertices from the VBO.
+                // because we only ever do indexed drawing from it.
+                // Marking the space free in m_allocationTracker will allow
+                // us to re-use the space later
+            }
 
             // setting up GL attributes
-            bool setupVertices();
-            void cleanupVertices();
+            bool setupVertices()  {
+               return m_vertexHolder.setupVertices();
+            }
+            void cleanupVertices() {
+               m_vertexHolder.cleanupVertices();
+            }
 
             // uploading the VBO
-            bool prepared() const;
-            void prepare(VboManager& vboManager);
+            bool prepared() const {
+                return m_vertexHolder.prepared();
+            }
+            void prepare(VboManager& vboManager)  {
+                m_vertexHolder.prepare(vboManager);
+                assert(m_vertexHolder.prepared());
+            }
         };
+
+        using BrushVertexArray = TrackedVertexArray<GLVertexTypes::P3NT2C4::Vertex>;
     }
 }
 
