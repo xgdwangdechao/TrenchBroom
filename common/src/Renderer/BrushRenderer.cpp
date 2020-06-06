@@ -39,12 +39,6 @@ namespace TrenchBroom {
         // BrushRendererBrushCache
 
         namespace BrushRendererBrushCache {
-            using VertexSpec = Renderer::GLVertexTypes::P3NT2C4;
-            using Vertex = VertexSpec::Vertex;
-
-            using EdgeVertexSpec = Renderer::GLVertexTypes::P3C4;
-            using EdgeVertex = EdgeVertexSpec::Vertex;
-            
             struct CachedFace {
                 const Assets::Texture* texture;
                 const Model::BrushFace* face;
@@ -524,7 +518,7 @@ namespace TrenchBroom {
             }
 
             // collect vertices
-            std::vector<BrushRendererBrushCache::Vertex> cachedVertices;
+            std::vector<BrushVertexArray::Vertex> cachedVertices;
             std::vector<BrushRendererBrushCache::CachedFace> facesSortedByTex;
             
             {

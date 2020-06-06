@@ -325,9 +325,9 @@ namespace TrenchBroom {
          */
         template <class V>
         class TrackedVertexArray {
-        private:
+        public:
             using Vertex = V;
-
+        private:
             VertexHolder<Vertex> m_vertexHolder;
             AllocationTracker m_allocationTracker;
         public:
