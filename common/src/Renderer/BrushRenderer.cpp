@@ -475,6 +475,29 @@ namespace TrenchBroom {
             BrushInfo& info = m_brushInfo[brush];
             const Model::Brush& brushValue = brush->brush();
 
+            // insert edge vertices into VBO
+            {
+                const size_t edgeVertCount = 2 * brushValue.edges().size();
+                auto [vertKey, vertDest] = m_edgeVertices->getPointerToInsertVerticesAt(edgeVertCount);              
+                info.edgeVerticesKey = vertKey;
+
+                size_t i = 0;
+                for (const Model::BrushEdge* currentEdge : brushValue.edges()) {
+                    const auto faceIndex1 = currentEdge->firstFace()->payload();
+                    const auto faceIndex2 = currentEdge->secondFace()->payload();
+                    assert(faceIndex1 && faceIndex2);
+                    
+                    const auto& face1 = brushValue.face(*faceIndex1);
+                    const auto& face2 = brushValue.face(*faceIndex2);
+
+                    const vm::vec3f pos1 = vm::vec3f(currentEdge->firstVertex()->position());
+                    const vm::vec3f pos2 = vm::vec3f(currentEdge->secondVertex()->position());
+
+                    vertDest[i++] = GLVertexTypes::P3NT2C4::Vertex(pos1, vm::vec3f(), vm::vec2f(), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+                    vertDest[i++] = GLVertexTypes::P3NT2C4::Vertex(pos2, vm::vec3f(), vm::vec2f(), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+                }
+            }
+
             // collect vertices
             std::vector<BrushRendererBrushCache::Vertex> cachedVertices;
             std::vector<BrushRendererBrushCache::CachedFace> facesSortedByTex;
@@ -523,29 +546,6 @@ namespace TrenchBroom {
             info.vertexHolderKey = vertBlock;
 
             const auto brushVerticesStartIndex = static_cast<GLuint>(vertBlock->pos);
-
-            // insert edge vertices into VBO
-            {
-                const size_t edgeVertCount = 2 * brushValue.edges().size();
-                auto [vertKey, vertDest] = m_edgeVertices->getPointerToInsertVerticesAt(edgeVertCount);              
-                info.edgeVerticesKey = vertKey;
-
-                size_t i = 0;
-                for (const Model::BrushEdge* currentEdge : brushValue.edges()) {
-                    const auto faceIndex1 = currentEdge->firstFace()->payload();
-                    const auto faceIndex2 = currentEdge->secondFace()->payload();
-                    assert(faceIndex1 && faceIndex2);
-                    
-                    const auto& face1 = brushValue.face(*faceIndex1);
-                    const auto& face2 = brushValue.face(*faceIndex2);
-
-                    const vm::vec3f pos1 = vm::vec3f(currentEdge->firstVertex()->position());
-                    const vm::vec3f pos2 = vm::vec3f(currentEdge->secondVertex()->position());
-
-                    vertDest[i++] = GLVertexTypes::P3NT2C4::Vertex(pos1, vm::vec3f(), vm::vec2f(), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
-                    vertDest[i++] = GLVertexTypes::P3NT2C4::Vertex(pos2, vm::vec3f(), vm::vec2f(), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
-                }
-            }
 
             // insert face indices
 
