@@ -495,25 +495,6 @@ namespace TrenchBroom {
             }
         }
 
-#if 0
-        static inline bool shouldRenderEdge(const BrushRendererBrushCache::CachedEdge& edge,
-                                            const BrushRenderer::Filter::EdgeRenderPolicy policy) {
-            using EdgeRenderPolicy = BrushRenderer::Filter::EdgeRenderPolicy;
-
-            switch (policy) {
-                case EdgeRenderPolicy::RenderAll:
-                    return true;
-                case EdgeRenderPolicy::RenderIfEitherFaceMarked:
-                    return (edge.face1 && edge.face1->isMarked()) || (edge.face2 && edge.face2->isMarked());
-                case EdgeRenderPolicy::RenderIfBothFacesMarked:
-                    return (edge.face1 && edge.face1->isMarked()) && (edge.face2 && edge.face2->isMarked());
-                case EdgeRenderPolicy::RenderNone:
-                    return false;
-                switchDefault()
-            }
-        }
-#endif
-
         static size_t countMarkedEdgeIndices(const std::vector<BrushRendererBrushCache::CachedEdge>& cachedEdges) {
             size_t indexCount = 0;
             for (const auto& edge : cachedEdges) {
