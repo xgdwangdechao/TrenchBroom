@@ -198,6 +198,7 @@ namespace TrenchBroom {
             renderer.setGroupBoundsColor(pref(Preferences::DefaultGroupColor));
             renderer.setEntityBoundsColor(pref(Preferences::UndefinedEntityColor));
 
+            m_brushRenderer->setEditorContext(&kdl::mem_lock(m_document)->editorContext());
             m_brushRenderer->setFaceColor(pref(Preferences::FaceColor));
             m_brushRenderer->setEdgeColor(pref(Preferences::EdgeColor));
         }

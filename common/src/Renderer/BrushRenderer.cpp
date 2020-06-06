@@ -279,8 +279,13 @@ namespace TrenchBroom {
         m_showOccludedEdges(false),
         m_forceTransparent(false),
         m_transparencyAlpha(1.0f),
-        m_showHiddenBrushes(false) {
+        m_showHiddenBrushes(false),
+        m_editorContext(nullptr) {
             clear();
+        }
+
+        void BrushRenderer::setEditorContext(Model::EditorContext* editorContext) {
+            m_editorContext = editorContext;
         }
 
         void BrushRenderer::addBrushes(const std::vector<Model::BrushNode*>& brushes) {
@@ -550,6 +555,13 @@ namespace TrenchBroom {
             return false;
         }
 
+        bool BrushRenderer::visible(const Model::BrushNode* brush) const {
+            if (m_editorContext == nullptr) {
+                return true;
+            }
+            return m_showHiddenBrushes || m_editorContext->visible(brush);
+        }
+
         void BrushRenderer::validateBrush(const Model::BrushNode* brush) {
             assert(m_allBrushes.find(brush) != std::end(m_allBrushes));
             assert(m_invalidBrushes.find(brush) != std::end(m_invalidBrushes));
@@ -557,21 +569,10 @@ namespace TrenchBroom {
 
             // At this point, brush is not in the VBO's and will not be rendered.
 
-            // FIXME: handle m_showHiddenBrushes
-#if 0
-            const NoFilter filter;
-            const FilterWrapper wrapper(filter, m_showHiddenBrushes);
-
-            // evaluate filter. only evaluate the filter once per brush.
-            const auto settings = wrapper.markFaces(brush);
-            const auto [facePolicy, edgePolicy] = settings;
-
-            if (facePolicy == Filter::FaceRenderPolicy::RenderNone &&
-                edgePolicy == Filter::EdgeRenderPolicy::RenderNone) {
-                // NOTE: this skips inserting the brush into m_brushInfo
+            if (!visible(brush)) {
                 return;
             }
-#endif
+
             BrushInfo& info = m_brushInfo[brush];
 
             // collect vertices
