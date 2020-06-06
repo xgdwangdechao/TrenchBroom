@@ -54,18 +54,6 @@ namespace TrenchBroom {
                 CachedFace(const Model::BrushFace* i_face,
                            size_t i_indexOfFirstVertexRelativeToBrush);
             };
-
-            struct CachedEdge {
-                const Model::BrushFace* face1;
-                const Model::BrushFace* face2;
-                size_t vertexIndex1RelativeToBrush;
-                size_t vertexIndex2RelativeToBrush;
-
-                CachedEdge(const Model::BrushFace* i_face1,
-                           const Model::BrushFace* i_face2,
-                           size_t i_vertexIndex1RelativeToBrush,
-                           size_t i_vertexIndex2RelativeToBrush);
-            };
         }
 
         BrushRendererBrushCache::CachedFace::CachedFace(const Model::BrushFace* i_face,
@@ -74,15 +62,6 @@ namespace TrenchBroom {
                   face(i_face),
                   vertexCount(i_face->vertexCount()),
                   indexOfFirstVertexRelativeToBrush(i_indexOfFirstVertexRelativeToBrush) {}
-
-        BrushRendererBrushCache::CachedEdge::CachedEdge(const Model::BrushFace* i_face1,
-                                                        const Model::BrushFace* i_face2,
-                                                        const size_t i_vertexIndex1RelativeToBrush,
-                                                        const size_t i_vertexIndex2RelativeToBrush)
-                : face1(i_face1),
-                  face2(i_face2),
-                  vertexIndex1RelativeToBrush(i_vertexIndex1RelativeToBrush),
-                  vertexIndex2RelativeToBrush(i_vertexIndex2RelativeToBrush) {}
 
         /**
          * Rendering overview:
@@ -423,16 +402,6 @@ namespace TrenchBroom {
                 *(dest++) = baseIndex + static_cast<GLuint>(i + 1);
                 *(dest++) = baseIndex + static_cast<GLuint>(i + 2);
             }
-        }
-
-        static size_t countMarkedEdgeIndices(const std::vector<BrushRendererBrushCache::CachedEdge>& cachedEdges) {
-            size_t indexCount = 0;
-            for (const auto& edge : cachedEdges) {
-                if (true /* shouldRenderEdge(edge, policy)*/) {
-                    indexCount += 2;
-                }
-            }
-            return indexCount;
         }
 
         bool BrushRenderer::shouldDrawFaceInTransparentPass(const Model::BrushNode* brush, const Model::BrushFace& face) const {
