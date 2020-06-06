@@ -464,6 +464,26 @@ namespace TrenchBroom {
             return vm::vec4f(1,1,1,1);
         }
 
+        /**
+         * The last component is how much to blend the tin color.
+         */
+        vm::vec4f BrushRenderer::faceColor(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face) {
+            BrushRenderFlags::Type flags = brushFlags;
+
+            if (face.selected()) {
+                flags |= BrushRenderFlags::Selected;
+            }
+
+            // FIXME: temporary colors
+            if (flags & BrushRenderFlags::Locked) {
+                return vm::vec4f(0,0,1,0.5);
+            }
+            if (flags & BrushRenderFlags::Selected) {
+                return vm::vec4f(1,0,0,0.5);
+            }            
+            return vm::vec4f(0,0,0,0);
+        }
+
         void BrushRenderer::validateBrush(const Model::BrushNode* brush) {
             assert(m_allBrushes.find(brush) != std::end(m_allBrushes));
             assert(m_invalidBrushes.find(brush) != std::end(m_invalidBrushes));
@@ -519,6 +539,7 @@ namespace TrenchBroom {
                 for (const Model::BrushFace& face : brushValue.faces()) {
                     const auto indexOfFirstVertexRelativeToBrush = cachedVertices.size();
                     const vm::vec3f faceNormal = vm::vec3f(face.boundary().normal);
+                    const vm::vec4f color = faceColor(brushFlags, face);
 
                     // The boundary is in CCW order, but the renderer expects CW order:
                     auto& boundary = face.geometry()->boundary();
@@ -527,7 +548,7 @@ namespace TrenchBroom {
                         Model::BrushVertex* vertex = current->origin();
 
                         const auto& position = vertex->position();
-                        cachedVertices.emplace_back(vm::vec3f(position), faceNormal, face.textureCoords(position), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+                        cachedVertices.emplace_back(vm::vec3f(position), faceNormal, face.textureCoords(position), color);
                     }
 
                     // face cache
