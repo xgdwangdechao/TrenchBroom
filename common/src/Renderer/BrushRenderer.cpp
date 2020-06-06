@@ -88,7 +88,11 @@ namespace TrenchBroom {
          * Rendering overview:
          * There are 2 things to render: brush faces (filled/textured polygons) and brush edges.
          *
-         * For faces, we need to write a copy of each vertex for each face it's used on.
+         * For faces, we need to write a copy of each vertex for each face it's used on, because
+         * of the texture coordinates/normal and face selection state being unique per face.
+         *
+         * For edges, it's a it more complicated because we only want to draw each edge once, even
+         * though it's shared between 2 faces.
          */
         static std::tuple<std::vector<BrushRendererBrushCache::Vertex>,
                          std::vector<BrushRendererBrushCache::CachedFace>,
@@ -550,6 +554,8 @@ namespace TrenchBroom {
             assert(m_allBrushes.find(brush) != std::end(m_allBrushes));
             assert(m_invalidBrushes.find(brush) != std::end(m_invalidBrushes));
             assert(m_brushInfo.find(brush) == std::end(m_brushInfo));
+
+            // At this point, brush is not in the VBO's and will not be rendered.
 
             // FIXME: handle m_showHiddenBrushes
 #if 0
