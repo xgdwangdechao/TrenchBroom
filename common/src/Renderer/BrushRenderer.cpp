@@ -36,27 +36,7 @@
 
 namespace TrenchBroom {
     namespace Renderer {
-        // BrushRendererBrushCache
-
-        namespace BrushRendererBrushCache {
-            struct CachedFace {
-                const Assets::Texture* texture;
-                const Model::BrushFace* face;
-                size_t vertexCount;
-                size_t indexOfFirstVertexRelativeToBrush;
-
-                CachedFace(const Model::BrushFace* i_face,
-                           size_t i_indexOfFirstVertexRelativeToBrush);
-            };
-        }
-
-        BrushRendererBrushCache::CachedFace::CachedFace(const Model::BrushFace* i_face,
-                                                        const size_t i_indexOfFirstVertexRelativeToBrush)
-                : texture(i_face->texture()),
-                  face(i_face),
-                  vertexCount(i_face->vertexCount()),
-                  indexOfFirstVertexRelativeToBrush(i_indexOfFirstVertexRelativeToBrush) {}
-
+    
         /**
          * Rendering overview:
          * There are 2 things to render: brush faces (filled/textured polygons) and brush edges.
@@ -478,6 +458,21 @@ namespace TrenchBroom {
             return vm::vec4f(0,0,0,0);
         }
 
+        struct CachedFace {
+            const Assets::Texture* texture;
+            const Model::BrushFace* face;
+            size_t vertexCount;
+            size_t indexOfFirstVertexRelativeToBrush;
+
+            CachedFace(const Model::BrushFace* i_face,
+                       size_t i_indexOfFirstVertexRelativeToBrush)
+            : texture(i_face->texture()),
+              face(i_face),
+              vertexCount(i_face->vertexCount()),
+              indexOfFirstVertexRelativeToBrush(i_indexOfFirstVertexRelativeToBrush) {}
+        };
+
+
         void BrushRenderer::validateBrush(const Model::BrushNode* brush) {
             assert(m_allBrushes.find(brush) != std::end(m_allBrushes));
             assert(m_invalidBrushes.find(brush) != std::end(m_invalidBrushes));
@@ -519,7 +514,7 @@ namespace TrenchBroom {
 
             // collect vertices
             std::vector<BrushVertexArray::Vertex> cachedVertices;
-            std::vector<BrushRendererBrushCache::CachedFace> facesSortedByTex;
+            std::vector<CachedFace> facesSortedByTex;
             
             {
                 // build vertex cache and face cache
@@ -554,7 +549,7 @@ namespace TrenchBroom {
 
                 std::sort(facesSortedByTex.begin(),
                           facesSortedByTex.end(),
-                          [](const BrushRendererBrushCache::CachedFace& a, const BrushRendererBrushCache::CachedFace& b){ return a.texture < b.texture; });
+                          [](const CachedFace& a, const CachedFace& b){ return a.texture < b.texture; });
             }
             
             ensure(!cachedVertices.empty(), "Brush must have cached vertices");
@@ -583,7 +578,7 @@ namespace TrenchBroom {
 
                 // process all faces with this texture (they'll be consecutive)
                 for (size_t j = i; j < nextI; ++j) {
-                    const BrushRendererBrushCache::CachedFace& cache = facesSortedByTex[j];
+                    const CachedFace& cache = facesSortedByTex[j];
                     if (true /* cache.face->isMarked() */) {
                         assert(cache.texture == texture);
                         if (shouldDrawFaceInTransparentPass(brush, *cache.face)) {
@@ -608,7 +603,7 @@ namespace TrenchBroom {
                     // process all faces with this texture (they'll be consecutive)
                     GLuint *currentDest = insertDest;
                     for (size_t j = i; j < nextI; ++j) {
-                        const BrushRendererBrushCache::CachedFace& cache = facesSortedByTex[j];
+                        const CachedFace& cache = facesSortedByTex[j];
                         if (/*cache.face->isMarked() && */ shouldDrawFaceInTransparentPass(brush, *cache.face)) {
                             addTriIndicesForPolygon(currentDest,
                                                     static_cast<GLuint>(brushVerticesStartIndex +
@@ -635,7 +630,7 @@ namespace TrenchBroom {
                     // process all faces with this texture (they'll be consecutive)
                     GLuint *currentDest = insertDest;
                     for (size_t j = i; j < nextI; ++j) {
-                        const BrushRendererBrushCache::CachedFace& cache = facesSortedByTex[j];
+                        const CachedFace& cache = facesSortedByTex[j];
                         if (/* cache.face->isMarked() && */ !shouldDrawFaceInTransparentPass(brush, *cache.face)) {
                             addTriIndicesForPolygon(currentDest,
                                                     static_cast<GLuint>(brushVerticesStartIndex +
