@@ -454,11 +454,45 @@ namespace TrenchBroom {
             return false;
         }
 
-        bool BrushRenderer::visible(const Model::BrushNode* brush) const {
-            if (m_editorContext == nullptr) {
-                return true;
+        /**
+         * This exists so we can evaluate the rendering style once and pass it around
+         * in an integer.
+         */
+        BrushRenderFlags::Type BrushRenderer::brushRenderFlags(const Model::BrushNode* brush) {
+            BrushRenderFlags::Type result = 0u;
+
+            if (!m_showHiddenBrushes) {
+                if (m_editorContext != nullptr && !m_editorContext->visible(brush)) {
+                    result |= BrushRenderFlags::Hidden;
+                }
             }
-            return m_showHiddenBrushes || m_editorContext->visible(brush);
+            
+            if (brush->transitivelySelected()) {
+                result |= BrushRenderFlags::Selected;
+            }
+
+            if (brush->locked()) {
+                result |= BrushRenderFlags::Locked;
+            }
+
+            return result;
+        }
+
+        vm::vec4f BrushRenderer::edgeColor(const BrushRenderFlags::Type brushFlags, const Model::BrushFace& face1, const Model::BrushFace& face2) {
+            BrushRenderFlags::Type edgeFlags = brushFlags;
+
+            if (face1.selected() || face2.selected()) {
+                edgeFlags |= BrushRenderFlags::Selected;
+            }
+
+            // FIXME: temporary color
+            if (edgeFlags & BrushRenderFlags::Locked) {
+                return vm::vec4f(0,0,1,1);
+            }
+            if (edgeFlags & BrushRenderFlags::Selected) {
+                return vm::vec4f(1,0,0,1);
+            }            
+            return vm::vec4f(1,1,1,1);
         }
 
         void BrushRenderer::validateBrush(const Model::BrushNode* brush) {
@@ -468,7 +502,8 @@ namespace TrenchBroom {
 
             // At this point, brush is not in the VBO's and will not be rendered.
 
-            if (!visible(brush)) {
+            const BrushRenderFlags::Type brushFlags = brushRenderFlags(brush);
+            if (brushFlags & BrushRenderFlags::Hidden) {
                 return;
             }
 
@@ -492,9 +527,10 @@ namespace TrenchBroom {
 
                     const vm::vec3f pos1 = vm::vec3f(currentEdge->firstVertex()->position());
                     const vm::vec3f pos2 = vm::vec3f(currentEdge->secondVertex()->position());
+                    const vm::vec4f color = edgeColor(brushFlags, face1, face2);
 
-                    vertDest[i++] = GLVertexTypes::P3C4::Vertex(pos1, vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
-                    vertDest[i++] = GLVertexTypes::P3C4::Vertex(pos2, vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+                    vertDest[i++] = GLVertexTypes::P3C4::Vertex(pos1, color);
+                    vertDest[i++] = GLVertexTypes::P3C4::Vertex(pos2, color);
                 }
             }
 

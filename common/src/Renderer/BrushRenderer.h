@@ -42,9 +42,9 @@ namespace TrenchBroom {
     namespace Renderer {
         namespace BrushRenderFlags {
             using Type = uint32_t;
-            constexpr Type Default  = 0u;
-            constexpr Type Selected = 1u << 0;
-            constexpr Type Locked   = 1u << 1;
+            constexpr Type Hidden   = 1u << 0;
+            constexpr Type Selected = 1u << 1;
+            constexpr Type Locked   = 1u << 2;
         }
 
         class BrushRenderer {
@@ -204,7 +204,8 @@ namespace TrenchBroom {
             void validate();
         private:
             bool shouldDrawFaceInTransparentPass(const Model::BrushNode* brush, const Model::BrushFace& face) const;
-            bool visible(const Model::BrushNode* brush) const;
+            BrushRenderFlags::Type brushRenderFlags(const Model::BrushNode* brush);
+            vm::vec4f edgeColor(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face1, const Model::BrushFace& face2);
             void validateBrush(const Model::BrushNode* brush);
             void addBrush(const Model::BrushNode* brush);
             void removeBrush(const Model::BrushNode* brush);
