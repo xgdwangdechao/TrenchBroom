@@ -84,6 +84,12 @@ namespace TrenchBroom {
                   vertexIndex1RelativeToBrush(i_vertexIndex1RelativeToBrush),
                   vertexIndex2RelativeToBrush(i_vertexIndex2RelativeToBrush) {}
 
+        /**
+         * Rendering overview:
+         * There are 2 things to render: brush faces (filled/textured polygons) and brush edges.
+         *
+         * For faces, we need to write a copy of each vertex for each face it's used on.
+         */
         static std::tuple<std::vector<BrushRendererBrushCache::Vertex>,
                          std::vector<BrushRendererBrushCache::CachedFace>,
                          std::vector<BrushRendererBrushCache::CachedEdge>> validateVertexCache(const Model::BrushNode* brushNode) {
