@@ -403,6 +403,7 @@ namespace TrenchBroom {
         };
 
         using BrushVertexArray = TrackedVertexArray<GLVertexTypes::P3NT2C4::Vertex>;
+        using BrushEdgeVertexArray = TrackedVertexArray<GLVertexTypes::P3C4::Vertex>;
     }
 }
 

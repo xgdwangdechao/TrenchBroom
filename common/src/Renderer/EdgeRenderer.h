@@ -143,19 +143,19 @@ namespace TrenchBroom {
         private:
             class Render : public RenderBase, public DirectRenderable {
             private:
-                std::shared_ptr<BrushVertexArray> m_vertexArray;
+                std::shared_ptr<BrushEdgeVertexArray> m_vertexArray;
             public:
-                Render(const Params& params, std::shared_ptr<BrushVertexArray> vertexArray);
+                Render(const Params& params, std::shared_ptr<BrushEdgeVertexArray> vertexArray);
             private:
                 void doPrepareVertices(VboManager& vboManager) override;
                 void doRender(RenderContext& renderContext) override;
                 void doRenderVertices(RenderContext& renderContext) override;
             };
         private:
-            std::shared_ptr<BrushVertexArray> m_vertexArray;
+            std::shared_ptr<BrushEdgeVertexArray> m_vertexArray;
         public:
             DirectBrushEdgeRenderer();
-            DirectBrushEdgeRenderer(std::shared_ptr<BrushVertexArray> vertexArray);
+            DirectBrushEdgeRenderer(std::shared_ptr<BrushEdgeVertexArray> vertexArray);
 
             DirectBrushEdgeRenderer(const DirectBrushEdgeRenderer& other);
             DirectBrushEdgeRenderer& operator=(DirectBrushEdgeRenderer other);

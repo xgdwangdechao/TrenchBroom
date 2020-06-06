@@ -280,7 +280,7 @@ namespace TrenchBroom {
             m_allBrushes.clear();
             m_invalidBrushes.clear();
 
-            m_edgeVertices = std::make_shared<BrushVertexArray>();
+            m_edgeVertices = std::make_shared<BrushEdgeVertexArray>();
             
             m_vertexArray = std::make_shared<BrushVertexArray>();            
             m_transparentFaces = std::make_shared<TextureToBrushIndicesMap>();
@@ -493,8 +493,8 @@ namespace TrenchBroom {
                     const vm::vec3f pos1 = vm::vec3f(currentEdge->firstVertex()->position());
                     const vm::vec3f pos2 = vm::vec3f(currentEdge->secondVertex()->position());
 
-                    vertDest[i++] = GLVertexTypes::P3NT2C4::Vertex(pos1, vm::vec3f(), vm::vec2f(), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
-                    vertDest[i++] = GLVertexTypes::P3NT2C4::Vertex(pos2, vm::vec3f(), vm::vec2f(), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+                    vertDest[i++] = GLVertexTypes::P3C4::Vertex(pos1, vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+                    vertDest[i++] = GLVertexTypes::P3C4::Vertex(pos2, vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
                 }
             }
 

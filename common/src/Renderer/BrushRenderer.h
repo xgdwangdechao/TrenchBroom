@@ -72,7 +72,7 @@ namespace TrenchBroom {
 
             std::shared_ptr<BrushVertexArray> m_vertexArray;
 
-            std::shared_ptr<BrushVertexArray> m_edgeVertices;
+            std::shared_ptr<BrushEdgeVertexArray> m_edgeVertices;
 
             using TextureToBrushIndicesMap = std::unordered_map<const Assets::Texture*, std::shared_ptr<BrushIndexArray>>;
             std::shared_ptr<TextureToBrushIndicesMap> m_transparentFaces;

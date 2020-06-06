@@ -266,7 +266,7 @@ namespace TrenchBroom {
 
         // DirectBrushEdgeRenderer::Render
 
-        DirectBrushEdgeRenderer::Render::Render(const BrushEdgeRenderer::Params& params, std::shared_ptr<BrushVertexArray> vertexArray) :
+        DirectBrushEdgeRenderer::Render::Render(const BrushEdgeRenderer::Params& params, std::shared_ptr<BrushEdgeVertexArray> vertexArray) :
         RenderBase(params),
         m_vertexArray(std::move(vertexArray)) {}
 
@@ -288,7 +288,7 @@ namespace TrenchBroom {
 
         DirectBrushEdgeRenderer::DirectBrushEdgeRenderer() {}
 
-        DirectBrushEdgeRenderer::DirectBrushEdgeRenderer(std::shared_ptr<BrushVertexArray> vertexArray) :
+        DirectBrushEdgeRenderer::DirectBrushEdgeRenderer(std::shared_ptr<BrushEdgeVertexArray> vertexArray) :
         m_vertexArray(std::move(vertexArray)) {}
 
         DirectBrushEdgeRenderer::DirectBrushEdgeRenderer(const DirectBrushEdgeRenderer& other) :
