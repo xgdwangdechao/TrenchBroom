@@ -60,8 +60,7 @@ namespace TrenchBroom {
         m_geometry(nullptr),
         m_lineNumber(0),
         m_lineCount(0),
-        m_selected(false),
-        m_markedToRenderFace(false) {
+        m_selected(false) {
             ensure(m_texCoordSystem != nullptr, "texCoordSystem is null");
             setPoints(point0, point1, point2);
         }
@@ -76,8 +75,7 @@ namespace TrenchBroom {
         m_geometry(nullptr),
         m_lineNumber(other.m_lineNumber),
         m_lineCount(other.m_lineCount),
-        m_selected(other.m_selected),
-        m_markedToRenderFace(false) {}
+        m_selected(other.m_selected) {}
         
         BrushFace::BrushFace(BrushFace&& other) noexcept :
         Taggable(other),
@@ -89,8 +87,7 @@ namespace TrenchBroom {
         m_geometry(other.m_geometry),
         m_lineNumber(other.m_lineNumber),
         m_lineCount(other.m_lineCount),
-        m_selected(other.m_selected),
-        m_markedToRenderFace(false) {}
+        m_selected(other.m_selected) {}
         
         BrushFace& BrushFace::operator=(BrushFace other) noexcept {
             using std::swap;
@@ -110,7 +107,6 @@ namespace TrenchBroom {
             swap(lhs.m_lineNumber, rhs.m_lineNumber);
             swap(lhs.m_lineCount, rhs.m_lineCount);
             swap(lhs.m_selected, rhs.m_selected);
-            swap(lhs.m_markedToRenderFace, rhs.m_markedToRenderFace);
         }
 
         BrushFace::~BrushFace() = default;
@@ -535,14 +531,6 @@ namespace TrenchBroom {
             for (size_t i = 0; i < 3; ++i) {
                 m_points[i] = correct(m_points[i]);
             }
-        }
-
-        void BrushFace::setMarked(const bool marked) const {
-            m_markedToRenderFace = marked;
-        }
-
-        bool BrushFace::isMarked() const {
-            return m_markedToRenderFace;
         }
 
         void BrushFace::doAcceptTagVisitor(TagVisitor& visitor) {

@@ -90,9 +90,6 @@ namespace TrenchBroom {
             mutable size_t m_lineNumber;
             mutable size_t m_lineCount;
             bool m_selected;
-            
-            // brush renderer
-            mutable bool m_markedToRenderFace;
         public:
             BrushFace(const vm::vec3& point0, const vm::vec3& point1, const vm::vec3& point2, const BrushFaceAttributes& attributes, std::unique_ptr<TexCoordSystem> texCoordSystem);
 
@@ -180,15 +177,6 @@ namespace TrenchBroom {
         private:
             void setPoints(const vm::vec3& point0, const vm::vec3& point1, const vm::vec3& point2);
             void correctPoints();
-        public: // brush renderer
-            /**
-             * This is used to cache results of evaluating the BrushRenderer Filter.
-             * It's only valid within a call to `BrushRenderer::validateBrush`.
-             *
-             * @param marked    whether the face is going to be rendered.
-             */
-            void setMarked(bool marked) const;
-            bool isMarked() const;
         private: // implement Taggable interface
             void doAcceptTagVisitor(TagVisitor& visitor) override;
             void doAcceptTagVisitor(ConstTagVisitor& visitor) const override;
