@@ -284,6 +284,8 @@ namespace TrenchBroom {
             }
 
             void doVisit(Model::BrushNode* brush) override   {
+                // FIXME: do we need this logic?
+#if 0
                 if (brush->locked()) {
                     if (collectLocked()) m_lockedNodes.addNode(brush);
                 } else if (selected(brush) || brush->hasSelectedFaces()) {
@@ -292,6 +294,8 @@ namespace TrenchBroom {
                 if (!brush->selected() && !brush->parentSelected() && !brush->locked()) {
                     if (collectDefault()) m_defaultNodes.addNode(brush);
                 }
+#endif
+                m_defaultNodes.addNode(brush);
             }
 
             bool collectLocked() const    { return (m_renderers & Renderer_Locked)    != 0; }
@@ -325,11 +329,7 @@ namespace TrenchBroom {
             invalidateEntityLinkRenderer();
 
             // FIXME: hack
-            std::vector<Model::BrushNode*> brushes;
-            kdl::vec_append(brushes, collect.defaultNodes().brushes());
-            kdl::vec_append(brushes, collect.selectedNodes().brushes());
-            kdl::vec_append(brushes, collect.lockedNodes().brushes());
-            m_brushRenderer->setBrushes(brushes);
+            m_brushRenderer->setBrushes(collect.defaultNodes().brushes());
         }
 
         void MapRenderer::invalidateRenderers(Renderer renderers) {
