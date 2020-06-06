@@ -157,29 +157,7 @@ namespace TrenchBroom {
             return { m_cachedVertices, m_cachedFacesSortedByTexture, m_cachedEdges };
         }
 
-        // Filter
-
-        BrushRenderer::Filter::Filter() {}
-
-        BrushRenderer::Filter::Filter(const Filter& /* other */) {}
-
-        BrushRenderer::Filter::~Filter() {}
-
-        BrushRenderer::Filter& BrushRenderer::Filter::operator=(const Filter& /* other */) { return *this; }
-
-        BrushRenderer::Filter::RenderSettings BrushRenderer::Filter::renderNothing() {
-            return std::make_tuple(FaceRenderPolicy::RenderNone, EdgeRenderPolicy::RenderNone);
-        }
-
-        // DefaultFilter
-
-        BrushRenderer::DefaultFilter::~DefaultFilter() {}
-        BrushRenderer::DefaultFilter::DefaultFilter(const Model::EditorContext& context) : m_context(context) {}
-
-        BrushRenderer::DefaultFilter::DefaultFilter(const DefaultFilter& other) :
-        Filter(),
-        m_context(other.m_context) {}
-
+#if 0
         bool BrushRenderer::DefaultFilter::visible(const Model::BrushNode* brush) const    {
             return m_context.visible(brush);
         }
@@ -206,17 +184,6 @@ namespace TrenchBroom {
 
         bool BrushRenderer::DefaultFilter::hasSelectedFaces(const Model::BrushNode* brush) const {
             return brush->descendantSelected();
-        }
-
-        // NoFilter
-
-        BrushRenderer::Filter::RenderSettings BrushRenderer::NoFilter::markFaces(const Model::BrushNode* brushNode) const {
-            const Model::Brush& brush = brushNode->brush();
-            for (const Model::BrushFace& face : brush.faces()) {
-                face.setMarked(true);
-            }
-            return std::make_tuple(FaceRenderPolicy::RenderMarked,
-                                   EdgeRenderPolicy::RenderAll);
         }
 
         // SelectedBrushRendererFilter
@@ -291,7 +258,7 @@ namespace TrenchBroom {
             return std::make_tuple(renderFaces ? FaceRenderPolicy::RenderMarked : FaceRenderPolicy::RenderNone,
                                    renderEdges ? EdgeRenderPolicy::RenderAll : EdgeRenderPolicy::RenderNone);
         }
-        
+#endif
 
         // BrushRenderer
 
@@ -484,29 +451,6 @@ namespace TrenchBroom {
             m_edgeRenderer.render(renderBatch); //, m_edgeColor); -- disable uniform color 
         }
 
-        class BrushRenderer::FilterWrapper : public BrushRenderer::Filter {
-        private:
-            const Filter& m_filter;
-            bool m_showHiddenBrushes;
-            NoFilter m_noFilter;
-
-            const Filter& resolve() const {
-                if (m_showHiddenBrushes) {
-                    return m_noFilter;
-                } else {
-                    return m_filter;
-                }
-            }
-        public:
-            FilterWrapper(const Filter& filter, const bool showHiddenBrushes) :
-            m_filter(filter),
-            m_showHiddenBrushes(showHiddenBrushes) {}
-
-            RenderSettings markFaces(const Model::BrushNode* brush) const override {
-                return resolve().markFaces(brush);
-            }
-        };
-
         void BrushRenderer::validate() {
             assert(!valid());
 
@@ -536,6 +480,7 @@ namespace TrenchBroom {
             }
         }
 
+#if 0
         static inline bool shouldRenderEdge(const BrushRendererBrushCache::CachedEdge& edge,
                                             const BrushRenderer::Filter::EdgeRenderPolicy policy) {
             using EdgeRenderPolicy = BrushRenderer::Filter::EdgeRenderPolicy;
@@ -552,17 +497,12 @@ namespace TrenchBroom {
                 switchDefault()
             }
         }
+#endif
 
-        static size_t countMarkedEdgeIndices(const std::vector<BrushRendererBrushCache::CachedEdge>& cachedEdges, const BrushRenderer::Filter::EdgeRenderPolicy policy) {
-            using EdgeRenderPolicy = BrushRenderer::Filter::EdgeRenderPolicy;
-
-            if (policy == EdgeRenderPolicy::RenderNone) {
-                return 0;
-            }
-
+        static size_t countMarkedEdgeIndices(const std::vector<BrushRendererBrushCache::CachedEdge>& cachedEdges) {
             size_t indexCount = 0;
             for (const auto& edge : cachedEdges) {
-                if (shouldRenderEdge(edge, policy)) {
+                if (true /* shouldRenderEdge(edge, policy)*/) {
                     indexCount += 2;
                 }
             }
@@ -570,18 +510,11 @@ namespace TrenchBroom {
         }
 
         static void getMarkedEdgeIndices(const std::vector<BrushRendererBrushCache::CachedEdge>& cachedEdges,
-                                         const BrushRenderer::Filter::EdgeRenderPolicy policy,
                                          const GLuint brushVerticesStartIndex,
                                          GLuint* dest) {
-            using EdgeRenderPolicy = BrushRenderer::Filter::EdgeRenderPolicy;
-
-            if (policy == EdgeRenderPolicy::RenderNone) {
-                return;
-            }
-
             size_t i = 0;
             for (const auto& edge : cachedEdges) {
-                if (shouldRenderEdge(edge, policy)) {
+                if (true /* shouldRenderEdge(edge, policy) */) {
                     dest[i++] = static_cast<GLuint>(brushVerticesStartIndex + edge.vertexIndex1RelativeToBrush);
                     dest[i++] = static_cast<GLuint>(brushVerticesStartIndex + edge.vertexIndex2RelativeToBrush);
                 }
@@ -612,6 +545,8 @@ namespace TrenchBroom {
             assert(m_invalidBrushes.find(brush) != std::end(m_invalidBrushes));
             assert(m_brushInfo.find(brush) == std::end(m_brushInfo));
 
+            // FIXME: handle m_showHiddenBrushes
+#if 0
             const NoFilter filter;
             const FilterWrapper wrapper(filter, m_showHiddenBrushes);
 
@@ -624,7 +559,7 @@ namespace TrenchBroom {
                 // NOTE: this skips inserting the brush into m_brushInfo
                 return;
             }
-
+#endif
             BrushInfo& info = m_brushInfo[brush];
 
             // collect vertices
@@ -641,11 +576,11 @@ namespace TrenchBroom {
 
             // insert edge indices into VBO
             {
-                const size_t edgeIndexCount = countMarkedEdgeIndices(cachedEdges, edgePolicy);
+                const size_t edgeIndexCount = countMarkedEdgeIndices(cachedEdges);
                 if (edgeIndexCount > 0) {
                     auto [key, insertDest] = m_edgeIndices->getPointerToInsertElementsAt(edgeIndexCount);
                     info.edgeIndicesKey = key;
-                    getMarkedEdgeIndices(cachedEdges, edgePolicy, brushVerticesStartIndex, insertDest);
+                    getMarkedEdgeIndices(cachedEdges, brushVerticesStartIndex, insertDest);
                 } else {
                     // it's possible to have no edges to render
                     // e.g. select all faces of a brush, and the unselected brush renderer
@@ -671,7 +606,7 @@ namespace TrenchBroom {
                 // process all faces with this texture (they'll be consecutive)
                 for (size_t j = i; j < nextI; ++j) {
                     const BrushRendererBrushCache::CachedFace& cache = facesSortedByTex[j];
-                    if (cache.face->isMarked()) {
+                    if (true /* cache.face->isMarked() */) {
                         assert(cache.texture == texture);
                         if (shouldDrawFaceInTransparentPass(brush, *cache.face)) {
                             transparentIndexCount += triIndicesCountForPolygon(cache.vertexCount);
@@ -696,7 +631,7 @@ namespace TrenchBroom {
                     GLuint *currentDest = insertDest;
                     for (size_t j = i; j < nextI; ++j) {
                         const BrushRendererBrushCache::CachedFace& cache = facesSortedByTex[j];
-                        if (cache.face->isMarked() && shouldDrawFaceInTransparentPass(brush, *cache.face)) {
+                        if (/*cache.face->isMarked() && */ shouldDrawFaceInTransparentPass(brush, *cache.face)) {
                             addTriIndicesForPolygon(currentDest,
                                                     static_cast<GLuint>(brushVerticesStartIndex +
                                                                         cache.indexOfFirstVertexRelativeToBrush),
@@ -723,7 +658,7 @@ namespace TrenchBroom {
                     GLuint *currentDest = insertDest;
                     for (size_t j = i; j < nextI; ++j) {
                         const BrushRendererBrushCache::CachedFace& cache = facesSortedByTex[j];
-                        if (cache.face->isMarked() && !shouldDrawFaceInTransparentPass(brush, *cache.face)) {
+                        if (/* cache.face->isMarked() && */ !shouldDrawFaceInTransparentPass(brush, *cache.face)) {
                             addTriIndicesForPolygon(currentDest,
                                                     static_cast<GLuint>(brushVerticesStartIndex +
                                                                         cache.indexOfFirstVertexRelativeToBrush),
