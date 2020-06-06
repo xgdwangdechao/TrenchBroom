@@ -152,6 +152,11 @@ namespace TrenchBroom {
                 return m_snapshot.data() + offsetWithinBlock;
             }
 
+            void zeroRange(const size_t offsetWithinBlock, const size_t count) {
+                T* dest = getPointerToWriteElementsTo(offsetWithinBlock, count);
+                std::memset(dest, 0, count * sizeof(T));
+            }
+
             bool prepared() const {
                 // NOTE: this returns true if the capacity is 0
                 return m_dirtyRange.clean();
@@ -223,7 +228,6 @@ namespace TrenchBroom {
              * NOTE: This destructively moves the contents of `elements` into the Holder.
              */
             explicit IndexHolder(std::vector<Index>& elements);
-            void zeroRange(size_t offsetWithinBlock, size_t count);
             void render(PrimType primType, size_t offset, size_t count) const;
 
             static std::shared_ptr<IndexHolder> swap(std::vector<Index>& elements);
@@ -303,6 +307,10 @@ namespace TrenchBroom {
                 VboHolder<V>::m_vbo->unbind();
             }
 
+            void render(const PrimType primType, const GLint index, const GLsizei count) {            
+                glAssert(glDrawArrays(toGL(primType), index, count));
+            }
+
             static std::shared_ptr<VertexHolder<V>> swap(std::vector<V>& elements) {
                 return std::make_shared<VertexHolder<V>>(elements);
             }
@@ -356,13 +364,19 @@ namespace TrenchBroom {
                 return {block, dest};
             }
 
-            void deleteVerticesWithKey(AllocationTracker::Block* key) {
+            void deleteVerticesWithKey(AllocationTracker::Block* key, const bool zeroRange) {
+                const auto pos = key->pos;
+                const auto size = key->size;
+
                 m_allocationTracker.free(key);
 
                 // there's no need to actually delete the vertices from the VBO.
                 // because we only ever do indexed drawing from it.
                 // Marking the space free in m_allocationTracker will allow
                 // us to re-use the space later
+                if (zeroRange) {
+                    m_vertexHolder.zeroRange(pos, size);
+                }
             }
 
             // setting up GL attributes
@@ -380,6 +394,11 @@ namespace TrenchBroom {
             void prepare(VboManager& vboManager)  {
                 m_vertexHolder.prepare(vboManager);
                 assert(m_vertexHolder.prepared());
+            }
+
+            void render(const PrimType primType) {
+                const GLsizei vertexCount = static_cast<GLsizei>(m_vertexHolder.size());
+                m_vertexHolder.render(primType, 0, vertexCount);
             }
         };
 

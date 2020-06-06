@@ -139,6 +139,33 @@ namespace TrenchBroom {
             virtual void doRender(RenderBatch& renderBatch, const Params& params) = 0;
         };
 
+        class DirectBrushEdgeRenderer : public BrushEdgeRenderer {
+        private:
+            class Render : public RenderBase, public DirectRenderable {
+            private:
+                std::shared_ptr<BrushVertexArray> m_vertexArray;
+            public:
+                Render(const Params& params, std::shared_ptr<BrushVertexArray> vertexArray);
+            private:
+                void doPrepareVertices(VboManager& vboManager) override;
+                void doRender(RenderContext& renderContext) override;
+                void doRenderVertices(RenderContext& renderContext) override;
+            };
+        private:
+            std::shared_ptr<BrushVertexArray> m_vertexArray;
+        public:
+            DirectBrushEdgeRenderer();
+            DirectBrushEdgeRenderer(std::shared_ptr<BrushVertexArray> vertexArray);
+
+            DirectBrushEdgeRenderer(const DirectBrushEdgeRenderer& other);
+            DirectBrushEdgeRenderer& operator=(DirectBrushEdgeRenderer other);
+
+            friend void swap(DirectBrushEdgeRenderer& left, DirectBrushEdgeRenderer& right);
+        private:
+            void doRender(RenderBatch& renderBatch, const BrushEdgeRenderer::Params& params) override;
+        };
+
+        // FIXME: IndexedBrushEdgeRenderer
         class IndexedEdgeRenderer : public BrushEdgeRenderer {
         private:
             class Render : public RenderBase, public IndexedRenderable {

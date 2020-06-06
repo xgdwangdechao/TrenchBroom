@@ -75,11 +75,8 @@ namespace TrenchBroom {
         IndexHolder::IndexHolder(std::vector<Index> &elements)
                 : VboHolder<Index>(VboType::ElementArrayBuffer, elements) {}
 
-        void IndexHolder::zeroRange(const size_t offsetWithinBlock, const size_t count) {
-            Index* dest = getPointerToWriteElementsTo(offsetWithinBlock, count);
-            std::memset(dest, 0, count * sizeof(Index));
-        }
-
+        // FIXME: we should force rendering the entire IndexHolder since that's the entire point of
+        // these data structures
         void IndexHolder::render(const PrimType primType, const size_t offset, size_t count) const {
             const GLsizei renderCount = static_cast<GLsizei>(count);
             const GLvoid *renderOffset = reinterpret_cast<GLvoid *>(m_vbo->offset() + sizeof(Index) * offset);

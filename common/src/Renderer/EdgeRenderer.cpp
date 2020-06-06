@@ -264,6 +264,51 @@ namespace TrenchBroom {
             doRender(renderBatch, Params(width, offset, onTop, useColor, color));
         }
 
+        // DirectBrushEdgeRenderer::Render
+
+        DirectBrushEdgeRenderer::Render::Render(const BrushEdgeRenderer::Params& params, std::shared_ptr<BrushVertexArray> vertexArray) :
+        RenderBase(params),
+        m_vertexArray(std::move(vertexArray)) {}
+
+        void DirectBrushEdgeRenderer::Render::doPrepareVertices(VboManager& vboManager) {
+            m_vertexArray->prepare(vboManager);
+        }
+
+        void DirectBrushEdgeRenderer::Render::doRender(RenderContext& renderContext) {
+            renderEdges(renderContext);
+        }
+
+        void DirectBrushEdgeRenderer::Render::doRenderVertices(RenderContext&) {
+            m_vertexArray->setupVertices();
+            m_vertexArray->render(PrimType::Lines);
+            m_vertexArray->cleanupVertices();
+        }
+
+        // DirectBrushEdgeRenderer
+
+        DirectBrushEdgeRenderer::DirectBrushEdgeRenderer() {}
+
+        DirectBrushEdgeRenderer::DirectBrushEdgeRenderer(std::shared_ptr<BrushVertexArray> vertexArray) :
+        m_vertexArray(std::move(vertexArray)) {}
+
+        DirectBrushEdgeRenderer::DirectBrushEdgeRenderer(const DirectBrushEdgeRenderer& other) :
+        m_vertexArray(other.m_vertexArray) {}
+
+        DirectBrushEdgeRenderer& DirectBrushEdgeRenderer::operator=(DirectBrushEdgeRenderer other) {
+            using std::swap;
+            swap(*this, other);
+            return *this;
+        }
+
+        void swap(DirectBrushEdgeRenderer& left, DirectBrushEdgeRenderer& right) {
+            using std::swap;
+            swap(left.m_vertexArray, right.m_vertexArray);
+        }
+
+        void DirectBrushEdgeRenderer::doRender(RenderBatch& renderBatch, const BrushEdgeRenderer::Params& params) {
+            renderBatch.addOneShot(new Render(params, m_vertexArray));
+        }
+
         // IndexedEdgeRenderer::Render
 
         IndexedEdgeRenderer::Render::Render(const BrushEdgeRenderer::Params& params, std::shared_ptr<BrushVertexArray> vertexArray, std::shared_ptr<BrushIndexArray> indexArray) :

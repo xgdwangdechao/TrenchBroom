@@ -51,7 +51,7 @@ namespace TrenchBroom {
         private:
             struct BrushInfo {
                 AllocationTracker::Block* vertexHolderKey;
-                AllocationTracker::Block* edgeIndicesKey;
+                AllocationTracker::Block* edgeVerticesKey;
                 std::vector<std::pair<const Assets::Texture*, AllocationTracker::Block*>> opaqueFaceIndicesKeys;
                 std::vector<std::pair<const Assets::Texture*, AllocationTracker::Block*>> transparentFaceIndicesKeys;
             };
@@ -71,7 +71,8 @@ namespace TrenchBroom {
             std::unordered_set<const Model::BrushNode*> m_invalidBrushes;
 
             std::shared_ptr<BrushVertexArray> m_vertexArray;
-            std::shared_ptr<BrushIndexArray> m_edgeIndices;
+
+            std::shared_ptr<BrushVertexArray> m_edgeVertices;
 
             using TextureToBrushIndicesMap = std::unordered_map<const Assets::Texture*, std::shared_ptr<BrushIndexArray>>;
             std::shared_ptr<TextureToBrushIndicesMap> m_transparentFaces;
@@ -79,7 +80,7 @@ namespace TrenchBroom {
 
             FaceRenderer m_opaqueFaceRenderer;
             FaceRenderer m_transparentFaceRenderer;
-            IndexedEdgeRenderer m_edgeRenderer;
+            DirectBrushEdgeRenderer m_edgeRenderer;
 
             Color m_faceColor;
             bool m_showEdges;

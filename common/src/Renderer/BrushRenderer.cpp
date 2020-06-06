@@ -280,14 +280,15 @@ namespace TrenchBroom {
             m_allBrushes.clear();
             m_invalidBrushes.clear();
 
-            m_vertexArray = std::make_shared<BrushVertexArray>();
-            m_edgeIndices = std::make_shared<BrushIndexArray>();
+            m_edgeVertices = std::make_shared<BrushVertexArray>();
+            
+            m_vertexArray = std::make_shared<BrushVertexArray>();            
             m_transparentFaces = std::make_shared<TextureToBrushIndicesMap>();
             m_opaqueFaces = std::make_shared<TextureToBrushIndicesMap>();
 
             m_opaqueFaceRenderer = FaceRenderer(m_vertexArray, m_opaqueFaces, m_faceColor);
             m_transparentFaceRenderer = FaceRenderer(m_vertexArray, m_transparentFaces, m_faceColor);
-            m_edgeRenderer = IndexedEdgeRenderer(m_vertexArray, m_edgeIndices);
+            m_edgeRenderer = DirectBrushEdgeRenderer(m_edgeVertices);
         }
 
         void BrushRenderer::setFaceColor(const Color& faceColor) {
@@ -406,7 +407,7 @@ namespace TrenchBroom {
 
             m_opaqueFaceRenderer = FaceRenderer(m_vertexArray, m_opaqueFaces, m_faceColor);
             m_transparentFaceRenderer = FaceRenderer(m_vertexArray, m_transparentFaces, m_faceColor);
-            m_edgeRenderer = IndexedEdgeRenderer(m_vertexArray, m_edgeIndices);
+            m_edgeRenderer = DirectBrushEdgeRenderer(m_edgeVertices);
         }
 
         static size_t triIndicesCountForPolygon(const size_t vertexCount) {
@@ -432,18 +433,6 @@ namespace TrenchBroom {
                 }
             }
             return indexCount;
-        }
-
-        static void getMarkedEdgeIndices(const std::vector<BrushRendererBrushCache::CachedEdge>& cachedEdges,
-                                         const GLuint brushVerticesStartIndex,
-                                         GLuint* dest) {
-            size_t i = 0;
-            for (const auto& edge : cachedEdges) {
-                if (true /* shouldRenderEdge(edge, policy) */) {
-                    dest[i++] = static_cast<GLuint>(brushVerticesStartIndex + edge.vertexIndex1RelativeToBrush);
-                    dest[i++] = static_cast<GLuint>(brushVerticesStartIndex + edge.vertexIndex2RelativeToBrush);
-                }
-            }
         }
 
         bool BrushRenderer::shouldDrawFaceInTransparentPass(const Model::BrushNode* brush, const Model::BrushFace& face) const {
@@ -484,15 +473,14 @@ namespace TrenchBroom {
             }
 
             BrushInfo& info = m_brushInfo[brush];
+            const Model::Brush& brushValue = brush->brush();
 
             // collect vertices
             std::vector<BrushRendererBrushCache::Vertex> cachedVertices;
             std::vector<BrushRendererBrushCache::CachedFace> facesSortedByTex;
-            std::vector<BrushRendererBrushCache::CachedEdge> cachedEdges;
-
+            
             {
                 // build vertex cache and face cache
-                const Model::Brush& brushValue = brush->brush();
 
                 cachedVertices.clear();
                 cachedVertices.reserve(brushValue.vertexCount()); // FIXME: too small reserve size
@@ -510,17 +498,8 @@ namespace TrenchBroom {
                         Model::BrushHalfEdge* current = *it;
                         Model::BrushVertex* vertex = current->origin();
 
-                        // Set the vertex payload to the index, relative to the brush's first vertex being 0.
-                        // This is used below when building the edge cache.
-                        // NOTE: we'll overwrite the payload as we visit the same vertex several times while visiting
-                        // different faces, this is fine.
-                        const auto currentIndex = cachedVertices.size();
-                        vertex->setPayload(static_cast<GLuint>(currentIndex));
-
                         const auto& position = vertex->position();
                         cachedVertices.emplace_back(vm::vec3f(position), faceNormal, face.textureCoords(position), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
-
-                        current = current->previous();
                     }
 
                     // face cache
@@ -533,25 +512,6 @@ namespace TrenchBroom {
                 std::sort(facesSortedByTex.begin(),
                           facesSortedByTex.end(),
                           [](const BrushRendererBrushCache::CachedFace& a, const BrushRendererBrushCache::CachedFace& b){ return a.texture < b.texture; });
-
-                // Build edge index cache
-
-                cachedEdges.clear();
-                cachedEdges.reserve(brushValue.edgeCount());
-
-                for (const Model::BrushEdge* currentEdge : brushValue.edges()) {
-                    const auto faceIndex1 = currentEdge->firstFace()->payload();
-                    const auto faceIndex2 = currentEdge->secondFace()->payload();
-                    assert(faceIndex1 && faceIndex2);
-                    
-                    const auto& face1 = brushValue.face(*faceIndex1);
-                    const auto& face2 = brushValue.face(*faceIndex2);
-                    
-                    const auto vertexIndex1RelativeToBrush = currentEdge->firstVertex()->payload();
-                    const auto vertexIndex2RelativeToBrush = currentEdge->secondVertex()->payload();
-
-                    cachedEdges.emplace_back(&face1, &face2, vertexIndex1RelativeToBrush, vertexIndex2RelativeToBrush);
-                }
             }
             
             ensure(!cachedVertices.empty(), "Brush must have cached vertices");
@@ -564,18 +524,26 @@ namespace TrenchBroom {
 
             const auto brushVerticesStartIndex = static_cast<GLuint>(vertBlock->pos);
 
-            // insert edge indices into VBO
+            // insert edge vertices into VBO
             {
-                const size_t edgeIndexCount = countMarkedEdgeIndices(cachedEdges);
-                if (edgeIndexCount > 0) {
-                    auto [key, insertDest] = m_edgeIndices->getPointerToInsertElementsAt(edgeIndexCount);
-                    info.edgeIndicesKey = key;
-                    getMarkedEdgeIndices(cachedEdges, brushVerticesStartIndex, insertDest);
-                } else {
-                    // it's possible to have no edges to render
-                    // e.g. select all faces of a brush, and the unselected brush renderer
-                    // will hit this branch.
-                    ensure(info.edgeIndicesKey == nullptr, "BrushInfo not initialized");
+                const size_t edgeVertCount = 2 * brushValue.edges().size();
+                auto [vertKey, vertDest] = m_edgeVertices->getPointerToInsertVerticesAt(edgeVertCount);              
+                info.edgeVerticesKey = vertKey;
+
+                size_t i = 0;
+                for (const Model::BrushEdge* currentEdge : brushValue.edges()) {
+                    const auto faceIndex1 = currentEdge->firstFace()->payload();
+                    const auto faceIndex2 = currentEdge->secondFace()->payload();
+                    assert(faceIndex1 && faceIndex2);
+                    
+                    const auto& face1 = brushValue.face(*faceIndex1);
+                    const auto& face2 = brushValue.face(*faceIndex2);
+
+                    const vm::vec3f pos1 = vm::vec3f(currentEdge->firstVertex()->position());
+                    const vm::vec3f pos2 = vm::vec3f(currentEdge->secondVertex()->position());
+
+                    vertDest[i++] = GLVertexTypes::P3NT2C4::Vertex(pos1, vm::vec3f(), vm::vec2f(), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+                    vertDest[i++] = GLVertexTypes::P3NT2C4::Vertex(pos2, vm::vec3f(), vm::vec2f(), vm::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
                 }
             }
 
@@ -696,9 +664,9 @@ namespace TrenchBroom {
             const BrushInfo& info = it->second;
 
             // update Vbo's
-            m_vertexArray->deleteVerticesWithKey(info.vertexHolderKey);
-            if (info.edgeIndicesKey != nullptr) {
-                m_edgeIndices->zeroElementsWithKey(info.edgeIndicesKey);
+            m_vertexArray->deleteVerticesWithKey(info.vertexHolderKey, false);
+            if (info.edgeVerticesKey != nullptr) {
+                m_edgeVertices->deleteVerticesWithKey(info.edgeVerticesKey, true);
             }
 
             for (const auto& [texture, opaqueKey] : info.opaqueFaceIndicesKeys) {
