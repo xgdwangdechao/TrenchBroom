@@ -462,14 +462,17 @@ namespace TrenchBroom {
             const Assets::Texture* texture;
             const Model::BrushFace* face;
             size_t vertexCount;
-            size_t indexOfFirstVertexRelativeToBrush;
+            /**
+             * Relative to the start of the VBO
+             */
+            size_t indexOfFirstVertex;
 
             CachedFace(const Model::BrushFace* i_face,
-                       size_t i_indexOfFirstVertexRelativeToBrush)
+                       size_t i_indexOfFirstVertex)
             : texture(i_face->texture()),
               face(i_face),
               vertexCount(i_face->vertexCount()),
-              indexOfFirstVertexRelativeToBrush(i_indexOfFirstVertexRelativeToBrush) {}
+              indexOfFirstVertex(i_indexOfFirstVertex) {}
         };
 
 
@@ -485,6 +488,7 @@ namespace TrenchBroom {
                 return;
             }
 
+            // The remainder of this function will fill in all of the fields of info
             BrushInfo& info = m_brushInfo[brush];
             const Model::Brush& brushValue = brush->brush();
 
@@ -512,21 +516,27 @@ namespace TrenchBroom {
                 }
             }
 
-            // collect vertices
-            std::vector<BrushVertexArray::Vertex> cachedVertices;
+            // count vertices-per-face
+            const size_t faceVerticesCount = [&](){
+                size_t total = 0u;
+                for (const auto& face : brushValue.faces()) {
+                    total += face.vertexCount();
+                }
+                return total;
+            }();
+
+            // insert vertices into VBO, and also build a vector of face metadata
             std::vector<CachedFace> facesSortedByTex;
-            
+            facesSortedByTex.reserve(brushValue.faceCount());
             {
-                // build vertex cache and face cache
-
-                cachedVertices.clear();
-                cachedVertices.reserve(brushValue.vertexCount()); // FIXME: too small reserve size
-
-                facesSortedByTex.clear();
-                facesSortedByTex.reserve(brushValue.faceCount());
-
-                for (const Model::BrushFace& face : brushValue.faces()) {
-                    const auto indexOfFirstVertexRelativeToBrush = cachedVertices.size();
+                assert(m_vertexArray != nullptr);
+                auto [vertBlock, vertDest] = m_vertexArray->getPointerToInsertVerticesAt(faceVerticesCount);
+                info.vertexHolderKey = vertBlock;
+                               
+                size_t insertedVertices = 0u;
+                const size_t vboRegionStart = vertBlock->pos;
+                for (const Model::BrushFace& face : brushValue.faces()) {                    
+                    const size_t indexOfFirstVertex = vboRegionStart + insertedVertices;
                     const vm::vec3f faceNormal = vm::vec3f(face.boundary().normal);
                     const vm::vec4f color = faceColor(brushFlags, face);
 
@@ -536,13 +546,14 @@ namespace TrenchBroom {
                         Model::BrushHalfEdge* current = *it;
                         Model::BrushVertex* vertex = current->origin();
 
-                        const auto& position = vertex->position();
-                        cachedVertices.emplace_back(vm::vec3f(position), faceNormal, face.textureCoords(position), color);
+                        vertDest[insertedVertices++] = BrushVertexArray::Vertex(vm::vec3f(vertex->position()), faceNormal, face.textureCoords(vertex->position()), color);
                     }
 
                     // face cache
-                    facesSortedByTex.emplace_back(&face, indexOfFirstVertexRelativeToBrush);
+                    facesSortedByTex.emplace_back(&face, indexOfFirstVertex);
                 }
+
+                assert(insertedVertices == faceVerticesCount);
 
                 // Sort by texture so BrushRenderer can efficiently step through the BrushFaces
                 // grouped by texture (via `BrushRendererBrushCache::cachedFacesSortedByTexture()`), without needing to build an std::map
@@ -550,20 +561,9 @@ namespace TrenchBroom {
                 std::sort(facesSortedByTex.begin(),
                           facesSortedByTex.end(),
                           [](const CachedFace& a, const CachedFace& b){ return a.texture < b.texture; });
-            }
+            }            
             
-            ensure(!cachedVertices.empty(), "Brush must have cached vertices");
-
-            assert(m_vertexArray != nullptr);
-            auto [vertBlock, dest] = m_vertexArray->getPointerToInsertVerticesAt(cachedVertices.size());
-            std::memcpy(dest, cachedVertices.data(), cachedVertices.size() * sizeof(*dest));
-            static_assert(sizeof(dest[0]) == sizeof(cachedVertices.data()[0]));
-            info.vertexHolderKey = vertBlock;
-
-            const auto brushVerticesStartIndex = static_cast<GLuint>(vertBlock->pos);
-
             // insert face indices
-
             const size_t facesSortedByTexSize = facesSortedByTex.size();
 
             size_t nextI;
@@ -606,8 +606,7 @@ namespace TrenchBroom {
                         const CachedFace& cache = facesSortedByTex[j];
                         if (/*cache.face->isMarked() && */ shouldDrawFaceInTransparentPass(brush, *cache.face)) {
                             addTriIndicesForPolygon(currentDest,
-                                                    static_cast<GLuint>(brushVerticesStartIndex +
-                                                                        cache.indexOfFirstVertexRelativeToBrush),
+                                                    static_cast<GLuint>(cache.indexOfFirstVertex),
                                                     cache.vertexCount);
 
                             currentDest += triIndicesCountForPolygon(cache.vertexCount);
@@ -633,8 +632,7 @@ namespace TrenchBroom {
                         const CachedFace& cache = facesSortedByTex[j];
                         if (/* cache.face->isMarked() && */ !shouldDrawFaceInTransparentPass(brush, *cache.face)) {
                             addTriIndicesForPolygon(currentDest,
-                                                    static_cast<GLuint>(brushVerticesStartIndex +
-                                                                        cache.indexOfFirstVertexRelativeToBrush),
+                                                    static_cast<GLuint>(cache.indexOfFirstVertex),
                                                     cache.vertexCount);
 
                             currentDest += triIndicesCountForPolygon(cache.vertexCount);
