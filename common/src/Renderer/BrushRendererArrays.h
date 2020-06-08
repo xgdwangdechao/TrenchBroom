@@ -396,6 +396,10 @@ namespace TrenchBroom {
                 assert(m_vertexHolder.prepared());
             }
 
+            bool empty() const {
+                return m_vertexHolder.size() == 0u;
+            }
+
             void render(const PrimType primType) {
                 const GLsizei vertexCount = static_cast<GLsizei>(m_vertexHolder.size());
                 m_vertexHolder.render(primType, 0, vertexCount);

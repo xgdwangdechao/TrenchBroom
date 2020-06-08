@@ -275,6 +275,9 @@ namespace TrenchBroom {
         }
 
         void DirectBrushEdgeRenderer::Render::doRender(RenderContext& renderContext) {
+            if (m_vertexArray->empty()) {
+                return;
+            }
             renderEdges(renderContext);
         }
 
