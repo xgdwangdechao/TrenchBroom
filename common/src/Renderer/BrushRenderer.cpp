@@ -343,9 +343,11 @@ namespace TrenchBroom {
         }
 
         void BrushRenderer::renderEdges(RenderBatch& renderBatch) {
-            if (m_showOccludedEdges) {
-                m_edgeRenderer.renderOnTop(renderBatch, m_occludedEdgeColor);
-            }
+//            if (m_showOccludedEdges) {
+
+            // we tell the shader that we're rendering on top (no depth test/write)
+            // and it can discard vertices
+            m_edgeRenderer.renderOnTop(renderBatch); //, m_occludedEdgeColor);
             m_edgeRenderer.render(renderBatch); //, m_edgeColor); -- disable uniform color 
         }
 
@@ -401,7 +403,7 @@ namespace TrenchBroom {
          * This exists so we can evaluate the rendering style once and pass it around
          * in an integer.
          */
-        BrushRenderFlags::Type BrushRenderer::brushRenderFlags(const Model::BrushNode* brush) {
+        BrushRenderFlags::Type BrushRenderer::brushRenderFlags(const Model::BrushNode* brush) const {
             BrushRenderFlags::Type result = 0u;
 
             if (!m_showHiddenBrushes) {
@@ -421,12 +423,28 @@ namespace TrenchBroom {
             return result;
         }
 
-        vm::vec4f BrushRenderer::edgeColor(const BrushRenderFlags::Type brushFlags, const Model::BrushFace& face1, const Model::BrushFace& face2) {
-            BrushRenderFlags::Type edgeFlags = brushFlags;
+        BrushRenderFlags::Type BrushRenderer::edgeRenderFlags(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face1, const Model::BrushFace& face2) const {
+            BrushRenderFlags::Type flags = brushFlags;
 
             if (face1.selected() || face2.selected()) {
-                edgeFlags |= BrushRenderFlags::Selected;
+                flags |= BrushRenderFlags::Selected;
             }
+
+            return flags;
+        }
+
+        BrushRenderFlags::Type BrushRenderer::faceRenderFlags(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face) const {
+            BrushRenderFlags::Type flags = brushFlags;
+
+            if (face.selected()) {
+                flags |= BrushRenderFlags::Selected;
+            }
+
+            return flags;
+        }
+
+        vm::vec4f BrushRenderer::edgeColor(const BrushRenderFlags::Type brushFlags, const Model::BrushFace& face1, const Model::BrushFace& face2) const {
+            const BrushRenderFlags::Type edgeFlags = edgeRenderFlags(brushFlags, face1, face2);
 
             // FIXME: temporary color
             if (edgeFlags & BrushRenderFlags::Locked) {
@@ -439,14 +457,10 @@ namespace TrenchBroom {
         }
 
         /**
-         * The last component is how much to blend the tin color.
+         * The last component is how much to blend the tint color ???
          */
-        vm::vec4f BrushRenderer::faceColor(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face) {
-            BrushRenderFlags::Type flags = brushFlags;
-
-            if (face.selected()) {
-                flags |= BrushRenderFlags::Selected;
-            }
+        vm::vec4f BrushRenderer::faceColor(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face) const {
+            const BrushRenderFlags::Type flags = faceRenderFlags(brushFlags, face);
 
             // FIXME: temporary colors
             if (flags & BrushRenderFlags::Locked) {
@@ -510,9 +524,10 @@ namespace TrenchBroom {
                     const vm::vec3f pos1 = vm::vec3f(currentEdge->firstVertex()->position());
                     const vm::vec3f pos2 = vm::vec3f(currentEdge->secondVertex()->position());
                     const vm::vec4f color = edgeColor(brushFlags, face1, face2);
-
-                    vertDest[i++] = GLVertexTypes::P3C4::Vertex(pos1, color);
-                    vertDest[i++] = GLVertexTypes::P3C4::Vertex(pos2, color);
+                    const auto flags = edgeRenderFlags(brushFlags, face1, face2);
+                    
+                    vertDest[i++] = BrushEdgeVertex(pos1, vm::vec<uint8_t, 3>(color.xyz() * 255.0f), vm::vec<uint8_t, 1>(flags));
+                    vertDest[i++] = BrushEdgeVertex(pos2, vm::vec<uint8_t, 3>(color.xyz() * 255.0f), vm::vec<uint8_t, 1>(flags));
                 }
             }
 

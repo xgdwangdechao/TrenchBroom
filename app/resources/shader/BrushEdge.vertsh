@@ -19,13 +19,22 @@
  along with TrenchBroom. If not, see <http://www.gnu.org/licenses/>.
  */
 
+attribute vec4 position;
+attribute vec3 defaultColor;
+attribute float flags;
+
 varying vec4 worldCoordinates;
 varying vec4 vertexColor;
+varying float flagsVarying;
+
+uniform bool OnTop;
 
 void main(void) {
-    vertexColor = gl_Color;
+    vertexColor = vec4(defaultColor, 1.0);
 
-    gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;
+    gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * position;
+    
     // Brushes are assumed to be in world space already (Face.vertsh also assumes this)
-    worldCoordinates = gl_Vertex;
+    worldCoordinates = position;
+    flagsVarying = flags; // assumed to be consistent across the primitive
 }

@@ -214,6 +214,7 @@ namespace TrenchBroom {
             {
                 PreferenceManager& prefs = PreferenceManager::instance();
                 ActiveShader shader(renderContext.shaderManager(), Shaders::BrushEdgeShader);
+                shader.set("OnTop", m_params.onTop);
                 shader.set("ShowSoftMapBounds", !renderContext.softMapBounds().is_empty());
                 shader.set("SoftMapBoundsMin", renderContext.softMapBounds().min);
                 shader.set("SoftMapBoundsMax", renderContext.softMapBounds().max);

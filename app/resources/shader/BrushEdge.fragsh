@@ -24,16 +24,36 @@ uniform vec4 TintColor;
 
 varying vec4 worldCoordinates;
 varying vec4 vertexColor;
+varying float flagsVarying;
+
+uniform bool OnTop;
 
 vec3 applySoftMapBoundsTint(vec3 inputFragColor, vec3 worldCoords);
 
 void main() {
     gl_FragColor = vertexColor;
-    
-    if (ApplyTinting) {
-        gl_FragColor = vec4(gl_FragColor.rgb * TintColor.rgb * TintColor.a, gl_FragColor.a);
-        gl_FragColor = clamp(2.0 * gl_FragColor, 0.0, 1.0);
+
+    if (abs(flagsVarying - 2.0) < 0.01) {
+        // selected
+        gl_FragColor.rgb = vec3(1.0, 0.0, 0.0);
+    } else {
+        gl_FragColor.rgb = vec3(0.0, 1.0, 0.0);
+        // default
+        if (OnTop) {
+            //discard;
+        }
     }
+
+    //gl_FragColor.rgb = vec3(flagsVarying, flagsVarying, flagsVarying);
+
+    if (OnTop) {
+            gl_FragColor.rgb = vec3(1.0, 1.0, 0.0);
+    }
+
+//    if (ApplyTinting) {
+//        gl_FragColor = vec4(gl_FragColor.rgb * TintColor.rgb * TintColor.a, gl_FragColor.a);
+//        gl_FragColor = clamp(2.0 * gl_FragColor, 0.0, 1.0);
+//    }
 
     gl_FragColor.rgb = applySoftMapBoundsTint(gl_FragColor.rgb, worldCoordinates.xyz);
 }

@@ -204,9 +204,13 @@ namespace TrenchBroom {
             void validate();
         private:
             bool shouldDrawFaceInTransparentPass(const Model::BrushNode* brush, const Model::BrushFace& face) const;
-            BrushRenderFlags::Type brushRenderFlags(const Model::BrushNode* brush);
-            vm::vec4f edgeColor(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face1, const Model::BrushFace& face2);
-            vm::vec4f faceColor(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face);
+            BrushRenderFlags::Type brushRenderFlags(const Model::BrushNode* brush) const;
+
+            BrushRenderFlags::Type edgeRenderFlags(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face1, const Model::BrushFace& face2) const;
+            BrushRenderFlags::Type faceRenderFlags(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face) const;
+
+            vm::vec4f edgeColor(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face1, const Model::BrushFace& face2) const;
+            vm::vec4f faceColor(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face) const;
 
             void validateBrush(const Model::BrushNode* brush);
             void addBrush(const Model::BrushNode* brush);
