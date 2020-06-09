@@ -595,13 +595,11 @@ namespace TrenchBroom {
                 // process all faces with this texture (they'll be consecutive)
                 for (size_t j = i; j < nextI; ++j) {
                     const CachedFace& cache = facesSortedByTex[j];
-                    if (true /* cache.face->isMarked() */) {
-                        assert(cache.texture == texture);
-                        if (shouldDrawFaceInTransparentPass(brush, *cache.face)) {
-                            transparentIndexCount += triIndicesCountForPolygon(cache.vertexCount);
-                        } else {
-                            opaqueIndexCount += triIndicesCountForPolygon(cache.vertexCount);
-                        }
+                    assert(cache.texture == texture);
+                    if (shouldDrawFaceInTransparentPass(brush, *cache.face)) {
+                        transparentIndexCount += triIndicesCountForPolygon(cache.vertexCount);
+                    } else {
+                        opaqueIndexCount += triIndicesCountForPolygon(cache.vertexCount);
                     }
                 }
 
@@ -620,7 +618,7 @@ namespace TrenchBroom {
                     GLuint *currentDest = insertDest;
                     for (size_t j = i; j < nextI; ++j) {
                         const CachedFace& cache = facesSortedByTex[j];
-                        if (/*cache.face->isMarked() && */ shouldDrawFaceInTransparentPass(brush, *cache.face)) {
+                        if (shouldDrawFaceInTransparentPass(brush, *cache.face)) {
                             addTriIndicesForPolygon(currentDest,
                                                     static_cast<GLuint>(cache.indexOfFirstVertex),
                                                     cache.vertexCount);
@@ -646,7 +644,7 @@ namespace TrenchBroom {
                     GLuint *currentDest = insertDest;
                     for (size_t j = i; j < nextI; ++j) {
                         const CachedFace& cache = facesSortedByTex[j];
-                        if (/* cache.face->isMarked() && */ !shouldDrawFaceInTransparentPass(brush, *cache.face)) {
+                        if (!shouldDrawFaceInTransparentPass(brush, *cache.face)) {
                             addTriIndicesForPolygon(currentDest,
                                                     static_cast<GLuint>(cache.indexOfFirstVertex),
                                                     cache.vertexCount);
