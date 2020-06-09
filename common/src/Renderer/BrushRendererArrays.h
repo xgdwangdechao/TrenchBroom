@@ -420,9 +420,9 @@ namespace TrenchBroom {
             static inline const std::string name{"flags"};
         };
         using BrushEdgeVertex = GLVertexType<
-                GLVertexAttributeUser<PositionName,      GL_FLOAT,         3, Normalize::False>,
-                GLVertexAttributeUser<DefaultColorName,  GL_UNSIGNED_BYTE, 3, Normalize::True>,
-                GLVertexAttributeUser<FlagsName,         GL_UNSIGNED_BYTE, 1, Normalize::False>>::Vertex;
+                GLVertexAttributeUser<PositionName,      GL_FLOAT,         3, false>,
+                GLVertexAttributeUser<DefaultColorName,  GL_UNSIGNED_BYTE, 3, true>,
+                GLVertexAttributeUser<FlagsName,         GL_UNSIGNED_BYTE, 1, false>>::Vertex;
         static_assert(sizeof(BrushEdgeVertex) == 16u);
 
         using BrushEdgeVertexArray = TrackedVertexArray<BrushEdgeVertex>;
