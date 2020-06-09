@@ -406,12 +406,11 @@ namespace TrenchBroom {
             }
         };
 
-        using BrushVertexArray = TrackedVertexArray<GLVertexTypes::P3NT2C4::Vertex>;
-
-        // edge
-
         struct PositionName {
             static inline const std::string name{"position"};
+        };
+        struct TexCoordName {
+            static inline const std::string name{"texCoord"};
         };
         struct DefaultColorName {
             static inline const std::string name{"defaultColor"};
@@ -419,6 +418,21 @@ namespace TrenchBroom {
         struct FlagsName {
             static inline const std::string name{"flags"};
         };
+        struct NormalName {
+            static inline const std::string name{"normal"};
+        };
+
+        using BrushFaceVertex = GLVertexType<
+                GLVertexAttributeUser<PositionName,      GL_FLOAT,         3, false>,
+                GLVertexAttributeUser<TexCoordName,      GL_FLOAT,         2, false>,                
+                GLVertexAttributeUser<NormalName,        GL_BYTE,          3, true>,
+                GLVertexAttributeUser<FlagsName,         GL_UNSIGNED_BYTE, 1, false>>::Vertex;
+        static_assert(sizeof(BrushFaceVertex) == 24u);
+
+        using BrushVertexArray = TrackedVertexArray<BrushFaceVertex>;
+
+        // edge
+
         using BrushEdgeVertex = GLVertexType<
                 GLVertexAttributeUser<PositionName,      GL_FLOAT,         3, false>,
                 GLVertexAttributeUser<DefaultColorName,  GL_UNSIGNED_BYTE, 3, true>,

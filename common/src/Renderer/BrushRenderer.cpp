@@ -552,8 +552,9 @@ namespace TrenchBroom {
                 const size_t vboRegionStart = vertBlock->pos;
                 for (const Model::BrushFace& face : brushValue.faces()) {                    
                     const size_t indexOfFirstVertex = vboRegionStart + insertedVertices;
-                    const vm::vec3f faceNormal = vm::vec3f(face.boundary().normal);
-                    const vm::vec4f color = faceColor(brushFlags, face);
+
+                    const auto faceNormal = vm::vec<int8_t, 3>(face.boundary().normal * 127.0);
+                    const auto flags = vm::vec<uint8_t, 1>(faceRenderFlags(brushFlags, face));
 
                     // The boundary is in CCW order, but the renderer expects CW order:
                     auto& boundary = face.geometry()->boundary();
@@ -561,7 +562,7 @@ namespace TrenchBroom {
                         Model::BrushHalfEdge* current = *it;
                         Model::BrushVertex* vertex = current->origin();
 
-                        vertDest[insertedVertices++] = BrushVertexArray::Vertex(vm::vec3f(vertex->position()), faceNormal, face.textureCoords(vertex->position()), color);
+                        vertDest[insertedVertices++] = BrushFaceVertex(vm::vec3f(vertex->position()), face.textureCoords(vertex->position()), faceNormal, flags);
                     }
 
                     // face cache
