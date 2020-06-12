@@ -209,18 +209,22 @@ namespace TrenchBroom {
             assert(m_opaqueFaces->empty());
         }
 
+        void BrushRenderer::invalidateBrush(Model::BrushNode* brush) {
+            // skip brushes that are not in the renderer
+            if (m_allBrushes.find(brush) == std::end(m_allBrushes)) {
+                assert(m_brushInfo.find(brush) == std::end(m_brushInfo));
+                assert(m_invalidBrushes.find(brush) == std::end(m_invalidBrushes));
+                return;
+            }
+            // if it's not in the invalid set, put it in
+            if (m_invalidBrushes.insert(brush).second) {
+                removeBrushFromVbo(brush);
+            }
+        }
+
         void BrushRenderer::invalidateBrushes(const std::vector<Model::BrushNode*>& brushes) {
-            for (auto& brush : brushes) {
-                // skip brushes that are not in the renderer
-                if (m_allBrushes.find(brush) == std::end(m_allBrushes)) {
-                    assert(m_brushInfo.find(brush) == std::end(m_brushInfo));
-                    assert(m_invalidBrushes.find(brush) == std::end(m_invalidBrushes));
-                    continue;
-                }
-                // if it's not in the invalid set, put it in
-                if (m_invalidBrushes.insert(brush).second) {
-                    removeBrushFromVbo(brush);
-                }
+            for (auto* brush : brushes) {
+                invalidateBrush(brush);
             }
         }
 

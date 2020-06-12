@@ -121,6 +121,7 @@ namespace TrenchBroom {
              * maps will be empty, so the BrushRenderer will not have any lingering Texture* pointers.
              */
             void invalidate();
+            void invalidateBrush(Model::BrushNode* brush);
             void invalidateBrushes(const std::vector<Model::BrushNode*>& brushes);
             bool valid() const;
 
