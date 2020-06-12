@@ -34,7 +34,8 @@
 #include "Model/WorldNode.h"
 #include "Renderer/BrushRenderer.h"
 #include "Renderer/EntityLinkRenderer.h"
-#include "Renderer/ObjectRenderer.h"
+#include "Renderer/GroupRenderer.h"
+#include "Renderer/EntityRenderer.h"
 #include "Renderer/RenderBatch.h"
 #include "Renderer/RenderContext.h"
 #include "Renderer/RenderUtils.h"
@@ -51,9 +52,11 @@ namespace TrenchBroom {
     namespace Renderer {
         MapRenderer::MapRenderer(std::weak_ptr<View::MapDocument> document) :
         m_document(document),
-        m_defaultRenderer(createDefaultRenderer(m_document)),
-        m_selectionRenderer(createSelectionRenderer(m_document)),
-        m_lockedRenderer(createLockRenderer(m_document)),
+        m_groupRenderer(std::make_unique<GroupRenderer>(kdl::mem_lock(document)->editorContext())),
+        m_entityRenderer(std::make_unique<EntityRenderer>(
+            *kdl::mem_lock(document),
+            kdl::mem_lock(document)->entityModelManager(),
+            kdl::mem_lock(document)->editorContext())),
         m_entityLinkRenderer(std::make_unique<EntityLinkRenderer>(m_document)),
         m_brushRenderer(std::make_unique<BrushRenderer>()) {
             bindObservers();
@@ -65,31 +68,9 @@ namespace TrenchBroom {
             clear();
         }
 
-        std::unique_ptr<ObjectRenderer> MapRenderer::createDefaultRenderer(std::weak_ptr<View::MapDocument> document) {
-            return std::make_unique<ObjectRenderer>(
-                *kdl::mem_lock(document),
-                kdl::mem_lock(document)->entityModelManager(),
-                kdl::mem_lock(document)->editorContext());
-        }
-
-        std::unique_ptr<ObjectRenderer> MapRenderer::createSelectionRenderer(std::weak_ptr<View::MapDocument> document) {
-            return std::make_unique<ObjectRenderer>(
-                *kdl::mem_lock(document),
-                kdl::mem_lock(document)->entityModelManager(),
-                kdl::mem_lock(document)->editorContext());
-        }
-
-        std::unique_ptr<ObjectRenderer> MapRenderer::createLockRenderer(std::weak_ptr<View::MapDocument> document) {
-            return std::make_unique<ObjectRenderer>(
-                *kdl::mem_lock(document),
-                kdl::mem_lock(document)->entityModelManager(),
-                kdl::mem_lock(document)->editorContext());
-        }
-
         void MapRenderer::clear() {
-            m_defaultRenderer->clear();
-            m_selectionRenderer->clear();
-            m_lockedRenderer->clear();
+            m_groupRenderer->clear();
+            m_entityRenderer->clear();
             m_entityLinkRenderer->invalidate();
             m_brushRenderer->clear();
         }
@@ -102,27 +83,33 @@ namespace TrenchBroom {
             const Color occludedEdgeColor = pref(Preferences::SelectedFaceColor).mixed(color, mix);
             const Color tintColor = pref(Preferences::SelectedFaceColor).mixed(color, mix);
 
-            m_selectionRenderer->setEntityBoundsColor(edgeColor);
+            //m_selectionRenderer->setEntityBoundsColor(edgeColor);
             //m_selectionRenderer->setBrushEdgeColor(edgeColor);
-            m_selectionRenderer->setOccludedEdgeColor(occludedEdgeColor);
-            m_selectionRenderer->setTintColor(tintColor);
+            // m_selectionRenderer->setOccludedEdgeColor(occludedEdgeColor);
+            // m_selectionRenderer->setTintColor(tintColor);
         }
 
         void MapRenderer::restoreSelectionColors() {
-            setupSelectionRenderer(*m_selectionRenderer);
+            //setupSelectionRenderer(*m_selectionRenderer);
         }
 
         void MapRenderer::render(RenderContext& renderContext, RenderBatch& renderBatch) {
             commitPendingChanges();
             setupGL(renderBatch);
-            renderDefaultOpaque(renderContext, renderBatch);
-            renderLockedOpaque(renderContext, renderBatch);
-            renderSelectionOpaque(renderContext, renderBatch);
+
+            // renderDefaultOpaque(renderContext, renderBatch);
+            // renderLockedOpaque(renderContext, renderBatch);
+            // renderSelectionOpaque(renderContext, renderBatch);
+
+
             m_brushRenderer->renderOpaque(renderContext, renderBatch);
 
-            renderDefaultTransparent(renderContext, renderBatch);
-            renderLockedTransparent(renderContext, renderBatch);
-            renderSelectionTransparent(renderContext, renderBatch);
+            m_entityRenderer->render(renderContext, renderBatch);
+            m_groupRenderer->render(renderContext, renderBatch);
+
+            // renderDefaultTransparent(renderContext, renderBatch);
+            // renderLockedTransparent(renderContext, renderBatch);
+            // renderSelectionTransparent(renderContext, renderBatch);
             m_brushRenderer->renderTransparent(renderContext, renderBatch);
 
             renderEntityLinks(renderContext, renderBatch);
@@ -148,143 +135,147 @@ namespace TrenchBroom {
             renderBatch.addOneShot(new SetupGL());
         }
 
-        void MapRenderer::renderDefaultOpaque(RenderContext& renderContext, RenderBatch& renderBatch) {
-            m_defaultRenderer->setShowOverlays(renderContext.render3D());
-            m_defaultRenderer->renderOpaque(renderContext, renderBatch);
-        }
-
-        void MapRenderer::renderDefaultTransparent(RenderContext& renderContext, RenderBatch& renderBatch) {
-            m_defaultRenderer->setShowOverlays(renderContext.render3D());
-            //m_defaultRenderer->renderTransparent(renderContext, renderBatch);
-        }
-
-        void MapRenderer::renderSelectionOpaque(RenderContext& renderContext, RenderBatch& renderBatch) {
-            if (!renderContext.hideSelection()) {
-                m_selectionRenderer->renderOpaque(renderContext, renderBatch);
-            }
-        }
-
-        void MapRenderer::renderSelectionTransparent(RenderContext& renderContext, RenderBatch& renderBatch) {
-            // if (!renderContext.hideSelection()) {
-            //     m_selectionRenderer->renderTransparent(renderContext, renderBatch);
-            // }
-        }
-
-        void MapRenderer::renderLockedOpaque(RenderContext& renderContext, RenderBatch& renderBatch) {
-            m_lockedRenderer->setShowOverlays(renderContext.render3D());
-            m_lockedRenderer->renderOpaque(renderContext, renderBatch);
-        }
-
-        void MapRenderer::renderLockedTransparent(RenderContext& renderContext, RenderBatch& renderBatch) {
-            m_lockedRenderer->setShowOverlays(renderContext.render3D());
-            //m_lockedRenderer->renderTransparent(renderContext, renderBatch);
-        }
+        // void MapRenderer::renderDefaultOpaque(RenderContext& renderContext, RenderBatch& renderBatch) {
+        //     m_defaultRenderer->setShowOverlays(renderContext.render3D());
+        //     m_defaultRenderer->renderOpaque(renderContext, renderBatch);
+        // }
+        //
+        // void MapRenderer::renderDefaultTransparent(RenderContext& renderContext, RenderBatch& renderBatch) {
+        //     m_defaultRenderer->setShowOverlays(renderContext.render3D());
+        //     //m_defaultRenderer->renderTransparent(renderContext, renderBatch);
+        // }
+        //
+        // void MapRenderer::renderSelectionOpaque(RenderContext& renderContext, RenderBatch& renderBatch) {
+        //     if (!renderContext.hideSelection()) {
+        //         m_selectionRenderer->renderOpaque(renderContext, renderBatch);
+        //     }
+        // }
+        //
+        // void MapRenderer::renderSelectionTransparent(RenderContext& renderContext, RenderBatch& renderBatch) {
+        //     // if (!renderContext.hideSelection()) {
+        //     //     m_selectionRenderer->renderTransparent(renderContext, renderBatch);
+        //     // }
+        // }
+        //
+        // void MapRenderer::renderLockedOpaque(RenderContext& renderContext, RenderBatch& renderBatch) {
+        //     m_lockedRenderer->setShowOverlays(renderContext.render3D());
+        //     m_lockedRenderer->renderOpaque(renderContext, renderBatch);
+        // }
+        //
+        // void MapRenderer::renderLockedTransparent(RenderContext& renderContext, RenderBatch& renderBatch) {
+        //     m_lockedRenderer->setShowOverlays(renderContext.render3D());
+        //     //m_lockedRenderer->renderTransparent(renderContext, renderBatch);
+        // }
 
         void MapRenderer::renderEntityLinks(RenderContext& renderContext, RenderBatch& renderBatch) {
             m_entityLinkRenderer->render(renderContext, renderBatch);
         }
 
         void MapRenderer::setupRenderers() {
-            setupDefaultRenderer(*m_defaultRenderer);
-            setupSelectionRenderer(*m_selectionRenderer);
-            setupLockedRenderer(*m_lockedRenderer);
+            // setupDefaultRenderer(*m_defaultRenderer);
+            // setupSelectionRenderer(*m_selectionRenderer);
+            // setupLockedRenderer(*m_lockedRenderer);
             setupEntityLinkRenderer();
         }
 
-        void MapRenderer::setupDefaultRenderer(ObjectRenderer& renderer) {
-            renderer.setEntityOverlayTextColor(pref(Preferences::InfoOverlayTextColor));
-            renderer.setGroupOverlayTextColor(pref(Preferences::GroupInfoOverlayTextColor));
-            renderer.setOverlayBackgroundColor(pref(Preferences::InfoOverlayBackgroundColor));
-            renderer.setTint(false);
-            m_brushRenderer->setTransparencyAlpha(pref(Preferences::TransparentFaceAlpha));
+        // void MapRenderer::setupDefaultRenderer(ObjectRenderer& renderer) {
+        //     // renderer.setEntityOverlayTextColor(pref(Preferences::InfoOverlayTextColor));
+        //     // renderer.setGroupOverlayTextColor(pref(Preferences::GroupInfoOverlayTextColor));
+        //     // renderer.setOverlayBackgroundColor(pref(Preferences::InfoOverlayBackgroundColor));
+        //     // renderer.setTint(false);
+        //     // m_brushRenderer->setTransparencyAlpha(pref(Preferences::TransparentFaceAlpha));
+        //     //
+        //     // renderer.setGroupBoundsColor(pref(Preferences::DefaultGroupColor));
+        //     // renderer.setEntityBoundsColor(pref(Preferences::UndefinedEntityColor));
+        //     //
+        //     // m_brushRenderer->setEditorContext(&kdl::mem_lock(m_document)->editorContext());
+        //     // m_brushRenderer->setFaceColor(pref(Preferences::FaceColor));
+        //     // m_brushRenderer->setEdgeColor(pref(Preferences::EdgeColor));
+        // }
+        //
+        // void MapRenderer::setupSelectionRenderer(ObjectRenderer& renderer) {
+        //     // renderer.setEntityOverlayTextColor(pref(Preferences::SelectedInfoOverlayTextColor));
+        //     // renderer.setGroupOverlayTextColor(pref(Preferences::SelectedInfoOverlayTextColor));
+        //     // renderer.setOverlayBackgroundColor(pref(Preferences::SelectedInfoOverlayBackgroundColor));
+        //     // // renderer.setShowBrushEdges(true);
+        //     // renderer.setShowOccludedObjects(true);
+        //     // renderer.setOccludedEdgeColor(pref(Preferences::OccludedSelectedEdgeColor));
+        //     // renderer.setTint(true);
+        //     // renderer.setTintColor(pref(Preferences::SelectedFaceColor));
+        //     //
+        //     // renderer.setOverrideGroupBoundsColor(true);
+        //     // renderer.setGroupBoundsColor(pref(Preferences::SelectedEdgeColor));
+        //     //
+        //     // renderer.setOverrideEntityBoundsColor(true);
+        //     // renderer.setEntityBoundsColor(pref(Preferences::SelectedEdgeColor));
+        //     // renderer.setShowEntityAngles(true);
+        //     // renderer.setEntityAngleColor(pref(Preferences::AngleIndicatorColor));
+        //
+        //     // renderer.setBrushFaceColor(pref(Preferences::FaceColor));
+        //     // renderer.setBrushEdgeColor(pref(Preferences::SelectedEdgeColor));
+        // }
 
-            renderer.setGroupBoundsColor(pref(Preferences::DefaultGroupColor));
-            renderer.setEntityBoundsColor(pref(Preferences::UndefinedEntityColor));
-
-            m_brushRenderer->setEditorContext(&kdl::mem_lock(m_document)->editorContext());
-            m_brushRenderer->setFaceColor(pref(Preferences::FaceColor));
-            m_brushRenderer->setEdgeColor(pref(Preferences::EdgeColor));
-        }
-
-        void MapRenderer::setupSelectionRenderer(ObjectRenderer& renderer) {
-            renderer.setEntityOverlayTextColor(pref(Preferences::SelectedInfoOverlayTextColor));
-            renderer.setGroupOverlayTextColor(pref(Preferences::SelectedInfoOverlayTextColor));
-            renderer.setOverlayBackgroundColor(pref(Preferences::SelectedInfoOverlayBackgroundColor));
-            // renderer.setShowBrushEdges(true);
-            renderer.setShowOccludedObjects(true);
-            renderer.setOccludedEdgeColor(pref(Preferences::OccludedSelectedEdgeColor));
-            renderer.setTint(true);
-            renderer.setTintColor(pref(Preferences::SelectedFaceColor));
-
-            renderer.setOverrideGroupBoundsColor(true);
-            renderer.setGroupBoundsColor(pref(Preferences::SelectedEdgeColor));
-
-            renderer.setOverrideEntityBoundsColor(true);
-            renderer.setEntityBoundsColor(pref(Preferences::SelectedEdgeColor));
-            renderer.setShowEntityAngles(true);
-            renderer.setEntityAngleColor(pref(Preferences::AngleIndicatorColor));
-
-            // renderer.setBrushFaceColor(pref(Preferences::FaceColor));
-            // renderer.setBrushEdgeColor(pref(Preferences::SelectedEdgeColor));
-        }
-
-        void MapRenderer::setupLockedRenderer(ObjectRenderer& renderer) {
-            renderer.setEntityOverlayTextColor(pref(Preferences::LockedInfoOverlayTextColor));
-            renderer.setGroupOverlayTextColor(pref(Preferences::LockedInfoOverlayTextColor));
-            renderer.setOverlayBackgroundColor(pref(Preferences::LockedInfoOverlayBackgroundColor));
-            renderer.setShowOccludedObjects(false);
-            renderer.setTint(true);
-            renderer.setTintColor(pref(Preferences::LockedFaceColor));
-            // renderer.setTransparencyAlpha(pref(Preferences::TransparentFaceAlpha));
-
-            renderer.setOverrideGroupBoundsColor(true);
-            renderer.setGroupBoundsColor(pref(Preferences::LockedEdgeColor));
-
-            renderer.setOverrideEntityBoundsColor(true);
-            renderer.setEntityBoundsColor(pref(Preferences::LockedEdgeColor));
-            renderer.setShowEntityAngles(false);
-
-            // renderer.setBrushFaceColor(pref(Preferences::FaceColor));
-            // renderer.setBrushEdgeColor(pref(Preferences::LockedEdgeColor));
-        }
+        // void MapRenderer::setupLockedRenderer(ObjectRenderer& renderer) {
+        //     renderer.setEntityOverlayTextColor(pref(Preferences::LockedInfoOverlayTextColor));
+        //     renderer.setGroupOverlayTextColor(pref(Preferences::LockedInfoOverlayTextColor));
+        //     renderer.setOverlayBackgroundColor(pref(Preferences::LockedInfoOverlayBackgroundColor));
+        //     renderer.setShowOccludedObjects(false);
+        //     renderer.setTint(true);
+        //     renderer.setTintColor(pref(Preferences::LockedFaceColor));
+        //     // renderer.setTransparencyAlpha(pref(Preferences::TransparentFaceAlpha));
+        //
+        //     renderer.setOverrideGroupBoundsColor(true);
+        //     renderer.setGroupBoundsColor(pref(Preferences::LockedEdgeColor));
+        //
+        //     renderer.setOverrideEntityBoundsColor(true);
+        //     renderer.setEntityBoundsColor(pref(Preferences::LockedEdgeColor));
+        //     renderer.setShowEntityAngles(false);
+        //
+        //     // renderer.setBrushFaceColor(pref(Preferences::FaceColor));
+        //     // renderer.setBrushEdgeColor(pref(Preferences::LockedEdgeColor));
+        // }
 
         void MapRenderer::setupEntityLinkRenderer() {
         }
 
         class MapRenderer::CollectRenderableNodes : public Model::NodeVisitor {
         private:
-            Renderer m_renderers;
+            //Renderer m_renderers;
             Model::NodeCollection m_defaultNodes;
-            Model::NodeCollection m_selectedNodes;
-            Model::NodeCollection m_lockedNodes;
+            // Model::NodeCollection m_selectedNodes;
+            // Model::NodeCollection m_lockedNodes;
         public:
-            CollectRenderableNodes(const Renderer renderers) : m_renderers(renderers) {}
+            CollectRenderableNodes() {}//const Renderer renderers) : m_renderers(renderers) {}
 
             const Model::NodeCollection& defaultNodes() const  { return m_defaultNodes;  }
-            const Model::NodeCollection& selectedNodes() const { return m_selectedNodes; }
-            const Model::NodeCollection& lockedNodes() const   { return m_lockedNodes;   }
+            // const Model::NodeCollection& selectedNodes() const { return m_selectedNodes; }
+            // const Model::NodeCollection& lockedNodes() const   { return m_lockedNodes;   }
         private:
             void doVisit(Model::WorldNode*) override   {}
             void doVisit(Model::LayerNode*) override   {}
 
             void doVisit(Model::GroupNode* group) override   {
-                if (group->locked()) {
-                    if (collectLocked()) m_lockedNodes.addNode(group);
-                } else if (selected(group) || group->opened()) {
-                    if (collectSelection()) m_selectedNodes.addNode(group);
-                } else {
-                    if (collectDefault()) m_defaultNodes.addNode(group);
-                }
+                m_defaultNodes.addNode(group);
+
+                // if (group->locked()) {
+                //     if (collectLocked()) m_lockedNodes.addNode(group);
+                // } else if (selected(group) || group->opened()) {
+                //     if (collectSelection()) m_selectedNodes.addNode(group);
+                // } else {
+                //     if (collectDefault()) m_defaultNodes.addNode(group);
+                // }
             }
 
             void doVisit(Model::EntityNode* entity) override {
-                if (entity->locked()) {
-                    if (collectLocked()) m_lockedNodes.addNode(entity);
-                } else if (selected(entity)) {
-                    if (collectSelection()) m_selectedNodes.addNode(entity);
-                } else {
-                    if (collectDefault()) m_defaultNodes.addNode(entity);
-                }
+                m_defaultNodes.addNode(entity);
+
+                // if (entity->locked()) {
+                //     if (collectLocked()) m_lockedNodes.addNode(entity);
+                // } else if (selected(entity)) {
+                //     if (collectSelection()) m_selectedNodes.addNode(entity);
+                // } else {
+                //     if (collectDefault()) m_defaultNodes.addNode(entity);
+                // }
             }
 
             void doVisit(Model::BrushNode* brush) override   {
@@ -301,35 +292,39 @@ namespace TrenchBroom {
 #endif
                 m_defaultNodes.addNode(brush);
             }
+            //
+            // bool collectLocked() const    { return (m_renderers & Renderer_Locked)    != 0; }
+            // bool collectSelection() const { return (m_renderers & Renderer_Selection) != 0; }
+            // bool collectDefault() const   { return (m_renderers & Renderer_Default)   != 0; }
 
-            bool collectLocked() const    { return (m_renderers & Renderer_Locked)    != 0; }
-            bool collectSelection() const { return (m_renderers & Renderer_Selection) != 0; }
-            bool collectDefault() const   { return (m_renderers & Renderer_Default)   != 0; }
-
-            bool selected(const Model::Node* node) const {
-                return node->selected() || node->descendantSelected() || node->parentSelected();
-            }
+            // bool selected(const Model::Node* node) const {
+            //     return node->selected() || node->descendantSelected() || node->parentSelected();
+            // }
         };
 
         void MapRenderer::updateRenderers(const Renderer renderers) {
             auto document = kdl::mem_lock(m_document);
             Model::WorldNode* world = document->world();
 
-            CollectRenderableNodes collect(renderers);
+            CollectRenderableNodes collect; //(renderers);
             world->acceptAndRecurse(collect);
 
-            if ((renderers & Renderer_Default) != 0) {
-                m_defaultRenderer->setObjects(collect.defaultNodes().groups(),
-                                              collect.defaultNodes().entities());
-            }
-            if ((renderers & Renderer_Selection) != 0) {
-                m_selectionRenderer->setObjects(collect.selectedNodes().groups(),
-                                                collect.selectedNodes().entities());
-            }
-            if ((renderers& Renderer_Locked) != 0) {
-                m_lockedRenderer->setObjects(collect.lockedNodes().groups(),
-                                             collect.lockedNodes().entities());
-            }
+            m_entityRenderer->setEntities(collect.defaultNodes().entities());
+            m_groupRenderer->setGroups(collect.defaultNodes().groups());
+
+            //
+            // if ((renderers & Renderer_Default) != 0) {
+            //     m_defaultRenderer->setObjects(collect.defaultNodes().groups(),
+            //                                   collect.defaultNodes().entities());
+            // }
+            // if ((renderers & Renderer_Selection) != 0) {
+            //     m_selectionRenderer->setObjects(collect.selectedNodes().groups(),
+            //                                     collect.selectedNodes().entities());
+            // }
+            // if ((renderers& Renderer_Locked) != 0) {
+            //     m_lockedRenderer->setObjects(collect.lockedNodes().groups(),
+            //                                  collect.lockedNodes().entities());
+            // }
             invalidateEntityLinkRenderer();
 
             // FIXME: hack
@@ -337,12 +332,15 @@ namespace TrenchBroom {
         }
 
         void MapRenderer::invalidateRenderers(Renderer renderers) {
-            if ((renderers & Renderer_Default) != 0)
-                m_defaultRenderer->invalidate();
-            if ((renderers & Renderer_Selection) != 0)
-                m_selectionRenderer->invalidate();
-            if ((renderers& Renderer_Locked) != 0)
-                m_lockedRenderer->invalidate();
+            m_entityRenderer->invalidate();
+            m_groupRenderer->invalidate();
+
+            // if ((renderers & Renderer_Default) != 0)
+            //     m_defaultRenderer->invalidate();
+            // if ((renderers & Renderer_Selection) != 0)
+            //     m_selectionRenderer->invalidate();
+            // if ((renderers& Renderer_Locked) != 0)
+            //     m_lockedRenderer->invalidate();
 
             // FIXME: invalidate specific brushes
             m_brushRenderer->invalidate();
@@ -366,9 +364,7 @@ namespace TrenchBroom {
         }
 
         void MapRenderer::reloadEntityModels() {
-            m_defaultRenderer->reloadModels();
-            m_selectionRenderer->reloadModels();
-            m_lockedRenderer->reloadModels();
+            m_entityRenderer->reloadModels();
         }
 
         void MapRenderer::bindObservers() {

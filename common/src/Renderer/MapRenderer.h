@@ -48,6 +48,8 @@ namespace TrenchBroom {
     }
 
     namespace Renderer {
+        class EntityRenderer;
+        class GroupRenderer;
         class BrushRenderer;
         class EntityLinkRenderer;
         class ObjectRenderer;
@@ -64,9 +66,12 @@ namespace TrenchBroom {
 
             std::weak_ptr<View::MapDocument> m_document;
 
-            std::unique_ptr<ObjectRenderer> m_defaultRenderer;
-            std::unique_ptr<ObjectRenderer> m_selectionRenderer;
-            std::unique_ptr<ObjectRenderer> m_lockedRenderer;
+            // std::unique_ptr<ObjectRenderer> m_defaultRenderer;
+            // std::unique_ptr<ObjectRenderer> m_selectionRenderer;
+            // std::unique_ptr<ObjectRenderer> m_lockedRenderer;
+
+            std::unique_ptr<GroupRenderer> m_groupRenderer;
+            std::unique_ptr<EntityRenderer> m_entityRenderer;
             std::unique_ptr<EntityLinkRenderer> m_entityLinkRenderer;
             std::unique_ptr<BrushRenderer> m_brushRenderer;
         public:
@@ -87,18 +92,18 @@ namespace TrenchBroom {
         private:
             void commitPendingChanges();
             void setupGL(RenderBatch& renderBatch);
-            void renderDefaultOpaque(RenderContext& renderContext, RenderBatch& renderBatch);
-            void renderDefaultTransparent(RenderContext& renderContext, RenderBatch& renderBatch);
-            void renderSelectionOpaque(RenderContext& renderContext, RenderBatch& renderBatch);
-            void renderSelectionTransparent(RenderContext& renderContext, RenderBatch& renderBatch);
-            void renderLockedOpaque(RenderContext& renderContext, RenderBatch& renderBatch);
-            void renderLockedTransparent(RenderContext& renderContext, RenderBatch& renderBatch);
+            // void renderDefaultOpaque(RenderContext& renderContext, RenderBatch& renderBatch);
+            // void renderDefaultTransparent(RenderContext& renderContext, RenderBatch& renderBatch);
+            // void renderSelectionOpaque(RenderContext& renderContext, RenderBatch& renderBatch);
+            // void renderSelectionTransparent(RenderContext& renderContext, RenderBatch& renderBatch);
+            // void renderLockedOpaque(RenderContext& renderContext, RenderBatch& renderBatch);
+            // void renderLockedTransparent(RenderContext& renderContext, RenderBatch& renderBatch);
             void renderEntityLinks(RenderContext& renderContext, RenderBatch& renderBatch);
 
             void setupRenderers();
-            void setupDefaultRenderer(ObjectRenderer& renderer);
-            void setupSelectionRenderer(ObjectRenderer& renderer);
-            void setupLockedRenderer(ObjectRenderer& renderer);
+            // void setupDefaultRenderer(ObjectRenderer& renderer);
+            // void setupSelectionRenderer(ObjectRenderer& renderer);
+            // void setupLockedRenderer(ObjectRenderer& renderer);
             void setupEntityLinkRenderer();
 
             typedef enum {
