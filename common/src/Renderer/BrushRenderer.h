@@ -93,7 +93,6 @@ namespace TrenchBroom {
             bool m_forceTransparent;
             float m_transparencyAlpha;
 
-            bool m_showHiddenBrushes;
             const Model::EditorContext* m_editorContext;
         public:
             BrushRenderer();
@@ -183,11 +182,6 @@ namespace TrenchBroom {
              * or setForceTransparent() are ignored by default.
              */
             void setTransparencyAlpha(float transparencyAlpha);
-
-            /**
-             * Specifies whether or not brushes which are currently hidden should be rendered regardless.
-             */
-            void setShowHiddenBrushes(bool showHiddenBrushes);
         public: // rendering
             void render(RenderContext& renderContext, RenderBatch& renderBatch);
             void renderOpaque(RenderContext& renderContext, RenderBatch& renderBatch);

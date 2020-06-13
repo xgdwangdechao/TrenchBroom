@@ -161,7 +161,6 @@ namespace TrenchBroom {
         m_showOccludedEdges(false),
         m_forceTransparent(false),
         m_transparencyAlpha(1.0f),
-        m_showHiddenBrushes(false),
         m_editorContext(nullptr) {
             clear();
         }
@@ -295,13 +294,6 @@ namespace TrenchBroom {
             }
         }
 
-        void BrushRenderer::setShowHiddenBrushes(const bool showHiddenBrushes) {
-            if (showHiddenBrushes != m_showHiddenBrushes) {
-                m_showHiddenBrushes = showHiddenBrushes;
-                invalidate();
-            }
-        }
-
         void BrushRenderer::render(RenderContext& renderContext, RenderBatch& renderBatch) {
             renderOpaque(renderContext, renderBatch);
             renderTransparent(renderContext, renderBatch);
@@ -411,10 +403,8 @@ namespace TrenchBroom {
         BrushRenderFlags::Type BrushRenderer::brushRenderFlags(const Model::BrushNode* brush) const {
             BrushRenderFlags::Type result = 0u;
 
-            if (!m_showHiddenBrushes) {
-                if (m_editorContext != nullptr && !m_editorContext->visible(brush)) {
-                    result |= BrushRenderFlags::Hidden;
-                }
+            if (m_editorContext != nullptr && !m_editorContext->visible(brush)) {
+                result |= BrushRenderFlags::Hidden;
             }
 
             if (brush->transitivelySelected()) {
