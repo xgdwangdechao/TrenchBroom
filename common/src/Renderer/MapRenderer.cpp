@@ -48,6 +48,8 @@
 #include <set>
 #include <vector>
 
+#include <QDebug>
+
 namespace TrenchBroom {
     namespace Renderer {
         MapRenderer::MapRenderer(std::weak_ptr<View::MapDocument> document) :
@@ -336,54 +338,90 @@ namespace TrenchBroom {
             prefs.preferenceDidChangeNotifier.removeObserver(this, &MapRenderer::preferenceDidChange);
         }
 
+        static void debugLog(const char* functionName) {
+            qDebug() << functionName;
+        }
+
+        static void debugLog(const char* functionName, const std::vector<Model::Node*>& nodes) {
+            qDebug() << functionName << nodes.size() << "nodes";
+        }
+
+        static void debugLog(const char* functionName, const Model::Node* node) {
+            qDebug() << functionName << "1 node";
+        }
+
+        static void debugLog(const char* functionName, const std::vector<Model::BrushFaceHandle>& faces) {
+            qDebug() << functionName << faces.size() << "face handles";
+        }
+
+        static void debugLog(const char* functionName, const View::Selection& selection) {
+            qDebug() << functionName <<
+                QString::fromLatin1("%1/%2 nodes selected/deselected, %3/%4 faces selected/deselected")
+                .arg(selection.selectedNodes().size())
+                .arg(selection.deselectedNodes().size())
+                .arg(selection.selectedBrushFaces().size())
+                .arg(selection.deselectedBrushFaces().size());
+        }
+
         void MapRenderer::documentWasCleared(View::MapDocument*) {
+            debugLog(__func__);
             clear();
         }
 
         void MapRenderer::documentWasNewedOrLoaded(View::MapDocument*) {
+            debugLog(__func__);
             clear();
             updateRenderers();
         }
 
         void MapRenderer::nodesWereAdded(const std::vector<Model::Node*>& nodes) {
+            debugLog(__func__, nodes);
             // FIXME: selective
             updateRenderers();
         }
 
         void MapRenderer::nodesWereRemoved(const std::vector<Model::Node*>& nodes) {
+            debugLog(__func__, nodes);
             // FIXME: selective
             updateRenderers();
         }
 
         void MapRenderer::nodesDidChange(const std::vector<Model::Node*>& nodes) {
+            debugLog(__func__, nodes);
             invalidateNodes(nodes);
             invalidateEntityLinkRenderer();
         }
 
         void MapRenderer::nodeVisibilityDidChange(const std::vector<Model::Node*>& nodes) {
+            debugLog(__func__, nodes);
             // FIXME: do we need to add/remove from the renderers?
             invalidateNodes(nodes);
             //invalidateRenderers();
         }
 
         void MapRenderer::nodeLockingDidChange(const std::vector<Model::Node*>& nodes) {
+            debugLog(__func__, nodes);
             invalidateNodes(nodes);
             //updateRenderers();
         }
 
         void MapRenderer::groupWasOpened(Model::GroupNode* group) {
+            debugLog(__func__, group);
             updateRenderers();
         }
 
         void MapRenderer::groupWasClosed(Model::GroupNode* group) {
+            debugLog(__func__, group);
             updateRenderers();
         }
 
         void MapRenderer::brushFacesDidChange(const std::vector<Model::BrushFaceHandle>& faces) {
+            debugLog(__func__, faces);
             invalidateBrushFaces(faces);
         }
 
         void MapRenderer::selectionDidChange(const View::Selection& selection) {
+            debugLog(__func__, selection);
             invalidateNodes(selection.selectedNodes());
             invalidateNodes(selection.deselectedNodes());
             invalidateBrushFaces(selection.selectedBrushFaces());
@@ -391,6 +429,7 @@ namespace TrenchBroom {
         }
 
         void MapRenderer::textureCollectionsWillChange() {
+            debugLog(__func__);
             invalidateRenderers();
         }
 

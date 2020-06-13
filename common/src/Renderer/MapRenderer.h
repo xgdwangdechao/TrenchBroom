@@ -67,10 +67,6 @@ namespace TrenchBroom {
 
             std::weak_ptr<View::MapDocument> m_document;
 
-            // std::unique_ptr<ObjectRenderer> m_defaultRenderer;
-            // std::unique_ptr<ObjectRenderer> m_selectionRenderer;
-            // std::unique_ptr<ObjectRenderer> m_lockedRenderer;
-
             std::unique_ptr<GroupRenderer> m_groupRenderer;
             std::unique_ptr<EntityRenderer> m_entityRenderer;
             std::unique_ptr<EntityLinkRenderer> m_entityLinkRenderer;
@@ -145,7 +141,7 @@ namespace TrenchBroom {
             void mapViewConfigDidChange();
 
             void preferenceDidChange(const IO::Path& path);
-
+        private: // invalidating specific nodes
             class InvalidateNode;
             friend class InvalidateNode;
 
