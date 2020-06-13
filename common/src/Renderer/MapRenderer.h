@@ -40,6 +40,7 @@ namespace TrenchBroom {
     }
 
     namespace Model {
+        class EntityNode;
         class BrushNode;
         class BrushFaceHandle;
         class GroupNode;
@@ -80,9 +81,6 @@ namespace TrenchBroom {
 
             deleteCopyAndMove(MapRenderer)
         private:
-            static std::unique_ptr<ObjectRenderer> createDefaultRenderer(std::weak_ptr<View::MapDocument> document);
-            static std::unique_ptr<ObjectRenderer> createSelectionRenderer(std::weak_ptr<View::MapDocument> document);
-            static std::unique_ptr<ObjectRenderer> createLockRenderer(std::weak_ptr<View::MapDocument> document);
             void clear();
         public: // color config
             void overrideSelectionColors(const Color& color, float mix);
@@ -106,15 +104,6 @@ namespace TrenchBroom {
             // void setupLockedRenderer(ObjectRenderer& renderer);
             void setupEntityLinkRenderer();
 
-            typedef enum {
-                Renderer_Default            = 1,
-                Renderer_Selection          = 2,
-                Renderer_Locked             = 4,
-                Renderer_Default_Selection  = Renderer_Default | Renderer_Selection,
-                Renderer_Default_Locked     = Renderer_Default | Renderer_Locked,
-                Renderer_All                = Renderer_Default | Renderer_Selection | Renderer_Locked
-            } Renderer;
-
             class CollectRenderableNodes;
 
             /**
@@ -123,9 +112,8 @@ namespace TrenchBroom {
              * (in particular, brushes are not updated unless they move between renderers.)
              * If brushes are modified, you need to call invalidateRenderers() or invalidateObjectsInRenderers()
              */
-            void updateRenderers(Renderer renderers);
-            void invalidateRenderers(Renderer renderers);
-            void invalidateBrushesInRenderers(Renderer renderers, const std::vector<Model::BrushNode*>& brushes);
+            void updateRenderers();
+            void invalidateRenderers();
             void invalidateEntityLinkRenderer();
             void reloadEntityModels();
         private: // notification
@@ -157,6 +145,12 @@ namespace TrenchBroom {
             void mapViewConfigDidChange();
 
             void preferenceDidChange(const IO::Path& path);
+
+            class InvalidateNode;
+            friend class InvalidateNode;
+
+            void invalidateNodes(const std::vector<Model::Node*>& nodes);
+            void invalidateBrushFaces(const std::vector<Model::BrushFaceHandle>& faces);
         };
     }
 }

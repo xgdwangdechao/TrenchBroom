@@ -101,9 +101,7 @@ namespace TrenchBroom {
             // renderLockedOpaque(renderContext, renderBatch);
             // renderSelectionOpaque(renderContext, renderBatch);
 
-
             m_brushRenderer->renderOpaque(renderContext, renderBatch);
-
             m_entityRenderer->render(renderContext, renderBatch);
             m_groupRenderer->render(renderContext, renderBatch);
 
@@ -239,124 +237,44 @@ namespace TrenchBroom {
         }
 
         class MapRenderer::CollectRenderableNodes : public Model::NodeVisitor {
-        private:
-            //Renderer m_renderers;
-            Model::NodeCollection m_defaultNodes;
-            // Model::NodeCollection m_selectedNodes;
-            // Model::NodeCollection m_lockedNodes;
         public:
-            CollectRenderableNodes() {}//const Renderer renderers) : m_renderers(renderers) {}
-
-            const Model::NodeCollection& defaultNodes() const  { return m_defaultNodes;  }
-            // const Model::NodeCollection& selectedNodes() const { return m_selectedNodes; }
-            // const Model::NodeCollection& lockedNodes() const   { return m_lockedNodes;   }
+            Model::NodeCollection nodes;
         private:
             void doVisit(Model::WorldNode*) override   {}
             void doVisit(Model::LayerNode*) override   {}
 
             void doVisit(Model::GroupNode* group) override   {
-                m_defaultNodes.addNode(group);
-
-                // if (group->locked()) {
-                //     if (collectLocked()) m_lockedNodes.addNode(group);
-                // } else if (selected(group) || group->opened()) {
-                //     if (collectSelection()) m_selectedNodes.addNode(group);
-                // } else {
-                //     if (collectDefault()) m_defaultNodes.addNode(group);
-                // }
+                nodes.addNode(group);
             }
 
             void doVisit(Model::EntityNode* entity) override {
-                m_defaultNodes.addNode(entity);
-
-                // if (entity->locked()) {
-                //     if (collectLocked()) m_lockedNodes.addNode(entity);
-                // } else if (selected(entity)) {
-                //     if (collectSelection()) m_selectedNodes.addNode(entity);
-                // } else {
-                //     if (collectDefault()) m_defaultNodes.addNode(entity);
-                // }
+                nodes.addNode(entity);
             }
 
             void doVisit(Model::BrushNode* brush) override   {
-                // FIXME: do we need this logic?
-#if 0
-                if (brush->locked()) {
-                    if (collectLocked()) m_lockedNodes.addNode(brush);
-                } else if (selected(brush) || brush->hasSelectedFaces()) {
-                    if (collectSelection()) m_selectedNodes.addNode(brush);
-                }
-                if (!brush->selected() && !brush->parentSelected() && !brush->locked()) {
-                    if (collectDefault()) m_defaultNodes.addNode(brush);
-                }
-#endif
-                m_defaultNodes.addNode(brush);
+                nodes.addNode(brush);
             }
-            //
-            // bool collectLocked() const    { return (m_renderers & Renderer_Locked)    != 0; }
-            // bool collectSelection() const { return (m_renderers & Renderer_Selection) != 0; }
-            // bool collectDefault() const   { return (m_renderers & Renderer_Default)   != 0; }
-
-            // bool selected(const Model::Node* node) const {
-            //     return node->selected() || node->descendantSelected() || node->parentSelected();
-            // }
         };
 
-        void MapRenderer::updateRenderers(const Renderer renderers) {
+        void MapRenderer::updateRenderers() {
             auto document = kdl::mem_lock(m_document);
             Model::WorldNode* world = document->world();
 
-            CollectRenderableNodes collect; //(renderers);
+            CollectRenderableNodes collect;
             world->acceptAndRecurse(collect);
 
-            m_entityRenderer->setEntities(collect.defaultNodes().entities());
-            m_groupRenderer->setGroups(collect.defaultNodes().groups());
+            m_entityRenderer->setEntities(collect.nodes.entities());
+            m_groupRenderer->setGroups(collect.nodes.groups());
+            m_brushRenderer->setBrushes(collect.nodes.brushes());
 
-            //
-            // if ((renderers & Renderer_Default) != 0) {
-            //     m_defaultRenderer->setObjects(collect.defaultNodes().groups(),
-            //                                   collect.defaultNodes().entities());
-            // }
-            // if ((renderers & Renderer_Selection) != 0) {
-            //     m_selectionRenderer->setObjects(collect.selectedNodes().groups(),
-            //                                     collect.selectedNodes().entities());
-            // }
-            // if ((renderers& Renderer_Locked) != 0) {
-            //     m_lockedRenderer->setObjects(collect.lockedNodes().groups(),
-            //                                  collect.lockedNodes().entities());
-            // }
             invalidateEntityLinkRenderer();
-
-            // FIXME: hack
-            m_brushRenderer->setBrushes(collect.defaultNodes().brushes());
         }
 
-        void MapRenderer::invalidateRenderers(Renderer renderers) {
-            m_entityRenderer->invalidate();
+        void MapRenderer::invalidateRenderers() {
             m_groupRenderer->invalidate();
-
-            // if ((renderers & Renderer_Default) != 0)
-            //     m_defaultRenderer->invalidate();
-            // if ((renderers & Renderer_Selection) != 0)
-            //     m_selectionRenderer->invalidate();
-            // if ((renderers& Renderer_Locked) != 0)
-            //     m_lockedRenderer->invalidate();
-
-            // FIXME: invalidate specific brushes
+            m_entityRenderer->invalidate();
+            m_entityLinkRenderer->invalidate();
             m_brushRenderer->invalidate();
-        }
-
-        void MapRenderer::invalidateBrushesInRenderers(Renderer renderers, const std::vector<Model::BrushNode*>& brushes) {
-            m_brushRenderer->invalidateBrushes(brushes);
-            // if ((renderers & Renderer_Default) != 0) {
-            //     m_defaultRenderer->invalidateBrushes(brushes);
-            // }
-            // if ((renderers & Renderer_Selection) != 0) {
-            //     m_selectionRenderer->invalidateBrushes(brushes);
-            // }
-            // if ((renderers& Renderer_Locked) != 0) {
-            //     m_lockedRenderer->invalidateBrushes(brushes);
-            // }
         }
 
         void MapRenderer::invalidateEntityLinkRenderer() {
@@ -424,80 +342,77 @@ namespace TrenchBroom {
 
         void MapRenderer::documentWasNewedOrLoaded(View::MapDocument*) {
             clear();
-            updateRenderers(Renderer_All);
+            updateRenderers();
         }
 
-        void MapRenderer::nodesWereAdded(const std::vector<Model::Node*>&) {
-            updateRenderers(Renderer_All);
+        void MapRenderer::nodesWereAdded(const std::vector<Model::Node*>& nodes) {
+            // FIXME: selective
+            updateRenderers();
         }
 
-        void MapRenderer::nodesWereRemoved(const std::vector<Model::Node*>&) {
-            updateRenderers(Renderer_All);
+        void MapRenderer::nodesWereRemoved(const std::vector<Model::Node*>& nodes) {
+            // FIXME: selective
+            updateRenderers();
         }
 
-        void MapRenderer::nodesDidChange(const std::vector<Model::Node*>&) {
-            invalidateRenderers(Renderer_Selection);
+        void MapRenderer::nodesDidChange(const std::vector<Model::Node*>& nodes) {
+            invalidateNodes(nodes);
             invalidateEntityLinkRenderer();
         }
 
-        void MapRenderer::nodeVisibilityDidChange(const std::vector<Model::Node*>&) {
-            invalidateRenderers(Renderer_All);
+        void MapRenderer::nodeVisibilityDidChange(const std::vector<Model::Node*>& nodes) {
+            // FIXME: do we need to add/remove from the renderers?
+            invalidateNodes(nodes);
+            //invalidateRenderers();
         }
 
-        void MapRenderer::nodeLockingDidChange(const std::vector<Model::Node*>&) {
-            updateRenderers(Renderer_Default_Locked);
+        void MapRenderer::nodeLockingDidChange(const std::vector<Model::Node*>& nodes) {
+            invalidateNodes(nodes);
+            //updateRenderers();
         }
 
-        void MapRenderer::groupWasOpened(Model::GroupNode*) {
-            updateRenderers(Renderer_Default_Selection);
+        void MapRenderer::groupWasOpened(Model::GroupNode* group) {
+            updateRenderers();
         }
 
-        void MapRenderer::groupWasClosed(Model::GroupNode*) {
-            updateRenderers(Renderer_Default_Selection);
+        void MapRenderer::groupWasClosed(Model::GroupNode* group) {
+            updateRenderers();
         }
 
-        void MapRenderer::brushFacesDidChange(const std::vector<Model::BrushFaceHandle>&) {
-            invalidateRenderers(Renderer_Selection);
+        void MapRenderer::brushFacesDidChange(const std::vector<Model::BrushFaceHandle>& faces) {
+            invalidateBrushFaces(faces);
         }
 
         void MapRenderer::selectionDidChange(const View::Selection& selection) {
-            updateRenderers(Renderer_All); // need to update locked objects also because a selected object may have been reparented into a locked layer before deselection
-
-            // selecting faces needs to invalidate the brushes
-            if (!selection.selectedBrushFaces().empty()
-                || !selection.deselectedBrushFaces().empty()) {
-
-                
-                const auto toBrush = [](const auto& handle) { return handle.node(); };
-                auto brushes = kdl::vec_concat(kdl::vec_transform(selection.selectedBrushFaces(), toBrush), kdl::vec_transform(selection.deselectedBrushFaces(), toBrush));
-                kdl::vec_sort_and_remove_duplicates(brushes);
-                invalidateBrushesInRenderers(Renderer_All, brushes);
-            }
+            invalidateNodes(selection.selectedNodes());
+            invalidateNodes(selection.deselectedNodes());
+            invalidateBrushFaces(selection.selectedBrushFaces());
+            invalidateBrushFaces(selection.deselectedBrushFaces());
         }
 
         void MapRenderer::textureCollectionsWillChange() {
-            invalidateRenderers(Renderer_All);
+            invalidateRenderers();
         }
 
         void MapRenderer::entityDefinitionsDidChange() {
             reloadEntityModels();
-            invalidateRenderers(Renderer_All);
+            invalidateRenderers();
             invalidateEntityLinkRenderer();
         }
 
         void MapRenderer::modsDidChange() {
             reloadEntityModels();
-            invalidateRenderers(Renderer_All);
+            invalidateRenderers();
             invalidateEntityLinkRenderer();
         }
 
         void MapRenderer::editorContextDidChange() {
-            invalidateRenderers(Renderer_All);
+            invalidateRenderers();
             invalidateEntityLinkRenderer();
         }
 
         void MapRenderer::mapViewConfigDidChange() {
-            invalidateRenderers(Renderer_All);
+            invalidateRenderers();
             invalidateEntityLinkRenderer();
         }
 
@@ -507,8 +422,48 @@ namespace TrenchBroom {
             auto document = kdl::mem_lock(m_document);
             if (document->isGamePathPreference(path)) {
                 reloadEntityModels();
-                invalidateRenderers(Renderer_All);
+                invalidateRenderers();
                 invalidateEntityLinkRenderer();
+            }
+        }
+
+        // invalidating specific nodes
+
+        class MapRenderer::InvalidateNode : public Model::NodeVisitor {
+        private:
+            MapRenderer& m_parent;
+        public:
+            InvalidateNode(MapRenderer& parent) : m_parent(parent) {}
+        private:
+            void doVisit(Model::WorldNode*) override   {}
+            void doVisit(Model::LayerNode*) override   {}
+
+            void doVisit(Model::GroupNode* group) override   {
+                // FIXME: just the specific node
+                m_parent.m_groupRenderer->invalidate();
+            }
+
+            void doVisit(Model::EntityNode* entity) override {
+                // FIXME: just the specific node
+                m_parent.m_entityRenderer->invalidate();
+            }
+
+            void doVisit(Model::BrushNode* brush) override   {
+                m_parent.m_brushRenderer->invalidateBrush(brush);
+            }
+        };
+
+        void MapRenderer::invalidateNodes(const std::vector<Model::Node*>& nodes) {
+            InvalidateNode visitor(*this);
+            for (const auto& node : nodes) {
+                node->acceptAndRecurse(visitor);
+            }
+        }
+
+        void MapRenderer::invalidateBrushFaces(const std::vector<Model::BrushFaceHandle>& faces) {
+            InvalidateNode visitor(*this);
+            for (const auto& face : faces) {
+                face.node()->accept(visitor);
             }
         }
     }
