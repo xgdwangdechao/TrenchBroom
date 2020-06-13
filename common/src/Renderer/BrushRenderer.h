@@ -94,11 +94,10 @@ namespace TrenchBroom {
             float m_transparencyAlpha;
 
             bool m_showHiddenBrushes;
-            Model::EditorContext* m_editorContext;
+            const Model::EditorContext* m_editorContext;
         public:
             BrushRenderer();
-            
-            void setEditorContext(Model::EditorContext* editorContext);
+            explicit BrushRenderer(const Model::EditorContext& editorContext);
 
             /**
              * New brushes are invalidated, brushes already in the BrushRenderer are not invalidated.

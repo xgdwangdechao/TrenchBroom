@@ -166,8 +166,9 @@ namespace TrenchBroom {
             clear();
         }
 
-        void BrushRenderer::setEditorContext(Model::EditorContext* editorContext) {
-            m_editorContext = editorContext;
+        BrushRenderer::BrushRenderer(const Model::EditorContext& editorContext) :
+        BrushRenderer::BrushRenderer() {
+            m_editorContext = &editorContext;
         }
 
         void BrushRenderer::addBrushes(const std::vector<Model::BrushNode*>& brushes) {

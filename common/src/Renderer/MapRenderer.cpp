@@ -60,7 +60,7 @@ namespace TrenchBroom {
             kdl::mem_lock(document)->entityModelManager(),
             kdl::mem_lock(document)->editorContext())),
         m_entityLinkRenderer(std::make_unique<EntityLinkRenderer>(m_document)),
-        m_brushRenderer(std::make_unique<BrushRenderer>()) {
+        m_brushRenderer(std::make_unique<BrushRenderer>(kdl::mem_lock(document)->editorContext())) {
             bindObservers();
             setupRenderers();
         }
