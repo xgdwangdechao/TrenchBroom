@@ -36,7 +36,7 @@
 
 namespace TrenchBroom {
     namespace Renderer {
-    
+
         /**
          * Rendering overview:
          * There are 2 things to render: brush faces (filled/textured polygons) and brush edges.
@@ -116,7 +116,7 @@ namespace TrenchBroom {
         }
 
         // UnselectedBrushRendererFilter
-        
+
         BrushRenderer::UnselectedBrushRendererFilter::UnselectedBrushRendererFilter(const Model::EditorContext& context) :
         DefaultFilter(context) {}
 
@@ -132,7 +132,7 @@ namespace TrenchBroom {
             }
 
             const Model::Brush& brush = brushNode->brush();
-            
+
             bool anyFaceVisible = false;
             for (const Model::BrushFace& face : brush.faces()) {
                 const bool faceVisible = !selected(brushNode, face) && visible(brushNode, face);
@@ -239,8 +239,8 @@ namespace TrenchBroom {
             m_invalidBrushes.clear();
 
             m_edgeVertices = std::make_shared<BrushEdgeVertexArray>();
-            
-            m_vertexArray = std::make_shared<BrushVertexArray>();            
+
+            m_vertexArray = std::make_shared<BrushVertexArray>();
             m_transparentFaces = std::make_shared<TextureToBrushIndicesMap>();
             m_opaqueFaces = std::make_shared<TextureToBrushIndicesMap>();
 
@@ -353,7 +353,7 @@ namespace TrenchBroom {
             // we tell the shader that we're rendering on top (no depth test/write)
             // and it can discard vertices
             m_edgeRenderer.renderOnTop(renderBatch); //, m_occludedEdgeColor);
-            m_edgeRenderer.render(renderBatch); //, m_edgeColor); -- disable uniform color 
+            m_edgeRenderer.render(renderBatch); //, m_edgeColor); -- disable uniform color
         }
 
         void BrushRenderer::validate() {
@@ -416,7 +416,7 @@ namespace TrenchBroom {
                     result |= BrushRenderFlags::Hidden;
                 }
             }
-            
+
             if (brush->transitivelySelected()) {
                 result |= BrushRenderFlags::Selected;
             }
@@ -457,7 +457,7 @@ namespace TrenchBroom {
             }
             if (edgeFlags & BrushRenderFlags::Selected) {
                 return vm::vec4f(1,0,0,1);
-            }            
+            }
             return vm::vec4f(1,1,1,1);
         }
 
@@ -473,7 +473,7 @@ namespace TrenchBroom {
             }
             if (flags & BrushRenderFlags::Selected) {
                 return vm::vec4f(1,0,0,0.5);
-            }            
+            }
             return vm::vec4f(0,0,0,0);
         }
 
@@ -514,7 +514,7 @@ namespace TrenchBroom {
             // insert edge vertices into VBO
             {
                 const size_t edgeVertCount = 2 * brushValue.edges().size();
-                auto [vertKey, vertDest] = m_edgeVertices->getPointerToInsertVerticesAt(edgeVertCount);              
+                auto [vertKey, vertDest] = m_edgeVertices->getPointerToInsertVerticesAt(edgeVertCount);
                 info.edgeVerticesKey = vertKey;
 
                 size_t i = 0;
@@ -522,7 +522,7 @@ namespace TrenchBroom {
                     const auto faceIndex1 = currentEdge->firstFace()->payload();
                     const auto faceIndex2 = currentEdge->secondFace()->payload();
                     assert(faceIndex1 && faceIndex2);
-                    
+
                     const auto& face1 = brushValue.face(*faceIndex1);
                     const auto& face2 = brushValue.face(*faceIndex2);
 
@@ -530,7 +530,7 @@ namespace TrenchBroom {
                     const vm::vec3f pos2 = vm::vec3f(currentEdge->secondVertex()->position());
                     const vm::vec4f color = edgeColor(brushFlags, face1, face2);
                     const auto flags = edgeRenderFlags(brushFlags, face1, face2);
-                    
+
                     vertDest[i++] = BrushEdgeVertex(pos1, vm::vec<uint8_t, 3>(color.xyz() * 255.0f), vm::vec<uint8_t, 1>(flags));
                     vertDest[i++] = BrushEdgeVertex(pos2, vm::vec<uint8_t, 3>(color.xyz() * 255.0f), vm::vec<uint8_t, 1>(flags));
                 }
@@ -552,10 +552,10 @@ namespace TrenchBroom {
                 assert(m_vertexArray != nullptr);
                 auto [vertBlock, vertDest] = m_vertexArray->getPointerToInsertVerticesAt(faceVerticesCount);
                 info.vertexHolderKey = vertBlock;
-                               
+
                 size_t insertedVertices = 0u;
                 const size_t vboRegionStart = vertBlock->pos;
-                for (const Model::BrushFace& face : brushValue.faces()) {                    
+                for (const Model::BrushFace& face : brushValue.faces()) {
                     const size_t indexOfFirstVertex = vboRegionStart + insertedVertices;
 
                     const auto faceNormal = vm::vec<int8_t, 3>(face.boundary().normal * 127.0);
@@ -582,8 +582,8 @@ namespace TrenchBroom {
                 std::sort(facesSortedByTex.begin(),
                           facesSortedByTex.end(),
                           [](const CachedFace& a, const CachedFace& b){ return a.texture < b.texture; });
-            }            
-            
+            }
+
             // insert face indices
             const size_t facesSortedByTexSize = facesSortedByTex.size();
 
