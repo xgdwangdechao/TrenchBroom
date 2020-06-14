@@ -27,7 +27,6 @@
 #include "Renderer/FaceRenderer.h"
 
 #include <memory>
-#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
