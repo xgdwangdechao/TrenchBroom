@@ -69,6 +69,10 @@ void main(void) {
 
     flagsStruct edgeFlags = parseFlags(flags);
 
+    if (edgeFlags.hidden) {
+        gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
+    }
+
     // only selected edges get drawn on top
     if (OnTop && !edgeFlags.selected) {
         // We assume edgeFlags are the same for both ends of each line.

@@ -78,6 +78,10 @@ void main(void) {
     faceColor = Color;
     viewVector = CameraPosition - position.xyz;
 
+    if (faceFlags.hidden) {
+        gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
+    }
+
     if (faceFlags.locked) {
         GrayScale = 1.0;
         ApplyTinting = 1.0;

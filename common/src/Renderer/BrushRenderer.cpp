@@ -48,110 +48,6 @@ namespace TrenchBroom {
          * though it's shared between 2 faces.
          */
 
-
-#if 0
-        bool BrushRenderer::DefaultFilter::visible(const Model::BrushNode* brush) const    {
-            return m_context.visible(brush);
-        }
-
-        bool BrushRenderer::DefaultFilter::visible(const Model::BrushNode* brush, const Model::BrushFace& face) const {
-            return m_context.visible(brush, face);
-        }
-
-        bool BrushRenderer::DefaultFilter::editable(const Model::BrushNode* brush) const {
-            return m_context.editable(brush);
-        }
-
-        bool BrushRenderer::DefaultFilter::editable(const Model::BrushNode* brush, const Model::BrushFace& face) const {
-            return m_context.editable(brush, face);
-        }
-
-        bool BrushRenderer::DefaultFilter::selected(const Model::BrushNode* brush) const {
-            return brush->selected() || brush->parentSelected();
-        }
-
-        bool BrushRenderer::DefaultFilter::selected(const Model::BrushNode*, const Model::BrushFace& face) const {
-            return face.selected();
-        }
-
-        bool BrushRenderer::DefaultFilter::hasSelectedFaces(const Model::BrushNode* brush) const {
-            return brush->descendantSelected();
-        }
-
-        // SelectedBrushRendererFilter
-
-        BrushRenderer::SelectedBrushRendererFilter::SelectedBrushRendererFilter(const Model::EditorContext& context) :
-        DefaultFilter(context) {}
-
-        BrushRenderer::Filter::RenderSettings BrushRenderer::SelectedBrushRendererFilter::markFaces(const Model::BrushNode* brushNode) const {
-            if (!(visible(brushNode) && editable(brushNode))) {
-                return renderNothing();
-            }
-
-            const bool brushSelected = selected(brushNode);
-            const Model::Brush& brush = brushNode->brush();
-            for (const Model::BrushFace& face : brush.faces()) {
-                face.setMarked(brushSelected || selected(brushNode, face));
-            }
-            return std::make_tuple(FaceRenderPolicy::RenderMarked, EdgeRenderPolicy::RenderIfEitherFaceMarked);
-        }
-
-        // LockedBrushRendererFilter
-
-        BrushRenderer::LockedBrushRendererFilter::LockedBrushRendererFilter(const Model::EditorContext& context) :
-        DefaultFilter(context) {}
-
-        BrushRenderer::Filter::RenderSettings BrushRenderer::LockedBrushRendererFilter::markFaces(const Model::BrushNode* brushNode) const {
-            if (!visible(brushNode)) {
-                return renderNothing();
-            }
-
-            const Model::Brush& brush = brushNode->brush();
-            for (const Model::BrushFace& face : brush.faces()) {
-                face.setMarked(true);
-            }
-
-            return std::make_tuple(FaceRenderPolicy::RenderMarked,
-                                   EdgeRenderPolicy::RenderAll);
-        }
-
-        // UnselectedBrushRendererFilter
-
-        BrushRenderer::UnselectedBrushRendererFilter::UnselectedBrushRendererFilter(const Model::EditorContext& context) :
-        DefaultFilter(context) {}
-
-        BrushRenderer::Filter::RenderSettings BrushRenderer::UnselectedBrushRendererFilter::markFaces(const Model::BrushNode* brushNode) const {
-            const bool brushVisible = visible(brushNode);
-            const bool brushEditable = editable(brushNode);
-
-            const bool renderFaces = (brushVisible && brushEditable);
-                  bool renderEdges = (brushVisible && !selected(brushNode));
-
-            if (!renderFaces && !renderEdges) {
-                return renderNothing();
-            }
-
-            const Model::Brush& brush = brushNode->brush();
-
-            bool anyFaceVisible = false;
-            for (const Model::BrushFace& face : brush.faces()) {
-                const bool faceVisible = !selected(brushNode, face) && visible(brushNode, face);
-                face.setMarked(faceVisible);
-                anyFaceVisible |= faceVisible;
-            }
-
-            if (!anyFaceVisible) {
-                return renderNothing();
-            }
-
-            // Render all edges if only one face is visible.
-            renderEdges |= anyFaceVisible;
-
-            return std::make_tuple(renderFaces ? FaceRenderPolicy::RenderMarked : FaceRenderPolicy::RenderNone,
-                                   renderEdges ? EdgeRenderPolicy::RenderAll : EdgeRenderPolicy::RenderNone);
-        }
-#endif
-
         // BrushRenderer
 
         BrushRenderer::BrushRenderer() :
@@ -428,9 +324,12 @@ namespace TrenchBroom {
             return flags;
         }
 
-        BrushRenderFlags::Type BrushRenderer::faceRenderFlags(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face) const {
+        BrushRenderFlags::Type BrushRenderer::faceRenderFlags(const Model::BrushNode* brush, BrushRenderFlags::Type brushFlags, const Model::BrushFace& face) const {
             BrushRenderFlags::Type flags = brushFlags;
 
+            if (m_editorContext != nullptr && !m_editorContext->visible(brush, face)) {
+                flags |= BrushRenderFlags::Hidden;
+            }
             if (face.selected()) {
                 flags |= BrushRenderFlags::Selected;
             }
@@ -451,22 +350,6 @@ namespace TrenchBroom {
             return vm::vec4f(1,1,1,1);
         }
 
-        /**
-         * The last component is how much to blend the tint color ???
-         */
-        vm::vec4f BrushRenderer::faceColor(BrushRenderFlags::Type brushFlags, const Model::BrushFace& face) const {
-            const BrushRenderFlags::Type flags = faceRenderFlags(brushFlags, face);
-
-            // FIXME: temporary colors
-            if (flags & BrushRenderFlags::Locked) {
-                return vm::vec4f(0,0,1,0.5);
-            }
-            if (flags & BrushRenderFlags::Selected) {
-                return vm::vec4f(1,0,0,0.5);
-            }
-            return vm::vec4f(0,0,0,0);
-        }
-
         struct CachedFace {
             const Assets::Texture* texture;
             const Model::BrushFace* face;
@@ -483,7 +366,6 @@ namespace TrenchBroom {
               vertexCount(i_face->vertexCount()),
               indexOfFirstVertex(i_indexOfFirstVertex) {}
         };
-
 
         void BrushRenderer::validateBrush(const Model::BrushNode* brush) {
             assert(m_allBrushes.find(brush) != std::end(m_allBrushes));
@@ -549,7 +431,7 @@ namespace TrenchBroom {
                     const size_t indexOfFirstVertex = vboRegionStart + insertedVertices;
 
                     const auto faceNormal = vm::vec<int8_t, 3>(face.boundary().normal * 127.0);
-                    const auto flags = vm::vec<uint8_t, 1>(faceRenderFlags(brushFlags, face));
+                    const auto flags = vm::vec<uint8_t, 1>(faceRenderFlags(brush, brushFlags, face));
 
                     // The boundary is in CCW order, but the renderer expects CW order:
                     auto& boundary = face.geometry()->boundary();
