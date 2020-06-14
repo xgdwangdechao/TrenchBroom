@@ -53,7 +53,6 @@ namespace TrenchBroom {
         class GroupRenderer;
         class BrushRenderer;
         class EntityLinkRenderer;
-        class ObjectRenderer;
         class RenderBatch;
         class RenderContext;
 
@@ -62,8 +61,6 @@ namespace TrenchBroom {
             class SelectedBrushRendererFilter;
             class LockedBrushRendererFilter;
             class UnselectedBrushRendererFilter;
-
-            using RendererMap = std::map<Model::LayerNode*, ObjectRenderer*>;
 
             std::weak_ptr<View::MapDocument> m_document;
 
