@@ -239,7 +239,7 @@ namespace TrenchBroom {
             const vm::bbox3 worldBounds(4096.0);
             
             // build a cube with length 16 at the origin
-            BrushNode brush(Brush(worldBounds, {
+            BrushNode brush(Brush::create(worldBounds, {
                 // left
                 BrushFace::createParaxial(
                     vm::vec3(0.0, 0.0, 0.0),
@@ -343,7 +343,7 @@ namespace TrenchBroom {
             const vm::bbox3 worldBounds(4096.0);
 
             // build a cube with length 16 at the origin
-            BrushNode brush(Brush(worldBounds, {
+            BrushNode brush(Brush::create(worldBounds, {
                 // left
                 BrushFace::createParaxial(
                     vm::vec3(0.0, 0.0, 0.0),
@@ -393,7 +393,7 @@ namespace TrenchBroom {
             const vm::bbox3 worldBounds(4096.0);
 
             // build a cube with length 16 at the origin
-            BrushNode original(Brush(worldBounds, {
+            BrushNode original(Brush::create(worldBounds, {
                 // left
                 BrushFace::createParaxial(
                     vm::vec3(0.0, 0.0, 0.0),
