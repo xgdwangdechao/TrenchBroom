@@ -24,6 +24,8 @@
 #include "Macros.h"
 #include "Model/BrushGeometry.h"
 
+#include <kdl/result.h>
+
 #include <vecmath/forward.h>
 
 #include <memory>
@@ -32,6 +34,8 @@
 #include <vector>
 
 namespace TrenchBroom {
+    class GeometryException;
+    
     namespace Model {
         class ModelFactory;
         template <typename P> class PolyhedronMatcher;
@@ -65,7 +69,7 @@ namespace TrenchBroom {
         private:
             Brush(std::vector<BrushFace> faces);
 
-            void updateGeometryFromFaces(const vm::bbox3& worldBounds);
+            kdl::result<void, GeometryException> updateGeometryFromFaces(const vm::bbox3& worldBounds);
         public:
             const vm::bbox3& bounds() const;
         public: // face management:
