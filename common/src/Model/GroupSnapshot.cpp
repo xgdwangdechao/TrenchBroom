@@ -19,10 +19,12 @@
 
 #include "GroupSnapshot.h"
 
+#include "Exceptions.h"
 #include "Model/GroupNode.h"
 #include "Model/Node.h"
 #include "Model/TakeSnapshotVisitor.h"
 
+#include <kdl/overload.h>
 #include <kdl/vector_utils.h>
 
 namespace TrenchBroom {
@@ -43,9 +45,18 @@ namespace TrenchBroom {
             m_snapshots = visitor.result();
         }
 
-        void GroupSnapshot::doRestore(const vm::bbox3& worldBounds) {
-            for (NodeSnapshot* snapshot : m_snapshots)
-                snapshot->restore(worldBounds);
+        GroupSnapshot::SnapshotResult GroupSnapshot::doRestore(const vm::bbox3& worldBounds) {
+            std::vector<SnapshotException> errors;
+            for (NodeSnapshot* snapshot : m_snapshots) {
+                const auto restoreResult = snapshot->restore(worldBounds);
+                kdl::visit_result(kdl::overload {
+                    []() {},
+                    [&](const std::vector<SnapshotException>& e) { kdl::vec_append(errors, e); }
+                }, std::move(restoreResult));
+            }
+            return errors.empty()
+                ? SnapshotResult::success()
+                : SnapshotResult::error(std::move(errors));
         }
     }
 }

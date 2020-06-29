@@ -38,14 +38,15 @@ namespace TrenchBroom {
             }
         }
 
-        void BrushSnapshot::doRestore(const vm::bbox3& worldBounds) {
+        BrushSnapshot::SnapshotResult BrushSnapshot::doRestore(const vm::bbox3& worldBounds) {
             auto brushResult = Brush::create(worldBounds, std::move(m_faces));
-            kdl::visit_result(kdl::overload {
+            return kdl::visit_result(kdl::overload {
                 [&](Brush&& b) {
                     m_brushNode->setBrush(std::move(b));
+                    return SnapshotResult::success();
                 },
                 [](const GeometryException& e) {
-                    throw e; // TODO 2983
+                    return SnapshotResult::error(std::vector<SnapshotException>{ SnapshotException(e.what()) });
                 }
             }, std::move(brushResult));
         }

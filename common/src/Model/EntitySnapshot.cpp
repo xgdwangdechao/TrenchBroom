@@ -19,6 +19,7 @@
 
 #include "EntitySnapshot.h"
 
+#include "Exceptions.h"
 #include "Model/EntityNode.h"
 
 namespace TrenchBroom {
@@ -27,8 +28,9 @@ namespace TrenchBroom {
         m_entity(entity),
         m_attributesSnapshot(entity->attributes()) {}
 
-        void EntitySnapshot::doRestore(const vm::bbox3& /* worldBounds */) {
+        EntitySnapshot::SnapshotResult EntitySnapshot::doRestore(const vm::bbox3& /* worldBounds */) {
             m_entity->setAttributes(m_attributesSnapshot);
+            return SnapshotResult::success();
         }
     }
 }

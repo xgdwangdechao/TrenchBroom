@@ -34,6 +34,11 @@ namespace TrenchBroom {
         const char* what() const noexcept override;
     };
 
+    class SnapshotException : public Exception {
+    public:
+        using Exception::Exception;
+    };
+
     class GeometryException : public Exception {
     public:
         using Exception::Exception;

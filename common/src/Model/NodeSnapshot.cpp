@@ -19,12 +19,14 @@
 
 #include "NodeSnapshot.h"
 
+#include "Exceptions.h"
+
 namespace TrenchBroom {
     namespace Model {
         NodeSnapshot::~NodeSnapshot() {}
 
-        void NodeSnapshot::restore(const vm::bbox3& worldBounds) {
-            doRestore(worldBounds);
+        kdl::result<void, std::vector<SnapshotException>> NodeSnapshot::restore(const vm::bbox3& worldBounds) {
+            return doRestore(worldBounds);
         }
     }
 }

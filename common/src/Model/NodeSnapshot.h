@@ -22,14 +22,20 @@
 
 #include "FloatType.h"
 
+#include <kdl/result.h>
+
+#include <vector>
+
 namespace TrenchBroom {
+    class SnapshotException;
+    
     namespace Model {
         class NodeSnapshot {
         public:
             virtual ~NodeSnapshot();
-            void restore(const vm::bbox3& worldBounds);
+            kdl::result<void, std::vector<SnapshotException>> restore(const vm::bbox3& worldBounds);
         private:
-            virtual void doRestore(const vm::bbox3& worldBounds) = 0;
+            virtual kdl::result<void, std::vector<SnapshotException>> doRestore(const vm::bbox3& worldBounds) = 0;
         };
     }
 }

@@ -23,9 +23,13 @@
 #include "FloatType.h"
 #include "Model/NodeSnapshot.h"
 
+#include <kdl/result.h>
+
 #include <vector>
 
 namespace TrenchBroom {
+    class SnapshotException;
+    
     namespace Model {
         class GroupNode;
 
@@ -37,7 +41,9 @@ namespace TrenchBroom {
             ~GroupSnapshot() override;
         private:
             void takeSnapshot(GroupNode* group);
-            void doRestore(const vm::bbox3& worldBounds) override;
+            
+            using SnapshotResult = kdl::result<void, std::vector<SnapshotException>>;
+            SnapshotResult doRestore(const vm::bbox3& worldBounds) override;
         };
     }
 }

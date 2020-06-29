@@ -23,9 +23,13 @@
 #include "FloatType.h"
 #include "Macros.h"
 
+#include <kdl/result.h>
+
 #include <vector>
 
 namespace TrenchBroom {
+    class SnapshotException;
+    
     namespace Model {
         class BrushFace;
         class BrushFaceHandle;
@@ -46,7 +50,8 @@ namespace TrenchBroom {
 
             ~Snapshot();
 
-            void restoreNodes(const vm::bbox3& worldBounds);
+            using SnapshotResult = kdl::result<void, std::vector<SnapshotException>>;
+            SnapshotResult restoreNodes(const vm::bbox3& worldBounds);
         private:
             void takeSnapshot(Node* node);
             

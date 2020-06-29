@@ -19,12 +19,14 @@
 
 #include "Snapshot.h"
 
+#include "Exceptions.h"
 #include "Model/BrushFace.h"
 #include "Model/BrushFaceHandle.h"
 #include "Model/BrushNode.h"
 #include "Model/Node.h"
 #include "Model/NodeSnapshot.h"
 
+#include <kdl/overload.h>
 #include <kdl/vector_utils.h>
 
 namespace TrenchBroom {
@@ -33,9 +35,18 @@ namespace TrenchBroom {
             kdl::vec_clear_and_delete(m_nodeSnapshots);
         }
 
-        void Snapshot::restoreNodes(const vm::bbox3& worldBounds) {
-            for (NodeSnapshot* snapshot : m_nodeSnapshots)
-                snapshot->restore(worldBounds);
+        Snapshot::SnapshotResult Snapshot::restoreNodes(const vm::bbox3& worldBounds) {
+            std::vector<SnapshotException> errors;
+            for (NodeSnapshot* snapshot : m_nodeSnapshots) {
+                const auto restoreResult = snapshot->restore(worldBounds);
+                kdl::visit_result(kdl::overload {
+                    []() {},
+                    [&](const std::vector<SnapshotException>& e) { kdl::vec_append(errors, e); }
+                }, restoreResult);
+            }
+            return errors.empty()
+                ? SnapshotResult::success()
+                : SnapshotResult::error(std::move(errors));
         }
 
         void Snapshot::takeSnapshot(Node* node) {
