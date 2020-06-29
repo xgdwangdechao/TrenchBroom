@@ -20,10 +20,14 @@
 #include "BrushBuilder.h"
 
 #include "Ensure.h"
+#include "Exceptions.h"
 #include "Polyhedron.h"
 #include "Model/Brush.h"
 #include "Model/BrushFace.h"
 #include "Model/ModelFactory.h"
+
+#include <kdl/overload.h>
+#include <kdl/result.h>
 
 #include <cassert>
 #include <string>
@@ -105,7 +109,15 @@ namespace TrenchBroom {
                 bounds.min + vm::vec3::pos_y(),
                 BrushFaceAttributes(bottomTexture, m_defaultAttribs)));
 
-            return Brush::create(m_worldBounds, std::move(faces));
+            auto brushResult = Brush::create(m_worldBounds, std::move(faces));
+            return kdl::visit_result(kdl::overload {
+                [](Brush&& b) -> Brush {
+                    return std::move(b);
+                },
+                [](const GeometryException& e) -> Brush {
+                    throw e; // TODO 2983
+                },
+            }, std::move(brushResult));
         }
         
         Brush BrushBuilder::createBrush(const std::vector<vm::vec3>& points, const std::string& textureName) const {
@@ -135,7 +147,15 @@ namespace TrenchBroom {
                 brushFaces.push_back(m_factory->createFace(p1, p3, p2, textureName));
             }
 
-            return Brush::create(m_worldBounds, std::move(brushFaces));
+            auto brushResult = Brush::create(m_worldBounds, std::move(brushFaces));
+            return kdl::visit_result(kdl::overload {
+                [](Brush&& b) -> Brush {
+                    return std::move(b);
+                },
+                [](const GeometryException& e) -> Brush {
+                    throw e; // TODO 2983
+                },
+            }, std::move(brushResult));
         }
     }
 }

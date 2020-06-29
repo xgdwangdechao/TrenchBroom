@@ -41,6 +41,7 @@
 #include "Model/WorldNode.h"
 
 #include <kdl/collection_utils.h>
+#include <kdl/result.h>
 #include <kdl/vector_utils.h>
 
 #include <vecmath/vec.h>
@@ -239,7 +240,7 @@ namespace TrenchBroom {
             const vm::bbox3 worldBounds(4096.0);
             
             // build a cube with length 16 at the origin
-            BrushNode brush(Brush::create(worldBounds, {
+            BrushNode brush(kdl::get_success(Brush::create(worldBounds, {
                 // left
                 BrushFace::createParaxial(
                     vm::vec3(0.0, 0.0, 0.0),
@@ -270,7 +271,7 @@ namespace TrenchBroom {
                     vm::vec3(0.0, 0.0, 0.0),
                     vm::vec3(1.0, 0.0, 0.0),
                     vm::vec3(0.0, 1.0, 0.0)),
-            }));
+            })));
             
             CHECK(!brush.hasSelectedFaces());
             
@@ -343,7 +344,7 @@ namespace TrenchBroom {
             const vm::bbox3 worldBounds(4096.0);
 
             // build a cube with length 16 at the origin
-            BrushNode brush(Brush::create(worldBounds, {
+            BrushNode brush(kdl::get_success(Brush::create(worldBounds, {
                 // left
                 BrushFace::createParaxial(
                     vm::vec3(0.0, 0.0, 0.0),
@@ -374,7 +375,7 @@ namespace TrenchBroom {
                     vm::vec3(0.0, 0.0, 0.0),
                     vm::vec3(1.0, 0.0, 0.0),
                     vm::vec3(0.0, 1.0, 0.0)),
-            }));
+            })));
 
             PickResult hits1;
             brush.pick(vm::ray3(vm::vec3(8.0, -8.0, 8.0), vm::vec3::pos_y()), hits1);
@@ -393,7 +394,7 @@ namespace TrenchBroom {
             const vm::bbox3 worldBounds(4096.0);
 
             // build a cube with length 16 at the origin
-            BrushNode original(Brush::create(worldBounds, {
+            BrushNode original(kdl::get_success(Brush::create(worldBounds, {
                 // left
                 BrushFace::createParaxial(
                     vm::vec3(0.0, 0.0, 0.0),
@@ -424,7 +425,7 @@ namespace TrenchBroom {
                     vm::vec3(0.0, 0.0, 0.0),
                     vm::vec3(1.0, 0.0, 0.0),
                     vm::vec3(0.0, 1.0, 0.0)),
-            }));
+            })));
 
             BrushNode* clone = original.clone(worldBounds);
             

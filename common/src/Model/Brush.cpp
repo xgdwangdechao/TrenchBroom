@@ -92,13 +92,12 @@ namespace TrenchBroom {
         Brush::Brush(std::vector<BrushFace> faces) :
         m_faces(std::move(faces)) {}
 
-        Brush Brush::create(const vm::bbox3& worldBounds, std::vector<BrushFace> faces) {
+        kdl::result<Brush, GeometryException> Brush::create(const vm::bbox3& worldBounds, std::vector<BrushFace> faces) {
             Brush brush(std::move(faces));
             auto result = brush.updateGeometryFromFaces(worldBounds);
             
-            return kdl::visit_result(kdl::overload {
-                [&]() -> Brush { return brush; },
-                [](const GeometryException& e) -> Brush { throw e; }
+            return kdl::map_result(kdl::overload {
+                [&]() { return brush; }
             }, result);
         }
 
@@ -265,16 +264,19 @@ namespace TrenchBroom {
                 }
             }
 
-            try {
-                const auto testBrush = Brush::create(worldBounds, std::move(testFaces));
-                const auto inWorldBounds = worldBounds.contains(testBrush.bounds());
-                const auto closed = testBrush.closed();
-                const auto allFaces = testBrush.faceCount() == faceCount();
+            const auto brushResult = Brush::create(worldBounds, std::move(testFaces));
+            return kdl::visit_result(kdl::overload {
+                [&](const Brush& b) {
+                    const auto inWorldBounds = worldBounds.contains(b.bounds());
+                    const auto closed = b.closed();
+                    const auto allFaces = b.faceCount() == faceCount();
 
-                return inWorldBounds && closed && allFaces;
-            } catch (const GeometryException&) {
-                return false;
-            }
+                    return inWorldBounds && closed && allFaces;
+                },
+                [](const GeometryException&) {
+                    return false;
+                }
+            }, brushResult);
         }
 
         void Brush::moveBoundary(const vm::bbox3& worldBounds, const size_t faceIndex, const vm::vec3& delta, const bool lockTexture) {
@@ -286,7 +288,9 @@ namespace TrenchBroom {
             const auto result = updateGeometryFromFaces(worldBounds);
             kdl::visit_result(kdl::overload {
                 []() {},
-                [](const GeometryException& e) { throw e; }
+                [](const GeometryException& e) {
+                    throw e;  // TODO 2983
+                }
             }, result);
         }
 
@@ -847,7 +851,9 @@ namespace TrenchBroom {
             const auto result = updateGeometryFromFaces(worldBounds);
             kdl::visit_result(kdl::overload {
                 []() {},
-                [](const GeometryException& e) { throw e; }
+                [](const GeometryException& e) {
+                    throw e; // TODO 2983
+                }
             }, result);
         }
 
@@ -894,7 +900,9 @@ namespace TrenchBroom {
             const auto result = updateGeometryFromFaces(worldBounds);
             kdl::visit_result(kdl::overload {
                 []() {},
-                [](const GeometryException& e) { throw e; }
+                [](const GeometryException& e) {
+                    throw e; // TODO 2983
+                }
             }, result);
         }
 
@@ -916,7 +924,9 @@ namespace TrenchBroom {
             const auto result = updateGeometryFromFaces(worldBounds);
             kdl::visit_result(kdl::overload {
                 []() {},
-                [](const GeometryException& e) { throw e; }
+                [](const GeometryException& e) {
+                    throw e; // TODO 2983
+                }
             }, result);
         }
 
@@ -963,12 +973,19 @@ namespace TrenchBroom {
                 faces.push_back(factory.createFace(p0, p1, p2, attribs));
             }
 
-            auto brush = Brush::create(worldBounds, std::move(faces));
-            brush.cloneFaceAttributesFrom(*this);
-            for (const auto* subtrahend : subtrahends) {
-                brush.cloneInvertedFaceAttributesFrom(*subtrahend);
-            }
-            return brush;
+            auto brushResult = Brush::create(worldBounds, std::move(faces));
+            return kdl::visit_result(kdl::overload {
+                [&](Brush&& b) -> Brush {
+                    b.cloneFaceAttributesFrom(*this);
+                    for (const auto* subtrahend : subtrahends) {
+                        b.cloneInvertedFaceAttributesFrom(*subtrahend);
+                    }
+                    return std::move(b);
+                },
+                [](const GeometryException& e) -> Brush {
+                    throw e; // TODO 2983
+                }
+            }, std::move(brushResult));
         }
 
         void Brush::findIntegerPlanePoints(const vm::bbox3& worldBounds) {
@@ -979,7 +996,9 @@ namespace TrenchBroom {
             const auto result = updateGeometryFromFaces(worldBounds);
             kdl::visit_result(kdl::overload {
                 []() {},
-                [](const GeometryException& e) { throw e; }
+                [](const GeometryException& e) {
+                    throw e;  // TODO 2983
+                }
             }, result);
         }
 

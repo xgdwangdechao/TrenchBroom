@@ -19,9 +19,12 @@
 
 #include "BrushSnapshot.h"
 
+#include "Exceptions.h"
 #include "Model/BrushNode.h"
 #include "Model/BrushFace.h"
 
+#include <kdl/overload.h>
+#include <kdl/result.h>
 #include <kdl/vector_utils.h>
 
 namespace TrenchBroom {
@@ -36,7 +39,15 @@ namespace TrenchBroom {
         }
 
         void BrushSnapshot::doRestore(const vm::bbox3& worldBounds) {
-            m_brushNode->setBrush(Brush::create(worldBounds, std::move(m_faces)));
+            auto brushResult = Brush::create(worldBounds, std::move(m_faces));
+            kdl::visit_result(kdl::overload {
+                [&](Brush&& b) {
+                    m_brushNode->setBrush(std::move(b));
+                },
+                [](const GeometryException& e) {
+                    throw e; // TODO 2983
+                }
+            }, std::move(brushResult));
         }
     }
 }

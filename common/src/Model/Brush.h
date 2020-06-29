@@ -65,7 +65,7 @@ namespace TrenchBroom {
 
             ~Brush();
             
-            static Brush create(const vm::bbox3& worldBounds, std::vector<BrushFace> faces);
+            static kdl::result<Brush, GeometryException> create(const vm::bbox3& worldBounds, std::vector<BrushFace> faces);
         private:
             Brush(std::vector<BrushFace> faces);
 

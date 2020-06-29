@@ -29,6 +29,8 @@
 #include "Model/ModelFactory.h"
 
 #include <kdl/map_utils.h>
+#include <kdl/overload.h>
+#include <kdl/result.h>
 #include <kdl/string_format.h>
 #include <kdl/string_utils.h>
 #include <kdl/vector_utils.h>
@@ -226,18 +228,21 @@ namespace TrenchBroom {
         }
 
         void MapReader::createBrush(const size_t startLine, const size_t lineCount, const ExtraAttributes& extraAttributes, ParserStatus& status) {
-            try {
-                Model::BrushNode* brush = m_factory->createBrush(Model::Brush::create(m_worldBounds, std::move(m_faces)));
-                setFilePosition(brush, startLine, lineCount);
-                setExtraAttributes(brush, extraAttributes);
-
-                onBrush(m_brushParent, brush, status);
-                m_faces.clear();
-            } catch (GeometryException& e) {
-                status.error(startLine, kdl::str_to_string("Skipping brush: ", e.what()));
-                m_faces.clear(); // the faces will have been deleted by the brush's constructor
-            }
-
+            auto brushResult = Model::Brush::create(m_worldBounds, std::move(m_faces));
+            kdl::visit_result(kdl::overload {
+                [&](Model::Brush&& b) {
+                    Model::BrushNode* brushNode = m_factory->createBrush(std::move(b));
+                    setFilePosition(brushNode, startLine, lineCount);
+                    setExtraAttributes(brushNode, extraAttributes);
+                    
+                    onBrush(m_brushParent, brushNode, status);
+                    m_faces.clear();
+                },
+                [&](const GeometryException& e) {
+                    status.error(startLine, kdl::str_to_string("Skipping brush: ", e.what()));
+                    m_faces.clear();
+                }
+            }, std::move(brushResult));
         }
 
         MapReader::ParentInfo::Type MapReader::storeNode(Model::Node* node, const std::vector<Model::EntityAttribute>& attributes, ParserStatus& status) {
