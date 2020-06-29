@@ -21,8 +21,8 @@
 
 #include "GTestCompat.h"
 
-#include "FloatType.h"
 #include "Exceptions.h"
+#include "FloatType.h"
 #include "TestUtils.h"
 #include "Assets/Texture.h"
 #include "IO/NodeReader.h"
@@ -38,6 +38,7 @@
 #include "Model/Polyhedron.h"
 #include "Model/WorldNode.h"
 
+#include <kdl/result.h>
 #include <kdl/vector_utils.h>
 
 #include <vecmath/forward.h>
@@ -428,7 +429,7 @@ namespace TrenchBroom {
             WorldNode world(MapFormat::Standard);
 
             BrushBuilder builder(&world, worldBounds);
-            Brush cube = builder.createCube(128.0, "");
+            Brush cube = kdl::get_success(builder.createCube(128.0, ""));
             BrushFace& face = cube.faces().front();
 
             // This face's texture normal is in the same direction as the face normal
@@ -452,7 +453,7 @@ namespace TrenchBroom {
             WorldNode world(MapFormat::Standard);
 
             BrushBuilder builder(&world, worldBounds);
-            Brush cube = builder.createCube(128.0, "");
+            Brush cube = kdl::get_success(builder.createCube(128.0, ""));
             auto& faces = cube.faces();
 
             for (size_t i = 0; i < faces.size(); ++i) {
@@ -471,7 +472,7 @@ namespace TrenchBroom {
             WorldNode world(MapFormat::Valve);
 
             BrushBuilder builder(&world, worldBounds);
-            Brush cube = builder.createCube(128.0, "");
+            Brush cube = kdl::get_success(builder.createCube(128.0, ""));
             auto& faces = cube.faces();
 
             for (size_t i = 0; i < faces.size(); ++i) {

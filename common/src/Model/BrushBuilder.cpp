@@ -48,27 +48,27 @@ namespace TrenchBroom {
             ensure(m_factory != nullptr, "factory is null");
         }
 
-        Brush BrushBuilder::createCube(const FloatType size, const std::string& textureName) const {
+        kdl::result<Brush, GeometryException> BrushBuilder::createCube(const FloatType size, const std::string& textureName) const {
             return createCuboid(vm::bbox3(size / 2.0), textureName, textureName, textureName, textureName, textureName, textureName);
         }
 
-        Brush BrushBuilder::createCube(FloatType size, const std::string& leftTexture, const std::string& rightTexture, const std::string& frontTexture, const std::string& backTexture, const std::string& topTexture, const std::string& bottomTexture) const {
+        kdl::result<Brush, GeometryException> BrushBuilder::createCube(FloatType size, const std::string& leftTexture, const std::string& rightTexture, const std::string& frontTexture, const std::string& backTexture, const std::string& topTexture, const std::string& bottomTexture) const {
             return createCuboid(vm::bbox3(size / 2.0), leftTexture, rightTexture, frontTexture, backTexture, topTexture, bottomTexture);
         }
         
-        Brush BrushBuilder::createCuboid(const vm::vec3& size, const std::string& textureName) const {
+        kdl::result<Brush, GeometryException> BrushBuilder::createCuboid(const vm::vec3& size, const std::string& textureName) const {
             return createCuboid(vm::bbox3(-size / 2.0, size / 2.0), textureName, textureName, textureName, textureName, textureName, textureName);
         }
 
-        Brush BrushBuilder::createCuboid(const vm::vec3& size, const std::string& leftTexture, const std::string& rightTexture, const std::string& frontTexture, const std::string& backTexture, const std::string& topTexture, const std::string& bottomTexture) const {
+        kdl::result<Brush, GeometryException> BrushBuilder::createCuboid(const vm::vec3& size, const std::string& leftTexture, const std::string& rightTexture, const std::string& frontTexture, const std::string& backTexture, const std::string& topTexture, const std::string& bottomTexture) const {
             return createCuboid(vm::bbox3(-size / 2.0, size / 2.0), leftTexture, rightTexture, frontTexture, backTexture, topTexture, bottomTexture);
         }
 
-        Brush BrushBuilder::createCuboid(const vm::bbox3& bounds, const std::string& textureName) const {
+        kdl::result<Brush, GeometryException> BrushBuilder::createCuboid(const vm::bbox3& bounds, const std::string& textureName) const {
             return createCuboid(bounds, textureName, textureName, textureName, textureName, textureName, textureName);
         }
 
-        Brush BrushBuilder::createCuboid(const vm::bbox3& bounds, const std::string& leftTexture, const std::string& rightTexture, const std::string& frontTexture, const std::string& backTexture, const std::string& topTexture, const std::string& bottomTexture) const {
+        kdl::result<Brush, GeometryException> BrushBuilder::createCuboid(const vm::bbox3& bounds, const std::string& leftTexture, const std::string& rightTexture, const std::string& frontTexture, const std::string& backTexture, const std::string& topTexture, const std::string& bottomTexture) const {
             std::vector<BrushFace> faces;
             faces.reserve(6u);
 
@@ -109,22 +109,14 @@ namespace TrenchBroom {
                 bounds.min + vm::vec3::pos_y(),
                 BrushFaceAttributes(bottomTexture, m_defaultAttribs)));
 
-            auto brushResult = Brush::create(m_worldBounds, std::move(faces));
-            return kdl::visit_result(kdl::overload {
-                [](Brush&& b) -> Brush {
-                    return std::move(b);
-                },
-                [](const GeometryException& e) -> Brush {
-                    throw e; // TODO 2983
-                },
-            }, std::move(brushResult));
+            return Brush::create(m_worldBounds, std::move(faces));
         }
         
-        Brush BrushBuilder::createBrush(const std::vector<vm::vec3>& points, const std::string& textureName) const {
+        kdl::result<Brush, GeometryException> BrushBuilder::createBrush(const std::vector<vm::vec3>& points, const std::string& textureName) const {
             return createBrush(Polyhedron3(points), textureName);
         }
 
-        Brush BrushBuilder::createBrush(const Polyhedron3& polyhedron, const std::string& textureName) const {
+        kdl::result<Brush, GeometryException> BrushBuilder::createBrush(const Polyhedron3& polyhedron, const std::string& textureName) const {
             assert(polyhedron.closed());
 
             std::vector<BrushFace> brushFaces;
@@ -147,15 +139,7 @@ namespace TrenchBroom {
                 brushFaces.push_back(m_factory->createFace(p1, p3, p2, textureName));
             }
 
-            auto brushResult = Brush::create(m_worldBounds, std::move(brushFaces));
-            return kdl::visit_result(kdl::overload {
-                [](Brush&& b) -> Brush {
-                    return std::move(b);
-                },
-                [](const GeometryException& e) -> Brush {
-                    throw e; // TODO 2983
-                },
-            }, std::move(brushResult));
+            return Brush::create(m_worldBounds, std::move(brushFaces));
         }
     }
 }

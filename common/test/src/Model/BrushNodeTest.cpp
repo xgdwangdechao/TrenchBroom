@@ -23,6 +23,7 @@
 
 #include "TestUtils.h"
 
+#include "Exceptions.h"
 #include "Assets/Texture.h"
 #include "IO/DiskIO.h"
 #include "IO/NodeReader.h"
@@ -578,7 +579,7 @@ namespace TrenchBroom {
             WorldNode world(MapFormat::Standard);
             const BrushBuilder builder(&world, worldBounds);
 
-            BrushNode* cube = world.createBrush(builder.createCube(128.0, "testTexture"));
+            BrushNode* cube = world.createBrush(kdl::get_success(builder.createCube(128.0, "testTexture")));
             BrushSnapshot* snapshot = nullptr;
 
             // Temporarily set a texture on `cube`, take a snapshot, then clear the texture

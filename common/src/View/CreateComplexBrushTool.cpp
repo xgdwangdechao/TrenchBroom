@@ -19,6 +19,7 @@
 
 #include "CreateComplexBrushTool.h"
 
+#include "Exceptions.h"
 #include "PreferenceManager.h"
 #include "Model/BrushNode.h"
 #include "Model/BrushBuilder.h"
@@ -28,6 +29,8 @@
 #include "View/MapDocument.h"
 
 #include <kdl/memory_utils.h>
+#include <kdl/overload.h>
+#include <kdl/result.h>
 
 namespace TrenchBroom {
     namespace View {
@@ -45,8 +48,17 @@ namespace TrenchBroom {
                 auto document = kdl::mem_lock(m_document);
                 const auto game = document->game();
                 const Model::BrushBuilder builder(document->world(), document->worldBounds(), game->defaultFaceAttribs());
-                Model::BrushNode* brush = document->world()->createBrush(builder.createBrush(*m_polyhedron, document->currentTextureName()));
-                updateBrush(brush);
+                
+                auto brushResult = builder.createBrush(*m_polyhedron, document->currentTextureName());
+                kdl::visit_result(kdl::overload {
+                    [&](Model::Brush&& b) {
+                        updateBrush(document->world()->createBrush(std::move(b)));
+                    },
+                    [&](const GeometryException& e) {
+                        updateBrush(nullptr);
+                        document->error() << "Could not update brush: " << e.what();
+                    }
+                }, std::move(brushResult));
             } else {
                 updateBrush(nullptr);
             }
