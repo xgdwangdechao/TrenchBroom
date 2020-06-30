@@ -238,10 +238,11 @@ namespace TrenchBroom {
         void BrushRenderer::renderEdges(RenderBatch& renderBatch) {
 //            if (m_showOccludedEdges) {
 
+            m_edgeRenderer.render(renderBatch); //, m_edgeColor); -- disable uniform color
+
             // we tell the shader that we're rendering on top (no depth test/write)
             // and it can discard vertices
             m_edgeRenderer.renderOnTop(renderBatch); //, m_occludedEdgeColor);
-            m_edgeRenderer.render(renderBatch); //, m_edgeColor); -- disable uniform color
         }
 
         void BrushRenderer::validate() {
