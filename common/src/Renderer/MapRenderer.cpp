@@ -472,23 +472,26 @@ namespace TrenchBroom {
         private:
             MapRenderer& m_parent;
         public:
-            InvalidateNode(MapRenderer& parent) : m_parent(parent) {}
+            size_t invalidatedNodes;
+        public:
+            InvalidateNode(MapRenderer& parent) : m_parent(parent), invalidatedNodes(0u) {}
         private:
             void doVisit(Model::WorldNode*) override   {}
             void doVisit(Model::LayerNode*) override   {}
 
             void doVisit(Model::GroupNode* group) override   {
-                // FIXME: just the specific node
-                m_parent.m_groupRenderer->invalidate();
+                m_parent.m_groupRenderer->invalidateGroup(group);
+                ++invalidatedNodes;
             }
 
             void doVisit(Model::EntityNode* entity) override {
-                // FIXME: just the specific node
-                m_parent.m_entityRenderer->invalidate();
+                m_parent.m_entityRenderer->invalidateEntity(entity);
+                ++invalidatedNodes;
             }
 
             void doVisit(Model::BrushNode* brush) override   {
                 m_parent.m_brushRenderer->invalidateBrush(brush);
+                ++invalidatedNodes;
             }
         };
 

@@ -58,10 +58,6 @@ namespace TrenchBroom {
 
         class MapRenderer {
         private:
-            class SelectedBrushRendererFilter;
-            class LockedBrushRendererFilter;
-            class UnselectedBrushRendererFilter;
-
             std::weak_ptr<View::MapDocument> m_document;
 
             std::unique_ptr<GroupRenderer> m_groupRenderer;
