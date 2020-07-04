@@ -249,49 +249,25 @@ namespace TrenchBroom {
             return result.is_success() && !m_faces.empty();
         }
 
-        bool Brush::canMoveBoundary(const vm::bbox3& worldBounds, const size_t faceIndex, const vm::vec3& delta) const {
-            const auto& face = this->face(faceIndex);
-            auto testFace = BrushFace(face);
-            testFace.transform(vm::translation_matrix(delta), false);
+        kdl::result<Brush, GeometryException> Brush::moveBoundary(const vm::bbox3& worldBounds, const size_t faceIndex, const vm::vec3& delta, const bool lockTexture) const {
+            assert(faceIndex < faceCount());
 
-            std::vector<BrushFace> testFaces;
-            testFaces.reserve(faceCount());
-            testFaces.push_back(std::move(testFace));
+            auto newFaces = m_faces;
+            newFaces[faceIndex].transform(vm::translation_matrix(delta), lockTexture);
 
-            for (const auto& brushFace : m_faces) {
-                if (&brushFace != &face) {
-                    testFaces.emplace_back(brushFace);
-                }
-            }
-
-            const auto brushResult = Brush::create(worldBounds, std::move(testFaces));
+            auto brushResult = Brush::create(worldBounds, newFaces);
             return kdl::visit_result(kdl::overload {
-                [&](const Brush& b) {
-                    const auto inWorldBounds = worldBounds.contains(b.bounds());
-                    const auto closed = b.closed();
-                    const auto allFaces = b.faceCount() == faceCount();
-
-                    return inWorldBounds && closed && allFaces;
+                [&](Brush&& b) {
+                    return b.faceCount() != faceCount()
+                        ? kdl::result<Brush, GeometryException>::error(GeometryException("Face would disappear"))
+                        : !worldBounds.contains(b.bounds())
+                        ? kdl::result<Brush, GeometryException>::error(GeometryException("Brush exceeds world bounds"))
+                        : kdl::result<Brush, GeometryException>::success(std::move(b));
                 },
-                [](const GeometryException&) {
-                    return false;
-                }
-            }, brushResult);
-        }
-
-        void Brush::moveBoundary(const vm::bbox3& worldBounds, const size_t faceIndex, const vm::vec3& delta, const bool lockTexture) {
-            assert(canMoveBoundary(worldBounds, faceIndex, delta));
-
-            auto& face = this->face(faceIndex);
-            face.transform(vm::translation_matrix(delta), lockTexture);
-
-            const auto result = updateGeometryFromFaces(worldBounds);
-            kdl::visit_result(kdl::overload {
-                []() {},
                 [](const GeometryException& e) {
-                    throw e;  // TODO 2983
-                }
-            }, result);
+                    return kdl::result<Brush, GeometryException>::error(e);
+                },
+            }, std::move(brushResult));
         }
 
         bool Brush::canExpand(const vm::bbox3& worldBounds, const FloatType delta, const bool lockTexture) const {
