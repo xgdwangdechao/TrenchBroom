@@ -41,6 +41,8 @@
 #include "Model/WorldNode.h"
 #include "Renderer/BrushRendererBrushCache.h"
 
+#include <kdl/overload.h>
+#include <kdl/result.h>
 #include <kdl/vector_utils.h>
 
 #include <vecmath/intersection.h>
@@ -249,12 +251,20 @@ namespace TrenchBroom {
         kdl::result<void, TransformError> BrushNode::doTransform(const vm::bbox3& worldBounds, const vm::mat4x4& transformation, bool lockTextures) {
             const NotifyNodeChange nodeChange(this);
             const NotifyPhysicalBoundsChange boundsChange(this);
-            m_brush.transform(worldBounds, transformation, lockTextures);
-            
-            invalidateIssues();
-            invalidateVertexCache();
 
-            return kdl::result<void, TransformError>::success();
+            auto transformResult = m_brush.transform(worldBounds, transformation, lockTextures);
+            return kdl::visit_result(kdl::overload {
+                [&](Brush&& brush) {
+                    m_brush = std::move(brush);
+                    invalidateIssues();
+                    invalidateVertexCache();
+
+                    return kdl::result<void, TransformError>::success();
+                },
+                [](const GeometryException& e) {
+                    return kdl::result<void, TransformError>::error(TransformError{e.what()});
+                },
+            }, std::move(transformResult));
         }
 
         class BrushNode::Contains : public ConstNodeVisitor, public NodeQuery<bool> {

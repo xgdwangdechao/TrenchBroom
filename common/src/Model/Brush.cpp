@@ -872,28 +872,14 @@ namespace TrenchBroom {
             return Brush::create(worldBounds, kdl::vec_concat(m_faces, brush.faces()));
         }
 
-        bool Brush::canTransform(const vm::mat4x4& transformation, const vm::bbox3& worldBounds) const {
-            try {
-                auto testBrush = Brush(*this);
-                testBrush.transform(worldBounds, transformation, false);
-                return true;
-            } catch (GeometryException&) {
-                return false;
-            }
-        }
+        kdl::result<Brush, GeometryException> Brush::transform(const vm::bbox3& worldBounds, const vm::mat4x4& transformation, const bool lockTextures) const {
+            auto faces = kdl::vec_transform(m_faces, [&](const auto& face) {
+                auto result = face;
+                result.transform(transformation, lockTextures);
+                return result;
+            });
 
-        void Brush::transform(const vm::bbox3& worldBounds, const vm::mat4x4& transformation, const bool lockTextures) {
-            for (auto& face : m_faces) {
-                face.transform(transformation, lockTextures);
-            }
-
-            const auto result = updateGeometryFromFaces(worldBounds);
-            kdl::visit_result(kdl::overload {
-                []() {},
-                [](const GeometryException& e) {
-                    throw e; // TODO 2983
-                }
-            }, result);
+            return Brush::create(worldBounds, std::move(faces));
         }
 
         bool Brush::contains(const vm::bbox3& bounds) const {
